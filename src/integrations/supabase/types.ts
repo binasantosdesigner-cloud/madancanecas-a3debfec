@@ -14,16 +14,219 @@ export type Database = {
   }
   public: {
     Tables: {
-      [_ in never]: never
+      categories: {
+        Row: {
+          created_at: string
+          description: string | null
+          display_order: number
+          id: string
+          image_url: string | null
+          name: string
+          slug: string
+        }
+        Insert: {
+          created_at?: string
+          description?: string | null
+          display_order?: number
+          id?: string
+          image_url?: string | null
+          name: string
+          slug: string
+        }
+        Update: {
+          created_at?: string
+          description?: string | null
+          display_order?: number
+          id?: string
+          image_url?: string | null
+          name?: string
+          slug?: string
+        }
+        Relationships: []
+      }
+      orders: {
+        Row: {
+          created_at: string
+          customer_name: string
+          customer_phone: string | null
+          delivery_type: string
+          id: string
+          items: Json
+          notes: string | null
+          status: Database["public"]["Enums"]["order_status"]
+          total: number
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          customer_name: string
+          customer_phone?: string | null
+          delivery_type?: string
+          id?: string
+          items?: Json
+          notes?: string | null
+          status?: Database["public"]["Enums"]["order_status"]
+          total?: number
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          customer_name?: string
+          customer_phone?: string | null
+          delivery_type?: string
+          id?: string
+          items?: Json
+          notes?: string | null
+          status?: Database["public"]["Enums"]["order_status"]
+          total?: number
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
+      products: {
+        Row: {
+          active: boolean
+          category_id: string | null
+          created_at: string
+          description: string | null
+          featured: boolean
+          id: string
+          image_url: string | null
+          kind: Database["public"]["Enums"]["product_kind"]
+          price: number
+          slug: string
+          title: string
+          updated_at: string
+          variations: Json
+        }
+        Insert: {
+          active?: boolean
+          category_id?: string | null
+          created_at?: string
+          description?: string | null
+          featured?: boolean
+          id?: string
+          image_url?: string | null
+          kind?: Database["public"]["Enums"]["product_kind"]
+          price: number
+          slug: string
+          title: string
+          updated_at?: string
+          variations?: Json
+        }
+        Update: {
+          active?: boolean
+          category_id?: string | null
+          created_at?: string
+          description?: string | null
+          featured?: boolean
+          id?: string
+          image_url?: string | null
+          kind?: Database["public"]["Enums"]["product_kind"]
+          price?: number
+          slug?: string
+          title?: string
+          updated_at?: string
+          variations?: Json
+        }
+        Relationships: [
+          {
+            foreignKeyName: "products_category_id_fkey"
+            columns: ["category_id"]
+            isOneToOne: false
+            referencedRelation: "categories"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      profiles: {
+        Row: {
+          created_at: string
+          email: string | null
+          full_name: string | null
+          id: string
+          phone: string | null
+        }
+        Insert: {
+          created_at?: string
+          email?: string | null
+          full_name?: string | null
+          id: string
+          phone?: string | null
+        }
+        Update: {
+          created_at?: string
+          email?: string | null
+          full_name?: string | null
+          id?: string
+          phone?: string | null
+        }
+        Relationships: []
+      }
+      settings: {
+        Row: {
+          key: string
+          updated_at: string
+          value: string | null
+        }
+        Insert: {
+          key: string
+          updated_at?: string
+          value?: string | null
+        }
+        Update: {
+          key?: string
+          updated_at?: string
+          value?: string | null
+        }
+        Relationships: []
+      }
+      user_roles: {
+        Row: {
+          created_at: string
+          id: string
+          role: Database["public"]["Enums"]["app_role"]
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          role: Database["public"]["Enums"]["app_role"]
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          role?: Database["public"]["Enums"]["app_role"]
+          user_id?: string
+        }
+        Relationships: []
+      }
     }
     Views: {
       [_ in never]: never
     }
     Functions: {
-      [_ in never]: never
+      has_role: {
+        Args: {
+          _role: Database["public"]["Enums"]["app_role"]
+          _user_id: string
+        }
+        Returns: boolean
+      }
     }
     Enums: {
-      [_ in never]: never
+      app_role: "admin" | "customer"
+      order_status:
+        | "pending"
+        | "in_production"
+        | "shipped"
+        | "completed"
+        | "cancelled"
+      product_kind: "ready" | "custom"
     }
     CompositeTypes: {
       [_ in never]: never
@@ -150,6 +353,16 @@ export type CompositeTypes<
 
 export const Constants = {
   public: {
-    Enums: {},
+    Enums: {
+      app_role: ["admin", "customer"],
+      order_status: [
+        "pending",
+        "in_production",
+        "shipped",
+        "completed",
+        "cancelled",
+      ],
+      product_kind: ["ready", "custom"],
+    },
   },
 } as const
