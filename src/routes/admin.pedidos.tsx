@@ -13,7 +13,8 @@ const statuses = [
   { v: "shipped", l: "Enviado" },
   { v: "completed", l: "Concluído" },
   { v: "cancelled", l: "Cancelado" },
-];
+] as const;
+type OrderStatus = typeof statuses[number]["v"];
 
 function AdminOrders() {
   const qc = useQueryClient();
@@ -22,7 +23,7 @@ function AdminOrders() {
     queryFn: async () => (await supabase.from("orders").select("*").order("created_at", { ascending: false })).data ?? [],
   });
 
-  const updateStatus = async (id: string, status: typeof STATUSES[number]["v"]) => {
+  const updateStatus = async (id: string, status: OrderStatus) => {
     const { error } = await supabase.from("orders").update({ status }).eq("id", id);
     if (error) toast.error(error.message);
     else { toast.success("Status atualizado"); qc.invalidateQueries({ queryKey: ["admin-all-orders"] }); }
