@@ -3,6 +3,7 @@ import { Outlet, Link, createRootRouteWithContext, useRouter, HeadContent, Scrip
 import { Toaster } from "@/components/ui/sonner";
 import { AuthProvider } from "@/lib/auth";
 import { CartProvider } from "@/lib/cart";
+import { WhatsAppFloat } from "@/components/site/WhatsAppFloat";
 import appCss from "../styles.css?url";
 
 function NotFoundComponent() {
@@ -69,6 +70,7 @@ function RootComponent() {
         <CartProvider>
           <Outlet />
           <Toaster position="top-center" />
+          <WhatsAppFloat />
         </CartProvider>
       </AuthProvider>
     </QueryClientProvider>

@@ -1,5 +1,5 @@
 import { Link } from "@tanstack/react-router";
-import { Plus } from "lucide-react";
+import { Plus, MessageCircle } from "lucide-react";
 import { brl } from "@/lib/format";
 import { useCart } from "@/lib/cart";
 import { Button } from "@/components/ui/button";
@@ -56,9 +56,15 @@ export function ProductCard({ p }: { p: ProductCardData }) {
             <Plus className="size-4" />
           </Button>
         ) : (
-          <Link to="/produto/$slug" params={{ slug: p.slug }}>
-            <Button size="sm" variant="outline" className="rounded-full">Personalizar</Button>
-          </Link>
+          <a
+            href={`https://wa.me/5566984266994?text=${encodeURIComponent(`Olá! Quero personalizar ${p.title}. Pode me ajudar?`)}`}
+            target="_blank"
+            rel="noopener noreferrer"
+          >
+            <Button size="sm" variant="outline" className="rounded-full gap-1.5">
+              <MessageCircle className="size-3.5" /> Personalizar
+            </Button>
+          </a>
         )}
       </div>
     </article>
