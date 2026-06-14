@@ -9,6 +9,7 @@
 // Additionally, you should also exclude this file from your linter and/or formatter to prevent it from being checked or modified.
 
 import { Route as rootRouteImport } from './routes/__root'
+import { Route as SobreNosRouteImport } from './routes/sobre-nos'
 import { Route as ProdutosRouteImport } from './routes/produtos'
 import { Route as LoginRouteImport } from './routes/login'
 import { Route as ContaRouteImport } from './routes/conta'
@@ -21,6 +22,11 @@ import { Route as AdminProdutosRouteImport } from './routes/admin.produtos'
 import { Route as AdminPedidosRouteImport } from './routes/admin.pedidos'
 import { Route as AdminConfiguracoesRouteImport } from './routes/admin.configuracoes'
 
+const SobreNosRoute = SobreNosRouteImport.update({
+  id: '/sobre-nos',
+  path: '/sobre-nos',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const ProdutosRoute = ProdutosRouteImport.update({
   id: '/produtos',
   path: '/produtos',
@@ -84,6 +90,7 @@ export interface FileRoutesByFullPath {
   '/conta': typeof ContaRoute
   '/login': typeof LoginRoute
   '/produtos': typeof ProdutosRoute
+  '/sobre-nos': typeof SobreNosRoute
   '/admin/configuracoes': typeof AdminConfiguracoesRoute
   '/admin/pedidos': typeof AdminPedidosRoute
   '/admin/produtos': typeof AdminProdutosRoute
@@ -96,6 +103,7 @@ export interface FileRoutesByTo {
   '/conta': typeof ContaRoute
   '/login': typeof LoginRoute
   '/produtos': typeof ProdutosRoute
+  '/sobre-nos': typeof SobreNosRoute
   '/admin/configuracoes': typeof AdminConfiguracoesRoute
   '/admin/pedidos': typeof AdminPedidosRoute
   '/admin/produtos': typeof AdminProdutosRoute
@@ -110,6 +118,7 @@ export interface FileRoutesById {
   '/conta': typeof ContaRoute
   '/login': typeof LoginRoute
   '/produtos': typeof ProdutosRoute
+  '/sobre-nos': typeof SobreNosRoute
   '/admin/configuracoes': typeof AdminConfiguracoesRoute
   '/admin/pedidos': typeof AdminPedidosRoute
   '/admin/produtos': typeof AdminProdutosRoute
@@ -125,6 +134,7 @@ export interface FileRouteTypes {
     | '/conta'
     | '/login'
     | '/produtos'
+    | '/sobre-nos'
     | '/admin/configuracoes'
     | '/admin/pedidos'
     | '/admin/produtos'
@@ -137,6 +147,7 @@ export interface FileRouteTypes {
     | '/conta'
     | '/login'
     | '/produtos'
+    | '/sobre-nos'
     | '/admin/configuracoes'
     | '/admin/pedidos'
     | '/admin/produtos'
@@ -150,6 +161,7 @@ export interface FileRouteTypes {
     | '/conta'
     | '/login'
     | '/produtos'
+    | '/sobre-nos'
     | '/admin/configuracoes'
     | '/admin/pedidos'
     | '/admin/produtos'
@@ -164,11 +176,19 @@ export interface RootRouteChildren {
   ContaRoute: typeof ContaRoute
   LoginRoute: typeof LoginRoute
   ProdutosRoute: typeof ProdutosRoute
+  SobreNosRoute: typeof SobreNosRoute
   ProdutoSlugRoute: typeof ProdutoSlugRoute
 }
 
 declare module '@tanstack/react-router' {
   interface FileRoutesByPath {
+    '/sobre-nos': {
+      id: '/sobre-nos'
+      path: '/sobre-nos'
+      fullPath: '/sobre-nos'
+      preLoaderRoute: typeof SobreNosRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/produtos': {
       id: '/produtos'
       path: '/produtos'
@@ -272,6 +292,7 @@ const rootRouteChildren: RootRouteChildren = {
   ContaRoute: ContaRoute,
   LoginRoute: LoginRoute,
   ProdutosRoute: ProdutosRoute,
+  SobreNosRoute: SobreNosRoute,
   ProdutoSlugRoute: ProdutoSlugRoute,
 }
 export const routeTree = rootRouteImport
