@@ -22,7 +22,7 @@ function AdminOrders() {
     queryFn: async () => (await supabase.from("orders").select("*").order("created_at", { ascending: false })).data ?? [],
   });
 
-  const updateStatus = async (id: string, status: string) => {
+  const updateStatus = async (id: string, status: typeof STATUSES[number]["v"]) => {
     const { error } = await supabase.from("orders").update({ status }).eq("id", id);
     if (error) toast.error(error.message);
     else { toast.success("Status atualizado"); qc.invalidateQueries({ queryKey: ["admin-all-orders"] }); }
