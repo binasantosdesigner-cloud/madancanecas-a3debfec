@@ -30,6 +30,7 @@ export function Footer() {
             <li><Link to="/politica-de-trocas" className="hover:text-foreground transition-colors">Política de Trocas</Link></li>
             <li><Link to="/cuidados-com-os-produtos" className="hover:text-foreground transition-colors">Cuidados com os Produtos</Link></li>
             <li><Link to="/perguntas-frequentes" className="hover:text-foreground transition-colors">Perguntas Frequentes</Link></li>
+            <li><Link to="/brindes-corporativos" className="hover:text-foreground transition-colors">Brindes Corporativos</Link></li>
           </ul>
         </div>
         <div>

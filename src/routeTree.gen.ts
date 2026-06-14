@@ -17,6 +17,7 @@ import { Route as LoginRouteImport } from './routes/login'
 import { Route as CuidadosComOsProdutosRouteImport } from './routes/cuidados-com-os-produtos'
 import { Route as ContaRouteImport } from './routes/conta'
 import { Route as CarrinhoRouteImport } from './routes/carrinho'
+import { Route as BrindesCorporativosRouteImport } from './routes/brindes-corporativos'
 import { Route as AdminRouteImport } from './routes/admin'
 import { Route as IndexRouteImport } from './routes/index'
 import { Route as AdminIndexRouteImport } from './routes/admin.index'
@@ -65,6 +66,11 @@ const CarrinhoRoute = CarrinhoRouteImport.update({
   path: '/carrinho',
   getParentRoute: () => rootRouteImport,
 } as any)
+const BrindesCorporativosRoute = BrindesCorporativosRouteImport.update({
+  id: '/brindes-corporativos',
+  path: '/brindes-corporativos',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const AdminRoute = AdminRouteImport.update({
   id: '/admin',
   path: '/admin',
@@ -104,6 +110,7 @@ const AdminConfiguracoesRoute = AdminConfiguracoesRouteImport.update({
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
   '/admin': typeof AdminRouteWithChildren
+  '/brindes-corporativos': typeof BrindesCorporativosRoute
   '/carrinho': typeof CarrinhoRoute
   '/conta': typeof ContaRoute
   '/cuidados-com-os-produtos': typeof CuidadosComOsProdutosRoute
@@ -120,6 +127,7 @@ export interface FileRoutesByFullPath {
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
+  '/brindes-corporativos': typeof BrindesCorporativosRoute
   '/carrinho': typeof CarrinhoRoute
   '/conta': typeof ContaRoute
   '/cuidados-com-os-produtos': typeof CuidadosComOsProdutosRoute
@@ -138,6 +146,7 @@ export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
   '/admin': typeof AdminRouteWithChildren
+  '/brindes-corporativos': typeof BrindesCorporativosRoute
   '/carrinho': typeof CarrinhoRoute
   '/conta': typeof ContaRoute
   '/cuidados-com-os-produtos': typeof CuidadosComOsProdutosRoute
@@ -157,6 +166,7 @@ export interface FileRouteTypes {
   fullPaths:
     | '/'
     | '/admin'
+    | '/brindes-corporativos'
     | '/carrinho'
     | '/conta'
     | '/cuidados-com-os-produtos'
@@ -173,6 +183,7 @@ export interface FileRouteTypes {
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/'
+    | '/brindes-corporativos'
     | '/carrinho'
     | '/conta'
     | '/cuidados-com-os-produtos'
@@ -190,6 +201,7 @@ export interface FileRouteTypes {
     | '__root__'
     | '/'
     | '/admin'
+    | '/brindes-corporativos'
     | '/carrinho'
     | '/conta'
     | '/cuidados-com-os-produtos'
@@ -208,6 +220,7 @@ export interface FileRouteTypes {
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
   AdminRoute: typeof AdminRouteWithChildren
+  BrindesCorporativosRoute: typeof BrindesCorporativosRoute
   CarrinhoRoute: typeof CarrinhoRoute
   ContaRoute: typeof ContaRoute
   CuidadosComOsProdutosRoute: typeof CuidadosComOsProdutosRoute
@@ -275,6 +288,13 @@ declare module '@tanstack/react-router' {
       path: '/carrinho'
       fullPath: '/carrinho'
       preLoaderRoute: typeof CarrinhoRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/brindes-corporativos': {
+      id: '/brindes-corporativos'
+      path: '/brindes-corporativos'
+      fullPath: '/brindes-corporativos'
+      preLoaderRoute: typeof BrindesCorporativosRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/admin': {
@@ -348,6 +368,7 @@ const AdminRouteWithChildren = AdminRoute._addFileChildren(AdminRouteChildren)
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
   AdminRoute: AdminRouteWithChildren,
+  BrindesCorporativosRoute: BrindesCorporativosRoute,
   CarrinhoRoute: CarrinhoRoute,
   ContaRoute: ContaRoute,
   CuidadosComOsProdutosRoute: CuidadosComOsProdutosRoute,
