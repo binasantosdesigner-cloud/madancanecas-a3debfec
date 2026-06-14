@@ -9,8 +9,12 @@
 // Additionally, you should also exclude this file from your linter and/or formatter to prevent it from being checked or modified.
 
 import { Route as rootRouteImport } from './routes/__root'
+import { Route as SobreNosRouteImport } from './routes/sobre-nos'
 import { Route as ProdutosRouteImport } from './routes/produtos'
+import { Route as PoliticaDeTrocasRouteImport } from './routes/politica-de-trocas'
+import { Route as PerguntasFrequentesRouteImport } from './routes/perguntas-frequentes'
 import { Route as LoginRouteImport } from './routes/login'
+import { Route as CuidadosComOsProdutosRouteImport } from './routes/cuidados-com-os-produtos'
 import { Route as ContaRouteImport } from './routes/conta'
 import { Route as CarrinhoRouteImport } from './routes/carrinho'
 import { Route as AdminRouteImport } from './routes/admin'
@@ -21,14 +25,34 @@ import { Route as AdminProdutosRouteImport } from './routes/admin.produtos'
 import { Route as AdminPedidosRouteImport } from './routes/admin.pedidos'
 import { Route as AdminConfiguracoesRouteImport } from './routes/admin.configuracoes'
 
+const SobreNosRoute = SobreNosRouteImport.update({
+  id: '/sobre-nos',
+  path: '/sobre-nos',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const ProdutosRoute = ProdutosRouteImport.update({
   id: '/produtos',
   path: '/produtos',
   getParentRoute: () => rootRouteImport,
 } as any)
+const PoliticaDeTrocasRoute = PoliticaDeTrocasRouteImport.update({
+  id: '/politica-de-trocas',
+  path: '/politica-de-trocas',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const PerguntasFrequentesRoute = PerguntasFrequentesRouteImport.update({
+  id: '/perguntas-frequentes',
+  path: '/perguntas-frequentes',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const LoginRoute = LoginRouteImport.update({
   id: '/login',
   path: '/login',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const CuidadosComOsProdutosRoute = CuidadosComOsProdutosRouteImport.update({
+  id: '/cuidados-com-os-produtos',
+  path: '/cuidados-com-os-produtos',
   getParentRoute: () => rootRouteImport,
 } as any)
 const ContaRoute = ContaRouteImport.update({
@@ -82,8 +106,12 @@ export interface FileRoutesByFullPath {
   '/admin': typeof AdminRouteWithChildren
   '/carrinho': typeof CarrinhoRoute
   '/conta': typeof ContaRoute
+  '/cuidados-com-os-produtos': typeof CuidadosComOsProdutosRoute
   '/login': typeof LoginRoute
+  '/perguntas-frequentes': typeof PerguntasFrequentesRoute
+  '/politica-de-trocas': typeof PoliticaDeTrocasRoute
   '/produtos': typeof ProdutosRoute
+  '/sobre-nos': typeof SobreNosRoute
   '/admin/configuracoes': typeof AdminConfiguracoesRoute
   '/admin/pedidos': typeof AdminPedidosRoute
   '/admin/produtos': typeof AdminProdutosRoute
@@ -94,8 +122,12 @@ export interface FileRoutesByTo {
   '/': typeof IndexRoute
   '/carrinho': typeof CarrinhoRoute
   '/conta': typeof ContaRoute
+  '/cuidados-com-os-produtos': typeof CuidadosComOsProdutosRoute
   '/login': typeof LoginRoute
+  '/perguntas-frequentes': typeof PerguntasFrequentesRoute
+  '/politica-de-trocas': typeof PoliticaDeTrocasRoute
   '/produtos': typeof ProdutosRoute
+  '/sobre-nos': typeof SobreNosRoute
   '/admin/configuracoes': typeof AdminConfiguracoesRoute
   '/admin/pedidos': typeof AdminPedidosRoute
   '/admin/produtos': typeof AdminProdutosRoute
@@ -108,8 +140,12 @@ export interface FileRoutesById {
   '/admin': typeof AdminRouteWithChildren
   '/carrinho': typeof CarrinhoRoute
   '/conta': typeof ContaRoute
+  '/cuidados-com-os-produtos': typeof CuidadosComOsProdutosRoute
   '/login': typeof LoginRoute
+  '/perguntas-frequentes': typeof PerguntasFrequentesRoute
+  '/politica-de-trocas': typeof PoliticaDeTrocasRoute
   '/produtos': typeof ProdutosRoute
+  '/sobre-nos': typeof SobreNosRoute
   '/admin/configuracoes': typeof AdminConfiguracoesRoute
   '/admin/pedidos': typeof AdminPedidosRoute
   '/admin/produtos': typeof AdminProdutosRoute
@@ -123,8 +159,12 @@ export interface FileRouteTypes {
     | '/admin'
     | '/carrinho'
     | '/conta'
+    | '/cuidados-com-os-produtos'
     | '/login'
+    | '/perguntas-frequentes'
+    | '/politica-de-trocas'
     | '/produtos'
+    | '/sobre-nos'
     | '/admin/configuracoes'
     | '/admin/pedidos'
     | '/admin/produtos'
@@ -135,8 +175,12 @@ export interface FileRouteTypes {
     | '/'
     | '/carrinho'
     | '/conta'
+    | '/cuidados-com-os-produtos'
     | '/login'
+    | '/perguntas-frequentes'
+    | '/politica-de-trocas'
     | '/produtos'
+    | '/sobre-nos'
     | '/admin/configuracoes'
     | '/admin/pedidos'
     | '/admin/produtos'
@@ -148,8 +192,12 @@ export interface FileRouteTypes {
     | '/admin'
     | '/carrinho'
     | '/conta'
+    | '/cuidados-com-os-produtos'
     | '/login'
+    | '/perguntas-frequentes'
+    | '/politica-de-trocas'
     | '/produtos'
+    | '/sobre-nos'
     | '/admin/configuracoes'
     | '/admin/pedidos'
     | '/admin/produtos'
@@ -162,13 +210,24 @@ export interface RootRouteChildren {
   AdminRoute: typeof AdminRouteWithChildren
   CarrinhoRoute: typeof CarrinhoRoute
   ContaRoute: typeof ContaRoute
+  CuidadosComOsProdutosRoute: typeof CuidadosComOsProdutosRoute
   LoginRoute: typeof LoginRoute
+  PerguntasFrequentesRoute: typeof PerguntasFrequentesRoute
+  PoliticaDeTrocasRoute: typeof PoliticaDeTrocasRoute
   ProdutosRoute: typeof ProdutosRoute
+  SobreNosRoute: typeof SobreNosRoute
   ProdutoSlugRoute: typeof ProdutoSlugRoute
 }
 
 declare module '@tanstack/react-router' {
   interface FileRoutesByPath {
+    '/sobre-nos': {
+      id: '/sobre-nos'
+      path: '/sobre-nos'
+      fullPath: '/sobre-nos'
+      preLoaderRoute: typeof SobreNosRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/produtos': {
       id: '/produtos'
       path: '/produtos'
@@ -176,11 +235,32 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof ProdutosRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/politica-de-trocas': {
+      id: '/politica-de-trocas'
+      path: '/politica-de-trocas'
+      fullPath: '/politica-de-trocas'
+      preLoaderRoute: typeof PoliticaDeTrocasRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/perguntas-frequentes': {
+      id: '/perguntas-frequentes'
+      path: '/perguntas-frequentes'
+      fullPath: '/perguntas-frequentes'
+      preLoaderRoute: typeof PerguntasFrequentesRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/login': {
       id: '/login'
       path: '/login'
       fullPath: '/login'
       preLoaderRoute: typeof LoginRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/cuidados-com-os-produtos': {
+      id: '/cuidados-com-os-produtos'
+      path: '/cuidados-com-os-produtos'
+      fullPath: '/cuidados-com-os-produtos'
+      preLoaderRoute: typeof CuidadosComOsProdutosRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/conta': {
@@ -270,8 +350,12 @@ const rootRouteChildren: RootRouteChildren = {
   AdminRoute: AdminRouteWithChildren,
   CarrinhoRoute: CarrinhoRoute,
   ContaRoute: ContaRoute,
+  CuidadosComOsProdutosRoute: CuidadosComOsProdutosRoute,
   LoginRoute: LoginRoute,
+  PerguntasFrequentesRoute: PerguntasFrequentesRoute,
+  PoliticaDeTrocasRoute: PoliticaDeTrocasRoute,
   ProdutosRoute: ProdutosRoute,
+  SobreNosRoute: SobreNosRoute,
   ProdutoSlugRoute: ProdutoSlugRoute,
 }
 export const routeTree = rootRouteImport
