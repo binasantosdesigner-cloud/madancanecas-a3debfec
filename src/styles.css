@@ -45,32 +45,41 @@
 :root {
   --radius: 0.75rem;
 
-  /* Brand */
-  --brand-cream: oklch(0.985 0.01 80);
-  --brand-dark: oklch(0.18 0.012 60);
-  --brand-gold: oklch(0.72 0.11 70);
-  --brand-muted: oklch(0.95 0.012 75);
-  --whatsapp: oklch(0.72 0.18 145);
+  /* Brand — extraído da logo Madan */
+  --brand-cream: #faf4e8;
+  --brand-dark: #1a1a1a;
+  --brand-gold: #a57840;
+  --brand-muted: #f5ede0;
+  --whatsapp: #25d366;
 
-  --background: oklch(0.985 0.01 80);
-  --foreground: oklch(0.18 0.012 60);
-  --card: oklch(1 0 0);
-  --card-foreground: oklch(0.18 0.012 60);
-  --popover: oklch(1 0 0);
-  --popover-foreground: oklch(0.18 0.012 60);
-  --primary: oklch(0.18 0.012 60);
-  --primary-foreground: oklch(0.985 0.01 80);
-  --secondary: oklch(0.95 0.012 75);
-  --secondary-foreground: oklch(0.18 0.012 60);
-  --muted: oklch(0.95 0.012 75);
-  --muted-foreground: oklch(0.45 0.015 60);
-  --accent: oklch(0.72 0.11 70);
-  --accent-foreground: oklch(0.18 0.012 60);
+  /* Surfaces */
+  --background: #f0e6c8;          /* fundo bege/areia */
+  --foreground: #2a1f14;          /* texto principal */
+  --card: #faf4e8;
+  --card-foreground: #2a1f14;
+  --popover: #faf4e8;
+  --popover-foreground: #2a1f14;
+
+  /* Primary — rosa da logo */
+  --primary: #e8509a;
+  --primary-foreground: #ffffff;
+
+  /* Secondary / muted — superfícies */
+  --secondary: #faf4e8;
+  --secondary-foreground: #2a1f14;
+  --muted: #f5ede0;
+  --muted-foreground: #6b5540;
+
+  /* Accent — dourado da logo */
+  --accent: #a57840;
+  --accent-foreground: #ffffff;
+
   --destructive: oklch(0.55 0.22 25);
-  --destructive-foreground: oklch(0.99 0 0);
-  --border: oklch(0.18 0.012 60 / 0.1);
-  --input: oklch(0.18 0.012 60 / 0.12);
-  --ring: oklch(0.72 0.11 70);
+  --destructive-foreground: #ffffff;
+
+  --border: rgba(165, 120, 64, 0.2);
+  --input: rgba(165, 120, 64, 0.3);
+  --ring: #e8509a;
 }
 
 .dark {
