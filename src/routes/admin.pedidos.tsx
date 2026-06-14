@@ -43,7 +43,7 @@ function AdminOrders() {
               </div>
               <div className="flex items-center gap-3">
                 <span className="font-semibold">{brl(Number(o.total))}</span>
-                <Select value={o.status} onValueChange={(v) => updateStatus(o.id, v)}>
+                <Select value={o.status} onValueChange={(v) => updateStatus(o.id, v as OrderStatus)}>
                   <SelectTrigger className="w-44"><SelectValue /></SelectTrigger>
                   <SelectContent>{statuses.map((s) => <SelectItem key={s.v} value={s.v}>{s.l}</SelectItem>)}</SelectContent>
                 </Select>
