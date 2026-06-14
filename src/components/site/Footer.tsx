@@ -34,8 +34,16 @@ export function Footer() {
         <div>
           <h4 className="text-xs font-bold uppercase tracking-widest mb-4">Contato</h4>
           <ul className="space-y-2 text-sm text-muted-foreground">
-            <li>WhatsApp: clique para conversar</li>
-            <li>contato@madancanecas.com.br</li>
+            <li>
+              <a href="https://wa.me/5566984266994" target="_blank" rel="noopener noreferrer" className="hover:text-foreground transition-colors">
+                WhatsApp: (66) 98426-6994
+              </a>
+            </li>
+            <li>
+              <a href="mailto:madan.canecas@gmail.com" className="hover:text-foreground transition-colors">
+                madan.canecas@gmail.com
+              </a>
+            </li>
             <li>
               <a href={INSTAGRAM_URL} target="_blank" rel="noopener noreferrer" className="hover:text-foreground transition-colors">
                 Instagram @madancanecas
