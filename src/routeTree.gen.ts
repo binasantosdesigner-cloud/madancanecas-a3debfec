@@ -13,6 +13,7 @@ import { Route as SobreNosRouteImport } from './routes/sobre-nos'
 import { Route as ProdutosRouteImport } from './routes/produtos'
 import { Route as PoliticaDeTrocasRouteImport } from './routes/politica-de-trocas'
 import { Route as LoginRouteImport } from './routes/login'
+import { Route as CuidadosComOsProdutosRouteImport } from './routes/cuidados-com-os-produtos'
 import { Route as ContaRouteImport } from './routes/conta'
 import { Route as CarrinhoRouteImport } from './routes/carrinho'
 import { Route as AdminRouteImport } from './routes/admin'
@@ -41,6 +42,11 @@ const PoliticaDeTrocasRoute = PoliticaDeTrocasRouteImport.update({
 const LoginRoute = LoginRouteImport.update({
   id: '/login',
   path: '/login',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const CuidadosComOsProdutosRoute = CuidadosComOsProdutosRouteImport.update({
+  id: '/cuidados-com-os-produtos',
+  path: '/cuidados-com-os-produtos',
   getParentRoute: () => rootRouteImport,
 } as any)
 const ContaRoute = ContaRouteImport.update({
@@ -94,6 +100,7 @@ export interface FileRoutesByFullPath {
   '/admin': typeof AdminRouteWithChildren
   '/carrinho': typeof CarrinhoRoute
   '/conta': typeof ContaRoute
+  '/cuidados-com-os-produtos': typeof CuidadosComOsProdutosRoute
   '/login': typeof LoginRoute
   '/politica-de-trocas': typeof PoliticaDeTrocasRoute
   '/produtos': typeof ProdutosRoute
@@ -108,6 +115,7 @@ export interface FileRoutesByTo {
   '/': typeof IndexRoute
   '/carrinho': typeof CarrinhoRoute
   '/conta': typeof ContaRoute
+  '/cuidados-com-os-produtos': typeof CuidadosComOsProdutosRoute
   '/login': typeof LoginRoute
   '/politica-de-trocas': typeof PoliticaDeTrocasRoute
   '/produtos': typeof ProdutosRoute
@@ -124,6 +132,7 @@ export interface FileRoutesById {
   '/admin': typeof AdminRouteWithChildren
   '/carrinho': typeof CarrinhoRoute
   '/conta': typeof ContaRoute
+  '/cuidados-com-os-produtos': typeof CuidadosComOsProdutosRoute
   '/login': typeof LoginRoute
   '/politica-de-trocas': typeof PoliticaDeTrocasRoute
   '/produtos': typeof ProdutosRoute
@@ -141,6 +150,7 @@ export interface FileRouteTypes {
     | '/admin'
     | '/carrinho'
     | '/conta'
+    | '/cuidados-com-os-produtos'
     | '/login'
     | '/politica-de-trocas'
     | '/produtos'
@@ -155,6 +165,7 @@ export interface FileRouteTypes {
     | '/'
     | '/carrinho'
     | '/conta'
+    | '/cuidados-com-os-produtos'
     | '/login'
     | '/politica-de-trocas'
     | '/produtos'
@@ -170,6 +181,7 @@ export interface FileRouteTypes {
     | '/admin'
     | '/carrinho'
     | '/conta'
+    | '/cuidados-com-os-produtos'
     | '/login'
     | '/politica-de-trocas'
     | '/produtos'
@@ -186,6 +198,7 @@ export interface RootRouteChildren {
   AdminRoute: typeof AdminRouteWithChildren
   CarrinhoRoute: typeof CarrinhoRoute
   ContaRoute: typeof ContaRoute
+  CuidadosComOsProdutosRoute: typeof CuidadosComOsProdutosRoute
   LoginRoute: typeof LoginRoute
   PoliticaDeTrocasRoute: typeof PoliticaDeTrocasRoute
   ProdutosRoute: typeof ProdutosRoute
@@ -221,6 +234,13 @@ declare module '@tanstack/react-router' {
       path: '/login'
       fullPath: '/login'
       preLoaderRoute: typeof LoginRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/cuidados-com-os-produtos': {
+      id: '/cuidados-com-os-produtos'
+      path: '/cuidados-com-os-produtos'
+      fullPath: '/cuidados-com-os-produtos'
+      preLoaderRoute: typeof CuidadosComOsProdutosRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/conta': {
@@ -310,6 +330,7 @@ const rootRouteChildren: RootRouteChildren = {
   AdminRoute: AdminRouteWithChildren,
   CarrinhoRoute: CarrinhoRoute,
   ContaRoute: ContaRoute,
+  CuidadosComOsProdutosRoute: CuidadosComOsProdutosRoute,
   LoginRoute: LoginRoute,
   PoliticaDeTrocasRoute: PoliticaDeTrocasRoute,
   ProdutosRoute: ProdutosRoute,
