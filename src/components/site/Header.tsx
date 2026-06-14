@@ -1,5 +1,5 @@
 import { Link } from "@tanstack/react-router";
-import { ShoppingBag, User, Menu } from "lucide-react";
+import { ShoppingBag, User, Menu, Instagram } from "lucide-react";
 import { useCart } from "@/lib/cart";
 import { useAuth } from "@/lib/auth";
 import { Button } from "@/components/ui/button";
@@ -45,6 +45,17 @@ export function Header() {
               Admin
             </Link>
           )}
+          <a
+            href="https://www.instagram.com/madancanecas/"
+            target="_blank"
+            rel="noopener noreferrer"
+            aria-label="Instagram @madancanecas"
+            className="hidden sm:inline-flex"
+          >
+            <Button variant="ghost" size="icon">
+              <Instagram className="size-5" />
+            </Button>
+          </a>
           <Link to={user ? "/conta" : "/login"} aria-label="Conta">
             <Button variant="ghost" size="icon">
               <User className="size-5" />
