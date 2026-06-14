@@ -116,7 +116,7 @@ function HomePage() {
               <p className="mt-4 max-w-lg text-brand-cream/80">
                 Kits exclusivos para eventos, boas-vindas e brindes de alto impacto.
               </p>
-              <Link to="/produtos" className="mt-8">
+              <Link to="/brindes-corporativos" className="mt-8">
                 <Button size="lg" className="rounded-full bg-brand-cream text-brand-dark hover:bg-brand-cream/90">
                   Solicitar Orçamento
                 </Button>
