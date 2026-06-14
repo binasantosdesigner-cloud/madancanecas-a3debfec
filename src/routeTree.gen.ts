@@ -12,6 +12,7 @@ import { Route as rootRouteImport } from './routes/__root'
 import { Route as SobreNosRouteImport } from './routes/sobre-nos'
 import { Route as ProdutosRouteImport } from './routes/produtos'
 import { Route as PoliticaDeTrocasRouteImport } from './routes/politica-de-trocas'
+import { Route as PerguntasFrequentesRouteImport } from './routes/perguntas-frequentes'
 import { Route as LoginRouteImport } from './routes/login'
 import { Route as CuidadosComOsProdutosRouteImport } from './routes/cuidados-com-os-produtos'
 import { Route as ContaRouteImport } from './routes/conta'
@@ -37,6 +38,11 @@ const ProdutosRoute = ProdutosRouteImport.update({
 const PoliticaDeTrocasRoute = PoliticaDeTrocasRouteImport.update({
   id: '/politica-de-trocas',
   path: '/politica-de-trocas',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const PerguntasFrequentesRoute = PerguntasFrequentesRouteImport.update({
+  id: '/perguntas-frequentes',
+  path: '/perguntas-frequentes',
   getParentRoute: () => rootRouteImport,
 } as any)
 const LoginRoute = LoginRouteImport.update({
@@ -102,6 +108,7 @@ export interface FileRoutesByFullPath {
   '/conta': typeof ContaRoute
   '/cuidados-com-os-produtos': typeof CuidadosComOsProdutosRoute
   '/login': typeof LoginRoute
+  '/perguntas-frequentes': typeof PerguntasFrequentesRoute
   '/politica-de-trocas': typeof PoliticaDeTrocasRoute
   '/produtos': typeof ProdutosRoute
   '/sobre-nos': typeof SobreNosRoute
@@ -117,6 +124,7 @@ export interface FileRoutesByTo {
   '/conta': typeof ContaRoute
   '/cuidados-com-os-produtos': typeof CuidadosComOsProdutosRoute
   '/login': typeof LoginRoute
+  '/perguntas-frequentes': typeof PerguntasFrequentesRoute
   '/politica-de-trocas': typeof PoliticaDeTrocasRoute
   '/produtos': typeof ProdutosRoute
   '/sobre-nos': typeof SobreNosRoute
@@ -134,6 +142,7 @@ export interface FileRoutesById {
   '/conta': typeof ContaRoute
   '/cuidados-com-os-produtos': typeof CuidadosComOsProdutosRoute
   '/login': typeof LoginRoute
+  '/perguntas-frequentes': typeof PerguntasFrequentesRoute
   '/politica-de-trocas': typeof PoliticaDeTrocasRoute
   '/produtos': typeof ProdutosRoute
   '/sobre-nos': typeof SobreNosRoute
@@ -152,6 +161,7 @@ export interface FileRouteTypes {
     | '/conta'
     | '/cuidados-com-os-produtos'
     | '/login'
+    | '/perguntas-frequentes'
     | '/politica-de-trocas'
     | '/produtos'
     | '/sobre-nos'
@@ -167,6 +177,7 @@ export interface FileRouteTypes {
     | '/conta'
     | '/cuidados-com-os-produtos'
     | '/login'
+    | '/perguntas-frequentes'
     | '/politica-de-trocas'
     | '/produtos'
     | '/sobre-nos'
@@ -183,6 +194,7 @@ export interface FileRouteTypes {
     | '/conta'
     | '/cuidados-com-os-produtos'
     | '/login'
+    | '/perguntas-frequentes'
     | '/politica-de-trocas'
     | '/produtos'
     | '/sobre-nos'
@@ -200,6 +212,7 @@ export interface RootRouteChildren {
   ContaRoute: typeof ContaRoute
   CuidadosComOsProdutosRoute: typeof CuidadosComOsProdutosRoute
   LoginRoute: typeof LoginRoute
+  PerguntasFrequentesRoute: typeof PerguntasFrequentesRoute
   PoliticaDeTrocasRoute: typeof PoliticaDeTrocasRoute
   ProdutosRoute: typeof ProdutosRoute
   SobreNosRoute: typeof SobreNosRoute
@@ -227,6 +240,13 @@ declare module '@tanstack/react-router' {
       path: '/politica-de-trocas'
       fullPath: '/politica-de-trocas'
       preLoaderRoute: typeof PoliticaDeTrocasRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/perguntas-frequentes': {
+      id: '/perguntas-frequentes'
+      path: '/perguntas-frequentes'
+      fullPath: '/perguntas-frequentes'
+      preLoaderRoute: typeof PerguntasFrequentesRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/login': {
@@ -332,6 +352,7 @@ const rootRouteChildren: RootRouteChildren = {
   ContaRoute: ContaRoute,
   CuidadosComOsProdutosRoute: CuidadosComOsProdutosRoute,
   LoginRoute: LoginRoute,
+  PerguntasFrequentesRoute: PerguntasFrequentesRoute,
   PoliticaDeTrocasRoute: PoliticaDeTrocasRoute,
   ProdutosRoute: ProdutosRoute,
   SobreNosRoute: SobreNosRoute,
