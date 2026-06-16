@@ -26,13 +26,14 @@ export function Header() {
             <span className="font-serif text-2xl tracking-tight">Madan</span>
             <span className="text-[10px] uppercase tracking-[0.2em] text-muted-foreground">Canecas & Personalizados</span>
           </Link>
-          <nav className="hidden md:flex gap-6 text-sm">
+          <nav className="hidden md:flex gap-7 text-sm">
             {links.map((l, i) => (
               <Link
                 key={i}
                 to={l.to}
                 search={"search" in l ? (l.search as any) : undefined}
-                className="text-muted-foreground transition-colors hover:text-foreground"
+                className="nav-link text-foreground/75"
+                activeProps={{ "data-active": "true" } as any}
               >
                 {l.label}
               </Link>
@@ -53,17 +54,17 @@ export function Header() {
             aria-label="Instagram @madancanecas"
             className="hidden sm:inline-flex"
           >
-            <Button variant="ghost" size="icon">
+            <Button variant="ghost" size="icon" className="text-accent hover:text-accent hover:bg-accent/10">
               <Instagram className="size-5" />
             </Button>
           </a>
           <Link to={user ? "/conta" : "/login"} aria-label="Conta">
-            <Button variant="ghost" size="icon">
+            <Button variant="ghost" size="icon" className="text-accent hover:text-accent hover:bg-accent/10">
               <User className="size-5" />
             </Button>
           </Link>
           <Link to="/carrinho" className="relative" aria-label="Carrinho">
-            <Button variant="ghost" size="icon">
+            <Button variant="ghost" size="icon" className="text-accent hover:text-accent hover:bg-accent/10">
               <ShoppingBag className="size-5" />
             </Button>
             {count > 0 && (
@@ -83,7 +84,8 @@ export function Header() {
                     key={i}
                     to={l.to}
                     search={"search" in l ? (l.search as any) : undefined}
-                    className="text-base"
+                    className="text-base nav-link inline-block w-fit"
+                    activeProps={{ "data-active": "true" } as any}
                   >
                     {l.label}
                   </Link>

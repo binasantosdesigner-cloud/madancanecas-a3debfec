@@ -5,10 +5,12 @@ export const INSTAGRAM_URL = "https://www.instagram.com/madancanecas/";
 
 export function Footer() {
   return (
-    <footer className="mt-24 border-t border-border/60 bg-secondary/40">
+    <footer className="mt-24 border-t-2 border-accent/30 bg-secondary/40">
       <div className="mx-auto max-w-7xl px-6 py-16 grid gap-12 md:grid-cols-3">
         <div>
-          <h3 className="font-serif text-2xl">Madan</h3>
+          <h3 className="font-serif text-2xl">
+            <span className="text-accent">Madan</span>
+          </h3>
           <p className="mt-4 text-sm text-muted-foreground max-w-xs">
             Presentes personalizados feitos à mão, com acabamento premium e atendimento humano via WhatsApp.
           </p>
@@ -16,7 +18,7 @@ export function Footer() {
             href={INSTAGRAM_URL}
             target="_blank"
             rel="noopener noreferrer"
-            className="mt-6 inline-flex items-center gap-2 text-sm text-foreground hover:text-accent transition-colors"
+            className="mt-6 inline-flex items-center gap-2 text-sm text-accent hover:opacity-80 transition-opacity"
             aria-label="Instagram @madancanecas"
           >
             <Instagram className="size-4" />
@@ -24,30 +26,30 @@ export function Footer() {
           </a>
         </div>
         <div>
-          <h4 className="text-xs font-bold uppercase tracking-widest mb-4">Institucional</h4>
+          <h4 className="text-xs font-bold uppercase tracking-widest mb-4 text-accent">Institucional</h4>
           <ul className="space-y-2 text-sm text-muted-foreground">
-            <li><Link to="/sobre-nos" className="hover:text-foreground transition-colors">Sobre nós</Link></li>
-            <li><Link to="/politica-de-trocas" className="hover:text-foreground transition-colors">Política de Trocas</Link></li>
-            <li><Link to="/cuidados-com-os-produtos" className="hover:text-foreground transition-colors">Cuidados com os Produtos</Link></li>
-            <li><Link to="/perguntas-frequentes" className="hover:text-foreground transition-colors">Perguntas Frequentes</Link></li>
-            <li><Link to="/brindes-corporativos" className="hover:text-foreground transition-colors">Brindes Corporativos</Link></li>
+            <li><Link to="/sobre-nos" className="hover:text-accent transition-colors">Sobre nós</Link></li>
+            <li><Link to="/politica-de-trocas" className="hover:text-accent transition-colors">Política de Trocas</Link></li>
+            <li><Link to="/cuidados-com-os-produtos" className="hover:text-accent transition-colors">Cuidados com os Produtos</Link></li>
+            <li><Link to="/perguntas-frequentes" className="hover:text-accent transition-colors">Perguntas Frequentes</Link></li>
+            <li><Link to="/brindes-corporativos" className="hover:text-accent transition-colors">Brindes Corporativos</Link></li>
           </ul>
         </div>
         <div>
-          <h4 className="text-xs font-bold uppercase tracking-widest mb-4">Contato</h4>
+          <h4 className="text-xs font-bold uppercase tracking-widest mb-4 text-accent">Contato</h4>
           <ul className="space-y-2 text-sm text-muted-foreground">
             <li>
-              <a href="https://wa.me/5566984266994" target="_blank" rel="noopener noreferrer" className="hover:text-foreground transition-colors">
+              <a href="https://wa.me/5566984266994" target="_blank" rel="noopener noreferrer" className="hover:text-accent transition-colors">
                 WhatsApp: (66) 98426-6994
               </a>
             </li>
             <li>
-              <a href="mailto:madan.canecas@gmail.com" className="hover:text-foreground transition-colors">
+              <a href="mailto:madan.canecas@gmail.com" className="hover:text-accent transition-colors">
                 madan.canecas@gmail.com
               </a>
             </li>
             <li>
-              <a href={INSTAGRAM_URL} target="_blank" rel="noopener noreferrer" className="hover:text-foreground transition-colors">
+              <a href={INSTAGRAM_URL} target="_blank" rel="noopener noreferrer" className="hover:text-accent transition-colors">
                 Instagram @madancanecas
               </a>
             </li>
