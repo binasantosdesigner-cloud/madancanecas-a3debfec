@@ -48,7 +48,7 @@
   /* Brand — extraído da logo Madan */
   --brand-cream: #faf4e8;
   --brand-dark: #1a1a1a;
-  --brand-gold: #a57840;
+  --brand-gold: #e8509a;
   --brand-muted: #f5ede0;
   --whatsapp: #25d366;
 
@@ -71,7 +71,7 @@
   --muted-foreground: #6b5540;
 
   /* Accent — dourado da logo */
-  --accent: #a57840;
+  --accent: #e8509a;
   --accent-foreground: #ffffff;
 
   --destructive: oklch(0.55 0.22 25);
