@@ -27,6 +27,7 @@ import { Route as AdminProdutosRouteImport } from './routes/admin.produtos'
 import { Route as AdminPedidosRouteImport } from './routes/admin.pedidos'
 import { Route as AdminConfiguracoesRouteImport } from './routes/admin.configuracoes'
 import { Route as AdminCategoriasRouteImport } from './routes/admin.categorias'
+import { Route as AdminArtesRouteImport } from './routes/admin.artes'
 
 const SobreNosRoute = SobreNosRouteImport.update({
   id: '/sobre-nos',
@@ -118,6 +119,11 @@ const AdminCategoriasRoute = AdminCategoriasRouteImport.update({
   path: '/categorias',
   getParentRoute: () => AdminRoute,
 } as any)
+const AdminArtesRoute = AdminArtesRouteImport.update({
+  id: '/artes',
+  path: '/artes',
+  getParentRoute: () => AdminRoute,
+} as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
@@ -131,6 +137,7 @@ export interface FileRoutesByFullPath {
   '/politica-de-trocas': typeof PoliticaDeTrocasRoute
   '/produtos': typeof ProdutosRoute
   '/sobre-nos': typeof SobreNosRoute
+  '/admin/artes': typeof AdminArtesRoute
   '/admin/categorias': typeof AdminCategoriasRoute
   '/admin/configuracoes': typeof AdminConfiguracoesRoute
   '/admin/pedidos': typeof AdminPedidosRoute
@@ -150,6 +157,7 @@ export interface FileRoutesByTo {
   '/politica-de-trocas': typeof PoliticaDeTrocasRoute
   '/produtos': typeof ProdutosRoute
   '/sobre-nos': typeof SobreNosRoute
+  '/admin/artes': typeof AdminArtesRoute
   '/admin/categorias': typeof AdminCategoriasRoute
   '/admin/configuracoes': typeof AdminConfiguracoesRoute
   '/admin/pedidos': typeof AdminPedidosRoute
@@ -171,6 +179,7 @@ export interface FileRoutesById {
   '/politica-de-trocas': typeof PoliticaDeTrocasRoute
   '/produtos': typeof ProdutosRoute
   '/sobre-nos': typeof SobreNosRoute
+  '/admin/artes': typeof AdminArtesRoute
   '/admin/categorias': typeof AdminCategoriasRoute
   '/admin/configuracoes': typeof AdminConfiguracoesRoute
   '/admin/pedidos': typeof AdminPedidosRoute
@@ -193,6 +202,7 @@ export interface FileRouteTypes {
     | '/politica-de-trocas'
     | '/produtos'
     | '/sobre-nos'
+    | '/admin/artes'
     | '/admin/categorias'
     | '/admin/configuracoes'
     | '/admin/pedidos'
@@ -212,6 +222,7 @@ export interface FileRouteTypes {
     | '/politica-de-trocas'
     | '/produtos'
     | '/sobre-nos'
+    | '/admin/artes'
     | '/admin/categorias'
     | '/admin/configuracoes'
     | '/admin/pedidos'
@@ -232,6 +243,7 @@ export interface FileRouteTypes {
     | '/politica-de-trocas'
     | '/produtos'
     | '/sobre-nos'
+    | '/admin/artes'
     | '/admin/categorias'
     | '/admin/configuracoes'
     | '/admin/pedidos'
@@ -384,10 +396,18 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AdminCategoriasRouteImport
       parentRoute: typeof AdminRoute
     }
+    '/admin/artes': {
+      id: '/admin/artes'
+      path: '/artes'
+      fullPath: '/admin/artes'
+      preLoaderRoute: typeof AdminArtesRouteImport
+      parentRoute: typeof AdminRoute
+    }
   }
 }
 
 interface AdminRouteChildren {
+  AdminArtesRoute: typeof AdminArtesRoute
   AdminCategoriasRoute: typeof AdminCategoriasRoute
   AdminConfiguracoesRoute: typeof AdminConfiguracoesRoute
   AdminPedidosRoute: typeof AdminPedidosRoute
@@ -397,6 +417,7 @@ interface AdminRouteChildren {
 }
 
 const AdminRouteChildren: AdminRouteChildren = {
+  AdminArtesRoute: AdminArtesRoute,
   AdminCategoriasRoute: AdminCategoriasRoute,
   AdminConfiguracoesRoute: AdminConfiguracoesRoute,
   AdminPedidosRoute: AdminPedidosRoute,
