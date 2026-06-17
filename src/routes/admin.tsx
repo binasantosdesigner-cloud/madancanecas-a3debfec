@@ -1,6 +1,7 @@
 import { createFileRoute, Outlet, Link, useNavigate } from "@tanstack/react-router";
 import { useEffect } from "react";
 import { useAuth } from "@/lib/auth";
+import { Button } from "@/components/ui/button";
 import {
   SidebarProvider, Sidebar, SidebarContent, SidebarGroup, SidebarGroupContent,
   SidebarGroupLabel, SidebarMenu, SidebarMenuItem, SidebarMenuButton,
@@ -20,6 +21,7 @@ const NAV: NavItem[] = [
   { to: "/admin/usuarios", label: "Usuários", icon: Users },
   { to: "/admin/produtos", label: "Produtos", icon: Package },
   { to: "/admin/categorias", label: "Categorias", icon: Tag },
+  { to: "/admin/pagamentos", label: "Pagamentos", icon: ShoppingBag },
   { to: "/admin/artes", label: "Aprovação de Artes", icon: Palette },
   { to: "/admin/configuracoes", label: "Configurações", icon: Settings },
 ];
@@ -31,11 +33,26 @@ function AdminLayout() {
   useEffect(() => {
     if (loading || roleLoading) return;
     if (!user) navigate({ to: "/login" });
-    else if (!isAdmin) navigate({ to: "/" });
   }, [user, isAdmin, loading, roleLoading, navigate]);
 
-  if (loading || roleLoading || !user || !isAdmin) {
+  if (loading || roleLoading || !user) {
     return <div className="min-h-screen grid place-items-center bg-background">Verificando…</div>;
+  }
+
+  if (!isAdmin) {
+    return (
+      <div className="min-h-screen grid place-items-center bg-background px-4">
+        <div className="max-w-md text-center space-y-4">
+          <h1 className="font-serif text-3xl text-foreground">Acesso negado</h1>
+          <p className="text-sm text-muted-foreground">
+            Esta área é restrita à equipe administrativa da Madan.
+          </p>
+          <Button asChild variant="outline" className="rounded-full">
+            <Link to="/">Voltar ao site</Link>
+          </Button>
+        </div>
+      </div>
+    );
   }
 
   return (
