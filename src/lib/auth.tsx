@@ -6,6 +6,7 @@ interface AuthCtx {
   user: User | null;
   session: Session | null;
   loading: boolean;
+  roleLoading: boolean;
   isAdmin: boolean;
   signOut: () => Promise<void>;
 }
@@ -15,30 +16,42 @@ const Ctx = createContext<AuthCtx | null>(null);
 export function AuthProvider({ children }: { children: ReactNode }) {
   const [session, setSession] = useState<Session | null>(null);
   const [loading, setLoading] = useState(true);
+  const [roleLoading, setRoleLoading] = useState(true);
   const [isAdmin, setIsAdmin] = useState(false);
 
   useEffect(() => {
+    const fetchRole = (userId: string) => {
+      setRoleLoading(true);
+      setTimeout(async () => {
+        const { data } = await supabase
+          .from("user_roles")
+          .select("role")
+          .eq("user_id", userId)
+          .eq("role", "admin")
+          .maybeSingle();
+        setIsAdmin(!!data);
+        setRoleLoading(false);
+      }, 0);
+    };
+
     const { data: sub } = supabase.auth.onAuthStateChange((_e, s) => {
       setSession(s);
       setLoading(false);
       if (s?.user) {
-        // fetch role
-        setTimeout(async () => {
-          const { data } = await supabase
-            .from("user_roles")
-            .select("role")
-            .eq("user_id", s.user.id)
-            .eq("role", "admin")
-            .maybeSingle();
-          setIsAdmin(!!data);
-        }, 0);
+        fetchRole(s.user.id);
       } else {
         setIsAdmin(false);
+        setRoleLoading(false);
       }
     });
     supabase.auth.getSession().then(({ data }) => {
       setSession(data.session);
       setLoading(false);
+      if (data.session?.user) {
+        fetchRole(data.session.user.id);
+      } else {
+        setRoleLoading(false);
+      }
     });
     return () => sub.subscription.unsubscribe();
   }, []);
@@ -48,6 +61,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       user: session?.user ?? null,
       session,
       loading,
+      roleLoading,
       isAdmin,
       signOut: async () => { await supabase.auth.signOut(); },
     }}>
