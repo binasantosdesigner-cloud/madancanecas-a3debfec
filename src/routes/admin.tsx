@@ -25,16 +25,16 @@ const NAV: NavItem[] = [
 ];
 
 function AdminLayout() {
-  const { user, isAdmin, loading, signOut } = useAuth();
+  const { user, isAdmin, loading, roleLoading, signOut } = useAuth();
   const navigate = useNavigate();
 
   useEffect(() => {
-    if (loading) return;
+    if (loading || roleLoading) return;
     if (!user) navigate({ to: "/login" });
     else if (!isAdmin) navigate({ to: "/" });
-  }, [user, isAdmin, loading, navigate]);
+  }, [user, isAdmin, loading, roleLoading, navigate]);
 
-  if (loading || !user || !isAdmin) {
+  if (loading || roleLoading || !user || !isAdmin) {
     return <div className="min-h-screen grid place-items-center bg-background">Verificando…</div>;
   }
 
