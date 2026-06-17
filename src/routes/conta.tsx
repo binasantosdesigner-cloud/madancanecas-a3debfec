@@ -18,20 +18,22 @@ import { brl } from "@/lib/format";
 import {
   User, Package, CreditCard, ShoppingCart, Heart, Palette, MapPin,
   Bell, Award, HelpCircle, Settings, LogOut, LayoutDashboard,
-  Camera, Plus, Pencil, Trash2, Check,
+  Camera, Plus, Pencil, Trash2, Check, Brush, ArrowRight,
 } from "lucide-react";
+import { ArtApprovalsSection, useArtApprovals } from "@/components/account/ArtApprovalsSection";
 
 export const Route = createFileRoute("/conta")({ component: AccountPage });
 
 type SectionId =
   | "dashboard" | "perfil" | "pedidos" | "pagamentos" | "carrinho"
-  | "favoritos" | "projetos" | "enderecos" | "notificacoes"
+  | "favoritos" | "projetos" | "aprovacao" | "enderecos" | "notificacoes"
   | "beneficios" | "ajuda" | "config";
 
 const MENU: { id: SectionId; label: string; icon: React.ComponentType<{ className?: string }> }[] = [
   { id: "dashboard", label: "Início", icon: LayoutDashboard },
   { id: "perfil", label: "Meu Perfil", icon: User },
   { id: "pedidos", label: "Meus Pedidos", icon: Package },
+  { id: "aprovacao", label: "Aprovação de Arte", icon: Brush },
   { id: "pagamentos", label: "Pagamentos", icon: CreditCard },
   { id: "carrinho", label: "Meu Carrinho", icon: ShoppingCart },
   { id: "favoritos", label: "Favoritos", icon: Heart },
