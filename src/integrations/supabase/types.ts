@@ -14,6 +14,57 @@ export type Database = {
   }
   public: {
     Tables: {
+      addresses: {
+        Row: {
+          cep: string
+          city: string
+          complement: string | null
+          created_at: string
+          id: string
+          is_default: boolean
+          label: string | null
+          neighborhood: string
+          number: string
+          recipient: string | null
+          state: string
+          street: string
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          cep: string
+          city: string
+          complement?: string | null
+          created_at?: string
+          id?: string
+          is_default?: boolean
+          label?: string | null
+          neighborhood: string
+          number: string
+          recipient?: string | null
+          state: string
+          street: string
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          cep?: string
+          city?: string
+          complement?: string | null
+          created_at?: string
+          id?: string
+          is_default?: boolean
+          label?: string | null
+          neighborhood?: string
+          number?: string
+          recipient?: string | null
+          state?: string
+          street?: string
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
       categories: {
         Row: {
           created_at: string
@@ -144,6 +195,8 @@ export type Database = {
       }
       profiles: {
         Row: {
+          avatar_url: string | null
+          cpf: string | null
           created_at: string
           email: string | null
           full_name: string | null
@@ -151,6 +204,8 @@ export type Database = {
           phone: string | null
         }
         Insert: {
+          avatar_url?: string | null
+          cpf?: string | null
           created_at?: string
           email?: string | null
           full_name?: string | null
@@ -158,6 +213,8 @@ export type Database = {
           phone?: string | null
         }
         Update: {
+          avatar_url?: string | null
+          cpf?: string | null
           created_at?: string
           email?: string | null
           full_name?: string | null
