@@ -55,7 +55,7 @@ function AdminLayout() {
                     <SidebarMenuItem key={item.to}>
                       <SidebarMenuButton asChild tooltip={item.label}>
                         <Link
-                          to={item.to as string}
+                          to={item.to}
                           activeOptions={{ exact: !!item.exact }}
                           activeProps={{ "data-active": "true" } as Record<string, string>}
                           className="flex items-center gap-2"
