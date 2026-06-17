@@ -20,21 +20,25 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const [isAdmin, setIsAdmin] = useState(false);
 
   useEffect(() => {
+    let mounted = true;
+
     const fetchRole = (userId: string) => {
       setRoleLoading(true);
       setTimeout(async () => {
-        const { data } = await supabase
+        const { data, error } = await supabase
           .from("user_roles")
           .select("role")
           .eq("user_id", userId)
           .eq("role", "admin")
           .maybeSingle();
-        setIsAdmin(!!data);
+        if (!mounted) return;
+        setIsAdmin(!error && !!data);
         setRoleLoading(false);
       }, 0);
     };
 
     const { data: sub } = supabase.auth.onAuthStateChange((_e, s) => {
+      if (!mounted) return;
       setSession(s);
       setLoading(false);
       if (s?.user) {
@@ -45,15 +49,20 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       }
     });
     supabase.auth.getSession().then(({ data }) => {
+      if (!mounted) return;
       setSession(data.session);
       setLoading(false);
       if (data.session?.user) {
         fetchRole(data.session.user.id);
       } else {
+        setIsAdmin(false);
         setRoleLoading(false);
       }
     });
-    return () => sub.subscription.unsubscribe();
+    return () => {
+      mounted = false;
+      sub.subscription.unsubscribe();
+    };
   }, []);
 
   return (

@@ -44,7 +44,7 @@ export function Header() {
         <div className="flex items-center gap-2">
           {isAdmin && (
             <Link to="/admin" className="hidden md:inline-flex text-xs uppercase tracking-widest text-accent hover:underline px-3">
-              Admin
+              Painel Admin
             </Link>
           )}
           <a
@@ -90,7 +90,7 @@ export function Header() {
                     {l.label}
                   </Link>
                 ))}
-                {isAdmin && <Link to="/admin" className="text-accent">Admin</Link>}
+                {isAdmin && <Link to="/admin" className="text-accent">Painel Admin</Link>}
               </nav>
             </SheetContent>
           </Sheet>
