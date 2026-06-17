@@ -65,6 +65,183 @@ export type Database = {
         }
         Relationships: []
       }
+      art_approval_events: {
+        Row: {
+          art_approval_id: string
+          created_at: string
+          description: string | null
+          event_type: string
+          id: string
+          responsible: string
+          title: string
+        }
+        Insert: {
+          art_approval_id: string
+          created_at?: string
+          description?: string | null
+          event_type: string
+          id?: string
+          responsible?: string
+          title: string
+        }
+        Update: {
+          art_approval_id?: string
+          created_at?: string
+          description?: string | null
+          event_type?: string
+          id?: string
+          responsible?: string
+          title?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "art_approval_events_art_approval_id_fkey"
+            columns: ["art_approval_id"]
+            isOneToOne: false
+            referencedRelation: "art_approvals"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      art_approval_feedback: {
+        Row: {
+          art_approval_id: string
+          created_at: string
+          id: string
+          message: string
+          reference_file_url: string | null
+          user_id: string
+        }
+        Insert: {
+          art_approval_id: string
+          created_at?: string
+          id?: string
+          message: string
+          reference_file_url?: string | null
+          user_id: string
+        }
+        Update: {
+          art_approval_id?: string
+          created_at?: string
+          id?: string
+          message?: string
+          reference_file_url?: string | null
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "art_approval_feedback_art_approval_id_fkey"
+            columns: ["art_approval_id"]
+            isOneToOne: false
+            referencedRelation: "art_approvals"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      art_approval_versions: {
+        Row: {
+          art_approval_id: string
+          created_at: string
+          download_url: string | null
+          id: string
+          preview_image_url: string | null
+          team_notes: string | null
+          version_number: number
+        }
+        Insert: {
+          art_approval_id: string
+          created_at?: string
+          download_url?: string | null
+          id?: string
+          preview_image_url?: string | null
+          team_notes?: string | null
+          version_number?: number
+        }
+        Update: {
+          art_approval_id?: string
+          created_at?: string
+          download_url?: string | null
+          id?: string
+          preview_image_url?: string | null
+          team_notes?: string | null
+          version_number?: number
+        }
+        Relationships: [
+          {
+            foreignKeyName: "art_approval_versions_art_approval_id_fkey"
+            columns: ["art_approval_id"]
+            isOneToOne: false
+            referencedRelation: "art_approvals"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      art_approvals: {
+        Row: {
+          approval_deadline: string | null
+          approved_at: string | null
+          created_at: string
+          download_url: string | null
+          id: string
+          order_id: string | null
+          preview_image_url: string | null
+          product_id: string | null
+          product_name: string | null
+          project_name: string
+          status: Database["public"]["Enums"]["art_status"]
+          team_notes: string | null
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          approval_deadline?: string | null
+          approved_at?: string | null
+          created_at?: string
+          download_url?: string | null
+          id?: string
+          order_id?: string | null
+          preview_image_url?: string | null
+          product_id?: string | null
+          product_name?: string | null
+          project_name: string
+          status?: Database["public"]["Enums"]["art_status"]
+          team_notes?: string | null
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          approval_deadline?: string | null
+          approved_at?: string | null
+          created_at?: string
+          download_url?: string | null
+          id?: string
+          order_id?: string | null
+          preview_image_url?: string | null
+          product_id?: string | null
+          product_name?: string | null
+          project_name?: string
+          status?: Database["public"]["Enums"]["art_status"]
+          team_notes?: string | null
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "art_approvals_order_id_fkey"
+            columns: ["order_id"]
+            isOneToOne: false
+            referencedRelation: "orders"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "art_approvals_product_id_fkey"
+            columns: ["product_id"]
+            isOneToOne: false
+            referencedRelation: "products"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       categories: {
         Row: {
           created_at: string
@@ -277,6 +454,13 @@ export type Database = {
     }
     Enums: {
       app_role: "admin" | "customer"
+      art_status:
+        | "waiting"
+        | "adjustment_requested"
+        | "new_version"
+        | "approved"
+        | "expired"
+        | "cancelled"
       order_status:
         | "pending"
         | "in_production"
@@ -412,6 +596,14 @@ export const Constants = {
   public: {
     Enums: {
       app_role: ["admin", "customer"],
+      art_status: [
+        "waiting",
+        "adjustment_requested",
+        "new_version",
+        "approved",
+        "expired",
+        "cancelled",
+      ],
       order_status: [
         "pending",
         "in_production",
