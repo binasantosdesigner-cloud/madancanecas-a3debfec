@@ -18,20 +18,22 @@ import { brl } from "@/lib/format";
 import {
   User, Package, CreditCard, ShoppingCart, Heart, Palette, MapPin,
   Bell, Award, HelpCircle, Settings, LogOut, LayoutDashboard,
-  Camera, Plus, Pencil, Trash2, Check,
+  Camera, Plus, Pencil, Trash2, Check, Brush, ArrowRight,
 } from "lucide-react";
+import { ArtApprovalsSection, useArtApprovals } from "@/components/account/ArtApprovalsSection";
 
 export const Route = createFileRoute("/conta")({ component: AccountPage });
 
 type SectionId =
   | "dashboard" | "perfil" | "pedidos" | "pagamentos" | "carrinho"
-  | "favoritos" | "projetos" | "enderecos" | "notificacoes"
+  | "favoritos" | "projetos" | "aprovacao" | "enderecos" | "notificacoes"
   | "beneficios" | "ajuda" | "config";
 
 const MENU: { id: SectionId; label: string; icon: React.ComponentType<{ className?: string }> }[] = [
   { id: "dashboard", label: "Início", icon: LayoutDashboard },
   { id: "perfil", label: "Meu Perfil", icon: User },
   { id: "pedidos", label: "Meus Pedidos", icon: Package },
+  { id: "aprovacao", label: "Aprovação de Arte", icon: Brush },
   { id: "pagamentos", label: "Pagamentos", icon: CreditCard },
   { id: "carrinho", label: "Meu Carrinho", icon: ShoppingCart },
   { id: "favoritos", label: "Favoritos", icon: Heart },
@@ -121,6 +123,7 @@ function AccountPage() {
             {section === "dashboard" && <DashboardSection onNavigate={setSection} />}
             {section === "perfil" && <PerfilSection />}
             {section === "pedidos" && <PedidosSection />}
+            {section === "aprovacao" && <ArtApprovalsSection />}
             {section === "enderecos" && <EnderecosSection />}
             {section === "ajuda" && <AjudaSection />}
             {section === "carrinho" && <PlaceholderLink to="/carrinho" title="Meu Carrinho" desc="Gerencie os itens que você adicionou para finalizar a compra." cta="Abrir carrinho" />}
@@ -204,14 +207,16 @@ function DashboardSection({ onNavigate }: { onNavigate: (s: SectionId) => void }
     queryKey: ["orders", user?.id],
     queryFn: async () => (await supabase.from("orders").select("*").order("created_at", { ascending: false })).data ?? [],
   });
+  const { data: approvals } = useArtApprovals();
+  const pendingArts = approvals?.filter((a) => a.status === "waiting" || a.status === "new_version") ?? [];
   const active = orders?.filter((o: any) => !["completed", "cancelled"].includes(o.status)) ?? [];
   const total = orders?.reduce((s: number, o: any) => s + Number(o.total || 0), 0) ?? 0;
 
   const cards = [
     { label: "Pedidos em andamento", value: active.length, icon: Package, onClick: () => onNavigate("pedidos") },
+    { label: "Artes para aprovar", value: pendingArts.length, icon: Brush, onClick: () => onNavigate("aprovacao") },
     { label: "Total de pedidos", value: orders?.length ?? 0, icon: ShoppingCart, onClick: () => onNavigate("pedidos") },
     { label: "Total gasto", value: brl(total), icon: Award, onClick: () => onNavigate("beneficios") },
-    { label: "Endereços salvos", value: "—", icon: MapPin, onClick: () => onNavigate("enderecos") },
   ];
 
   return (
@@ -229,6 +234,24 @@ function DashboardSection({ onNavigate }: { onNavigate: (s: SectionId) => void }
           </button>
         ))}
       </div>
+
+      {pendingArts.length > 0 && (
+        <button
+          onClick={() => onNavigate("aprovacao")}
+          className="w-full text-left rounded-2xl border border-accent/40 bg-accent/5 p-6 hover:bg-accent/10 transition grid grid-cols-[auto_minmax(0,1fr)_auto] items-center gap-4"
+        >
+          <div className="h-12 w-12 rounded-xl bg-accent/15 text-accent grid place-items-center shrink-0">
+            <Brush className="h-5 w-5" />
+          </div>
+          <div className="min-w-0">
+            <p className="font-medium">Artes para aprovação</p>
+            <p className="text-sm text-muted-foreground">
+              Veja, aprove ou solicite ajustes nos seus personalizados — {pendingArts.length} pendente{pendingArts.length > 1 ? "s" : ""}.
+            </p>
+          </div>
+          <ArrowRight className="h-5 w-5 text-accent shrink-0" />
+        </button>
+      )}
 
       <SectionCard title="Pedidos recentes" action={<button onClick={() => onNavigate("pedidos")} className="text-sm text-accent hover:underline">Ver todos</button>}>
         {(orders?.length ?? 0) === 0 ? (
