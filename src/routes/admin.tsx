@@ -13,7 +13,8 @@ import {
 
 export const Route = createFileRoute("/admin")({ component: AdminLayout });
 
-const NAV = [
+type NavItem = { to: string; label: string; icon: typeof LayoutDashboard; exact?: boolean };
+const NAV: NavItem[] = [
   { to: "/admin", label: "Dashboard", icon: LayoutDashboard, exact: true },
   { to: "/admin/pedidos", label: "Pedidos", icon: ShoppingBag },
   { to: "/admin/usuarios", label: "Usuários", icon: Users },
@@ -21,7 +22,7 @@ const NAV = [
   { to: "/admin/categorias", label: "Categorias", icon: Tag },
   { to: "/admin/artes", label: "Aprovação de Artes", icon: Palette },
   { to: "/admin/configuracoes", label: "Configurações", icon: Settings },
-] as const;
+];
 
 function AdminLayout() {
   const { user, isAdmin, loading, signOut } = useAuth();
@@ -54,8 +55,8 @@ function AdminLayout() {
                     <SidebarMenuItem key={item.to}>
                       <SidebarMenuButton asChild tooltip={item.label}>
                         <Link
-                          to={item.to}
-                          activeOptions={{ exact: item.exact }}
+                          to={item.to as string}
+                          activeOptions={{ exact: !!item.exact }}
                           activeProps={{ "data-active": "true" } as Record<string, string>}
                           className="flex items-center gap-2"
                         >
