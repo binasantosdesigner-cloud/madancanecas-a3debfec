@@ -39,13 +39,26 @@ export function Footer() {
           </a>
         </div>
         <div>
+          <h4 className="text-xs font-bold uppercase tracking-widest mb-4 text-accent">Categorias</h4>
+          <ul className="space-y-2 text-sm text-muted-foreground">
+            <li><Link to="/produtos" className="hover:text-accent transition-colors">Todos os Produtos</Link></li>
+            {categories?.map((c) => (
+              <li key={c.id}>
+                <Link to="/produtos" search={{ cat: c.slug } as any} className="hover:text-accent transition-colors">
+                  {c.name}
+                </Link>
+              </li>
+            ))}
+            <li><Link to="/catalogo" className="hover:text-accent transition-colors">Catálogo Digital</Link></li>
+          </ul>
+        </div>
+        <div>
           <h4 className="text-xs font-bold uppercase tracking-widest mb-4 text-accent">Institucional</h4>
           <ul className="space-y-2 text-sm text-muted-foreground">
             <li><Link to="/sobre-nos" className="hover:text-accent transition-colors">Sobre nós</Link></li>
             <li><Link to="/politica-de-trocas" className="hover:text-accent transition-colors">Política de Trocas</Link></li>
             <li><Link to="/cuidados-com-os-produtos" className="hover:text-accent transition-colors">Cuidados com os Produtos</Link></li>
             <li><Link to="/perguntas-frequentes" className="hover:text-accent transition-colors">Perguntas Frequentes</Link></li>
-            <li><Link to="/catalogo" className="hover:text-accent transition-colors">Catálogo Completo</Link></li>
             <li><Link to="/brindes-corporativos" className="hover:text-accent transition-colors">Brindes Corporativos</Link></li>
           </ul>
         </div>
