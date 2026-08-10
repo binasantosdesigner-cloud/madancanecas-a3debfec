@@ -41,15 +41,14 @@ export function Footer() {
         <div>
           <h4 className="text-xs font-bold uppercase tracking-widest mb-4 text-accent">Categorias</h4>
           <ul className="space-y-2 text-sm text-muted-foreground">
-            <li><Link to="/produtos" className="hover:text-accent transition-colors">Todos os Produtos</Link></li>
+            <li><Link to="/catalogo" className="hover:text-accent transition-colors">Catálogo Digital</Link></li>
             {categories?.map((c) => (
               <li key={c.id}>
-                <Link to="/produtos" search={{ cat: c.slug } as any} className="hover:text-accent transition-colors">
+                <Link to="/catalogo" className="hover:text-accent transition-colors">
                   {c.name}
                 </Link>
               </li>
             ))}
-            <li><Link to="/catalogo" className="hover:text-accent transition-colors">Catálogo Digital</Link></li>
           </ul>
         </div>
         <div>

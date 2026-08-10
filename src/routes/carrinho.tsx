@@ -66,7 +66,7 @@ function CartPage() {
         <main className="flex-1 mx-auto max-w-2xl px-6 py-24 text-center">
           <h1 className="font-serif text-4xl">Seu carrinho está vazio</h1>
           <p className="mt-3 text-muted-foreground">Explore nossos produtos e encontre presentes únicos.</p>
-          <Link to="/produtos" className="mt-8 inline-block">
+          <Link to="/catalogo" className="mt-8 inline-block">
             <Button size="lg" className="rounded-full">Ver Produtos</Button>
           </Link>
         </main>

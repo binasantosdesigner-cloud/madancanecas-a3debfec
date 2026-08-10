@@ -22,22 +22,10 @@ export function Header() {
     },
   });
 
-  const staticLinks = [
-    { to: "/produtos", label: "Todos" },
-  ];
-
-  const dynamicLinks = categories?.map((c) => ({
-    to: "/produtos",
-    search: { cat: c.slug },
-    label: c.name,
-  })) || [];
-
-  const footerLinks = [
+  const links = [
     { to: "/catalogo", label: "Catálogo" },
     { to: "/brindes-corporativos", label: "Corporativo" },
   ];
-
-  const links = [...staticLinks, ...dynamicLinks, ...footerLinks];
 
   return (
     <header className="sticky top-0 z-40 border-b border-border/60 bg-background/80 backdrop-blur-md">
