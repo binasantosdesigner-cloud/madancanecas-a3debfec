@@ -1,12 +1,25 @@
 import { Instagram } from "lucide-react";
 import { Link } from "@tanstack/react-router";
+import { useQuery } from "@tanstack/react-query";
+import { supabase } from "@/integrations/supabase/client";
 
 export const INSTAGRAM_URL = "https://www.instagram.com/madancanecas/";
 
 export function Footer() {
+  const { data: categories } = useQuery({
+    queryKey: ["categories"],
+    queryFn: async () => {
+      const { data } = await supabase
+        .from("categories")
+        .select("*")
+        .order("display_order");
+      return data ?? [];
+    },
+  });
+
   return (
     <footer className="mt-24 border-t-2 border-accent/30 bg-secondary/40">
-      <div className="mx-auto max-w-7xl px-6 py-16 grid gap-12 md:grid-cols-3">
+      <div className="mx-auto max-w-7xl px-6 py-16 grid gap-12 md:grid-cols-4">
         <div>
           <h3 className="font-serif text-2xl">
             <span className="text-accent">Madan</span>
