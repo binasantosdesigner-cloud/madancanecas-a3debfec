@@ -4,20 +4,40 @@ import { useCart } from "@/lib/cart";
 import { useAuth } from "@/lib/auth";
 import { Button } from "@/components/ui/button";
 import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet";
-
-const links = [
-  { to: "/produtos", label: "Todos" },
-  { to: "/produtos", search: { cat: "canecas" }, label: "Canecas" },
-  { to: "/produtos", search: { cat: "camisetas" }, label: "Camisetas" },
-  { to: "/produtos", search: { cat: "copos" }, label: "Copos" },
-  { to: "/produtos", search: { cat: "canetas" }, label: "Canetas" },
-  { to: "/catalogo", label: "Catálogo" },
-  { to: "/brindes-corporativos", label: "Corporativo" },
-] as const;
+import { useQuery } from "@tanstack/react-query";
+import { supabase } from "@/integrations/supabase/client";
 
 export function Header() {
   const { count } = useCart();
-  const { user, isAdmin } = useAuth();
+  const { user } = useAuth();
+
+  const { data: categories } = useQuery({
+    queryKey: ["categories"],
+    queryFn: async () => {
+      const { data } = await supabase
+        .from("categories")
+        .select("*")
+        .order("display_order");
+      return data ?? [];
+    },
+  });
+
+  const staticLinks = [
+    { to: "/produtos", label: "Todos" },
+  ];
+
+  const dynamicLinks = categories?.map((c) => ({
+    to: "/produtos",
+    search: { cat: c.slug },
+    label: c.name,
+  })) || [];
+
+  const footerLinks = [
+    { to: "/catalogo", label: "Catálogo" },
+    { to: "/brindes-corporativos", label: "Corporativo" },
+  ];
+
+  const links = [...staticLinks, ...dynamicLinks, ...footerLinks];
 
   return (
     <header className="sticky top-0 z-40 border-b border-border/60 bg-background/80 backdrop-blur-md">
