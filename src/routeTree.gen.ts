@@ -19,7 +19,6 @@ import { Route as CuidadosComOsProdutosRouteImport } from './routes/cuidados-com
 import { Route as LoginRouteImport } from './routes/login'
 import { Route as PerguntasFrequentesRouteImport } from './routes/perguntas-frequentes'
 import { Route as PoliticaDeTrocasRouteImport } from './routes/politica-de-trocas'
-import { Route as ProdutosRouteImport } from './routes/produtos'
 import { Route as SobreNosRouteImport } from './routes/sobre-nos'
 import { Route as AdminIndexRouteImport } from './routes/admin.index'
 import { Route as AdminArtesRouteImport } from './routes/admin.artes'
@@ -29,7 +28,6 @@ import { Route as AdminPagamentosRouteImport } from './routes/admin.pagamentos'
 import { Route as AdminPedidosRouteImport } from './routes/admin.pedidos'
 import { Route as AdminProdutosRouteImport } from './routes/admin.produtos'
 import { Route as AdminUsuariosRouteImport } from './routes/admin.usuarios'
-import { Route as ProdutoSlugRouteImport } from './routes/produto.$slug'
 
 const IndexRoute = IndexRouteImport.update({
   id: '/',
@@ -81,11 +79,6 @@ const PoliticaDeTrocasRoute = PoliticaDeTrocasRouteImport.update({
   path: '/politica-de-trocas',
   getParentRoute: () => rootRouteImport,
 } as any)
-const ProdutosRoute = ProdutosRouteImport.update({
-  id: '/produtos',
-  path: '/produtos',
-  getParentRoute: () => rootRouteImport,
-} as any)
 const SobreNosRoute = SobreNosRouteImport.update({
   id: '/sobre-nos',
   path: '/sobre-nos',
@@ -131,11 +124,6 @@ const AdminUsuariosRoute = AdminUsuariosRouteImport.update({
   path: '/usuarios',
   getParentRoute: () => AdminRoute,
 } as any)
-const ProdutoSlugRoute = ProdutoSlugRouteImport.update({
-  id: '/produto/$slug',
-  path: '/produto/$slug',
-  getParentRoute: () => rootRouteImport,
-} as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
@@ -148,7 +136,6 @@ export interface FileRoutesByFullPath {
   '/login': typeof LoginRoute
   '/perguntas-frequentes': typeof PerguntasFrequentesRoute
   '/politica-de-trocas': typeof PoliticaDeTrocasRoute
-  '/produtos': typeof ProdutosRoute
   '/sobre-nos': typeof SobreNosRoute
   '/admin/artes': typeof AdminArtesRoute
   '/admin/categorias': typeof AdminCategoriasRoute
@@ -157,7 +144,6 @@ export interface FileRoutesByFullPath {
   '/admin/pedidos': typeof AdminPedidosRoute
   '/admin/produtos': typeof AdminProdutosRoute
   '/admin/usuarios': typeof AdminUsuariosRoute
-  '/produto/$slug': typeof ProdutoSlugRoute
   '/admin/': typeof AdminIndexRoute
 }
 export interface FileRoutesByTo {
@@ -170,7 +156,6 @@ export interface FileRoutesByTo {
   '/login': typeof LoginRoute
   '/perguntas-frequentes': typeof PerguntasFrequentesRoute
   '/politica-de-trocas': typeof PoliticaDeTrocasRoute
-  '/produtos': typeof ProdutosRoute
   '/sobre-nos': typeof SobreNosRoute
   '/admin/artes': typeof AdminArtesRoute
   '/admin/categorias': typeof AdminCategoriasRoute
@@ -179,7 +164,6 @@ export interface FileRoutesByTo {
   '/admin/pedidos': typeof AdminPedidosRoute
   '/admin/produtos': typeof AdminProdutosRoute
   '/admin/usuarios': typeof AdminUsuariosRoute
-  '/produto/$slug': typeof ProdutoSlugRoute
   '/admin': typeof AdminIndexRoute
 }
 export interface FileRoutesById {
@@ -194,7 +178,6 @@ export interface FileRoutesById {
   '/login': typeof LoginRoute
   '/perguntas-frequentes': typeof PerguntasFrequentesRoute
   '/politica-de-trocas': typeof PoliticaDeTrocasRoute
-  '/produtos': typeof ProdutosRoute
   '/sobre-nos': typeof SobreNosRoute
   '/admin/artes': typeof AdminArtesRoute
   '/admin/categorias': typeof AdminCategoriasRoute
@@ -203,7 +186,6 @@ export interface FileRoutesById {
   '/admin/pedidos': typeof AdminPedidosRoute
   '/admin/produtos': typeof AdminProdutosRoute
   '/admin/usuarios': typeof AdminUsuariosRoute
-  '/produto/$slug': typeof ProdutoSlugRoute
   '/admin/': typeof AdminIndexRoute
 }
 export interface FileRouteTypes {
@@ -219,7 +201,6 @@ export interface FileRouteTypes {
     | '/login'
     | '/perguntas-frequentes'
     | '/politica-de-trocas'
-    | '/produtos'
     | '/sobre-nos'
     | '/admin/artes'
     | '/admin/categorias'
@@ -228,7 +209,6 @@ export interface FileRouteTypes {
     | '/admin/pedidos'
     | '/admin/produtos'
     | '/admin/usuarios'
-    | '/produto/$slug'
     | '/admin/'
   fileRoutesByTo: FileRoutesByTo
   to:
@@ -241,7 +221,6 @@ export interface FileRouteTypes {
     | '/login'
     | '/perguntas-frequentes'
     | '/politica-de-trocas'
-    | '/produtos'
     | '/sobre-nos'
     | '/admin/artes'
     | '/admin/categorias'
@@ -250,7 +229,6 @@ export interface FileRouteTypes {
     | '/admin/pedidos'
     | '/admin/produtos'
     | '/admin/usuarios'
-    | '/produto/$slug'
     | '/admin'
   id:
     | '__root__'
@@ -264,7 +242,6 @@ export interface FileRouteTypes {
     | '/login'
     | '/perguntas-frequentes'
     | '/politica-de-trocas'
-    | '/produtos'
     | '/sobre-nos'
     | '/admin/artes'
     | '/admin/categorias'
@@ -273,7 +250,6 @@ export interface FileRouteTypes {
     | '/admin/pedidos'
     | '/admin/produtos'
     | '/admin/usuarios'
-    | '/produto/$slug'
     | '/admin/'
   fileRoutesById: FileRoutesById
 }
@@ -288,9 +264,7 @@ export interface RootRouteChildren {
   LoginRoute: typeof LoginRoute
   PerguntasFrequentesRoute: typeof PerguntasFrequentesRoute
   PoliticaDeTrocasRoute: typeof PoliticaDeTrocasRoute
-  ProdutosRoute: typeof ProdutosRoute
   SobreNosRoute: typeof SobreNosRoute
-  ProdutoSlugRoute: typeof ProdutoSlugRoute
 }
 
 declare module '@tanstack/react-router' {
@@ -365,13 +339,6 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof PoliticaDeTrocasRouteImport
       parentRoute: typeof rootRouteImport
     }
-    '/produtos': {
-      id: '/produtos'
-      path: '/produtos'
-      fullPath: '/produtos'
-      preLoaderRoute: typeof ProdutosRouteImport
-      parentRoute: typeof rootRouteImport
-    }
     '/sobre-nos': {
       id: '/sobre-nos'
       path: '/sobre-nos'
@@ -435,13 +402,6 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AdminUsuariosRouteImport
       parentRoute: typeof AdminRoute
     }
-    '/produto/$slug': {
-      id: '/produto/$slug'
-      path: '/produto/$slug'
-      fullPath: '/produto/$slug'
-      preLoaderRoute: typeof ProdutoSlugRouteImport
-      parentRoute: typeof rootRouteImport
-    }
   }
 }
 
@@ -480,9 +440,7 @@ const rootRouteChildren: RootRouteChildren = {
   LoginRoute: LoginRoute,
   PerguntasFrequentesRoute: PerguntasFrequentesRoute,
   PoliticaDeTrocasRoute: PoliticaDeTrocasRoute,
-  ProdutosRoute: ProdutosRoute,
   SobreNosRoute: SobreNosRoute,
-  ProdutoSlugRoute: ProdutoSlugRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
