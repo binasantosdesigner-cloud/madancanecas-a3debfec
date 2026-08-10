@@ -16,6 +16,7 @@ import { Route as PerguntasFrequentesRouteImport } from './routes/perguntas-freq
 import { Route as LoginRouteImport } from './routes/login'
 import { Route as CuidadosComOsProdutosRouteImport } from './routes/cuidados-com-os-produtos'
 import { Route as ContaRouteImport } from './routes/conta'
+import { Route as CatalogoRouteImport } from './routes/catalogo'
 import { Route as CarrinhoRouteImport } from './routes/carrinho'
 import { Route as BrindesCorporativosRouteImport } from './routes/brindes-corporativos'
 import { Route as AdminRouteImport } from './routes/admin'
@@ -63,6 +64,11 @@ const CuidadosComOsProdutosRoute = CuidadosComOsProdutosRouteImport.update({
 const ContaRoute = ContaRouteImport.update({
   id: '/conta',
   path: '/conta',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const CatalogoRoute = CatalogoRouteImport.update({
+  id: '/catalogo',
+  path: '/catalogo',
   getParentRoute: () => rootRouteImport,
 } as any)
 const CarrinhoRoute = CarrinhoRouteImport.update({
@@ -136,6 +142,7 @@ export interface FileRoutesByFullPath {
   '/admin': typeof AdminRouteWithChildren
   '/brindes-corporativos': typeof BrindesCorporativosRoute
   '/carrinho': typeof CarrinhoRoute
+  '/catalogo': typeof CatalogoRoute
   '/conta': typeof ContaRoute
   '/cuidados-com-os-produtos': typeof CuidadosComOsProdutosRoute
   '/login': typeof LoginRoute
@@ -157,6 +164,7 @@ export interface FileRoutesByTo {
   '/': typeof IndexRoute
   '/brindes-corporativos': typeof BrindesCorporativosRoute
   '/carrinho': typeof CarrinhoRoute
+  '/catalogo': typeof CatalogoRoute
   '/conta': typeof ContaRoute
   '/cuidados-com-os-produtos': typeof CuidadosComOsProdutosRoute
   '/login': typeof LoginRoute
@@ -180,6 +188,7 @@ export interface FileRoutesById {
   '/admin': typeof AdminRouteWithChildren
   '/brindes-corporativos': typeof BrindesCorporativosRoute
   '/carrinho': typeof CarrinhoRoute
+  '/catalogo': typeof CatalogoRoute
   '/conta': typeof ContaRoute
   '/cuidados-com-os-produtos': typeof CuidadosComOsProdutosRoute
   '/login': typeof LoginRoute
@@ -204,6 +213,7 @@ export interface FileRouteTypes {
     | '/admin'
     | '/brindes-corporativos'
     | '/carrinho'
+    | '/catalogo'
     | '/conta'
     | '/cuidados-com-os-produtos'
     | '/login'
@@ -225,6 +235,7 @@ export interface FileRouteTypes {
     | '/'
     | '/brindes-corporativos'
     | '/carrinho'
+    | '/catalogo'
     | '/conta'
     | '/cuidados-com-os-produtos'
     | '/login'
@@ -247,6 +258,7 @@ export interface FileRouteTypes {
     | '/admin'
     | '/brindes-corporativos'
     | '/carrinho'
+    | '/catalogo'
     | '/conta'
     | '/cuidados-com-os-produtos'
     | '/login'
@@ -270,6 +282,7 @@ export interface RootRouteChildren {
   AdminRoute: typeof AdminRouteWithChildren
   BrindesCorporativosRoute: typeof BrindesCorporativosRoute
   CarrinhoRoute: typeof CarrinhoRoute
+  CatalogoRoute: typeof CatalogoRoute
   ContaRoute: typeof ContaRoute
   CuidadosComOsProdutosRoute: typeof CuidadosComOsProdutosRoute
   LoginRoute: typeof LoginRoute
@@ -329,6 +342,13 @@ declare module '@tanstack/react-router' {
       path: '/conta'
       fullPath: '/conta'
       preLoaderRoute: typeof ContaRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/catalogo': {
+      id: '/catalogo'
+      path: '/catalogo'
+      fullPath: '/catalogo'
+      preLoaderRoute: typeof CatalogoRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/carrinho': {
@@ -454,6 +474,7 @@ const rootRouteChildren: RootRouteChildren = {
   AdminRoute: AdminRouteWithChildren,
   BrindesCorporativosRoute: BrindesCorporativosRoute,
   CarrinhoRoute: CarrinhoRoute,
+  CatalogoRoute: CatalogoRoute,
   ContaRoute: ContaRoute,
   CuidadosComOsProdutosRoute: CuidadosComOsProdutosRoute,
   LoginRoute: LoginRoute,
