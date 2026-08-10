@@ -77,7 +77,7 @@ function HomePage() {
                   Canecas, camisetas, copos e canetas personalizadas. Feitos à mão, do seu jeito.
                 </p>
                 <div className="mt-8 flex flex-wrap gap-3">
-                  <Link to="/produtos" search={{ kind: "custom" } as any}>
+                  <Link to="/catalogo">
                     <Button size="lg" className="rounded-full bg-brand-gold text-brand-dark hover:bg-brand-gold/90">
                       Crie seu Personalizado <ArrowRight className="ml-2 size-4" />
                     </Button>
@@ -100,11 +100,11 @@ function HomePage() {
               <h2 className="font-serif text-3xl md:text-4xl">Categorias</h2>
               <p className="mt-2 text-sm text-muted-foreground">Explore nossa curadoria.</p>
             </div>
-            <Link to="/produtos" className="text-xs uppercase tracking-widest border-b border-foreground/30 pb-1">Ver todos</Link>
+            <Link to="/catalogo" className="text-xs uppercase tracking-widest border-b border-foreground/30 pb-1">Ver todos</Link>
           </div>
           <div className="grid grid-cols-2 gap-4 md:grid-cols-4 md:gap-6">
             {cats.map((c) => (
-              <Link key={c.slug} to="/produtos" search={{ cat: c.slug } as any} className="group">
+              <Link key={c.slug} to="/catalogo" className="group">
                 <div className="overflow-hidden rounded-2xl bg-secondary aspect-square">
                   <img src={c.img} alt={c.name} loading="lazy" width={800} height={800} className="h-full w-full object-cover transition-transform duration-700 group-hover:scale-105" />
                 </div>
