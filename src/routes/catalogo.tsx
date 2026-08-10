@@ -1,0 +1,238 @@
+import { useState, useMemo } from "react";
+import { createFileRoute } from "@tanstack/react-router";
+import { Header } from "@/components/site/Header";
+import { Footer } from "@/components/site/Footer";
+import { Button } from "@/components/ui/button";
+import { cn } from "@/lib/utils";
+import { MessageCircle } from "lucide-react";
+import { motion, AnimatePresence } from "framer-motion";
+
+export const Route = createFileRoute("/catalogo")({
+  component: CatalogoPage,
+});
+
+type Product = {
+  name: string;
+  price: string;
+  category: string;
+};
+
+const CATEGORIES = [
+  "Todos",
+  "Canecas",
+  "Camisetas",
+  "Copos e Garrafas",
+  "Taças",
+  "Chaveiros",
+  "Agendas e Blocos",
+  "Azulejo e Relógio",
+  "Almofada e Toalhas",
+  "Outros",
+];
+
+const PRODUCTS: Product[] = [
+  // Canecas
+  { name: "Caneca Polímero", price: "35,00", category: "Canecas" },
+  { name: "Caneca Branca Porcelana", price: "35,00", category: "Canecas" },
+  { name: "Caneca Colorida", price: "45,00", category: "Canecas" },
+  { name: "Caneca Colorida Coração", price: "49,90", category: "Canecas" },
+  { name: "Caneca Preta", price: "49,00", category: "Canecas" },
+  { name: "Caneca Mágica", price: "55,00", category: "Canecas" },
+  { name: "Caneca com Colher", price: "55,00", category: "Canecas" },
+  { name: "Caneca Mármore", price: "55,00", category: "Canecas" },
+  { name: "Caneca com Glitter", price: "54,90", category: "Canecas" },
+  { name: "Caneca de Porcelana Neon Rosa", price: "55,00", category: "Canecas" },
+  { name: "Caneca de Chopp — Vidro", price: "68,00", category: "Canecas" },
+  { name: "Caneca de Chopp — Alumínio", price: "32,00", category: "Canecas" },
+  { name: "Caneca de Chopp — Acrílico", price: "12,50", category: "Canecas" },
+  { name: "Torre de Xícaras (2 un.)", price: "88,00", category: "Canecas" },
+  { name: "Torre de Xícaras (4 un.)", price: "149,00", category: "Canecas" },
+  // Camisetas
+  { name: "Camiseta Adulto Unissex", price: "45,00", category: "Camisetas" },
+  { name: "Camiseta Infantil", price: "40,00", category: "Camisetas" },
+  { name: "Baby Look", price: "45,00", category: "Camisetas" },
+  // Copos e Garrafas
+  { name: "Copo Long Drink", price: "8,00", category: "Copos e Garrafas" },
+  { name: "Copo Térmico Inox", price: "75,00", category: "Copos e Garrafas" },
+  { name: "Squeeze Inox 500ml", price: "85,00", category: "Copos e Garrafas" },
+  { name: "Squeeze de Alumínio", price: "65,00", category: "Copos e Garrafas" },
+  { name: "Garrafa Aquaplus", price: "18,90", category: "Copos e Garrafas" },
+  { name: "Garrafa Acqua Bio", price: "22,00", category: "Copos e Garrafas" },
+  { name: "Garrafa Térmica Inox", price: "80,00", category: "Copos e Garrafas" },
+  // Taças
+  { name: "Taça Gin Colorida", price: "14,50", category: "Taças" },
+  // Chaveiros
+  { name: "Chaveiro Acrílico", price: "7,00", category: "Chaveiros" },
+  { name: "Chaveiro Acrílico Coração", price: "7,00", category: "Chaveiros" },
+  { name: "Chaveiro Button Redondo", price: "7,50", category: "Chaveiros" },
+  { name: "Chaveiro Polímero Retangular", price: "7,00", category: "Chaveiros" },
+  { name: "Chaveiro de Metal", price: "17,00", category: "Chaveiros" },
+  // Agendas e Blocos
+  { name: "Agenda Capa Pet", price: "45,00", category: "Agendas e Blocos" },
+  { name: "Agenda Coração", price: "45,00", category: "Agendas e Blocos" },
+  { name: "Caderno Personalizado", price: "45,00", category: "Agendas e Blocos" },
+  { name: "Bloco de Anotação", price: "17,00", category: "Agendas e Blocos" },
+  { name: "Bloco de Notas com Post-it", price: "17,00", category: "Agendas e Blocos" },
+  // Azulejo e Relógio
+  { name: "Azulejo 20x20", price: "40,00", category: "Azulejo e Relógio" },
+  { name: "Azulejo 20x30", price: "40,00", category: "Azulejo e Relógio" },
+  { name: "Relógio Quadrado MDF 20x20", price: "45,00", category: "Azulejo e Relógio" },
+  // Almofada e Toalhas
+  { name: "Toalha Lavabinho 21x38cm", price: "15,00", category: "Almofada e Toalhas" },
+  { name: "Toalha Lavabinho 21x40cm", price: "12,00", category: "Almofada e Toalhas" },
+  { name: "Toalha Lavabo 29x45cm", price: "20,00", category: "Almofada e Toalhas" },
+  { name: "Toalha Aveludada 30x50cm", price: "22,00", category: "Almofada e Toalhas" },
+  { name: "Toalha de Rosto 45x70cm", price: "28,00", category: "Almofada e Toalhas" },
+  { name: "Toalha de Rosto 50x70cm", price: "39,90", category: "Almofada e Toalhas" },
+  { name: "Toalha Fitness 27x80cm", price: "28,00", category: "Almofada e Toalhas" },
+  // Outros
+  { name: "Mousepad", price: "15,00", category: "Outros" },
+  { name: "Ecobag", price: "30,00", category: "Outros" },
+  { name: "Caneta", price: "3,50", category: "Outros" },
+  { name: "Azulejo Decorativo", price: "40,00", category: "Outros" },
+  { name: "Placa Decorativa", price: "25,00", category: "Outros" },
+  { name: "Body Infantil", price: "40,00", category: "Outros" },
+  { name: "Naninha com Bichinho", price: "35,00", category: "Outros" },
+  { name: "Caixa MDF 25x25x10cm", price: "35,00", category: "Outros" },
+  { name: "Papel de Arroz", price: "7,00", category: "Outros" },
+];
+
+function CatalogoPage() {
+  const [selectedCategory, setSelectedCategory] = useState("Todos");
+
+  const filteredProducts = useMemo(() => {
+    if (selectedCategory === "Todos") return PRODUCTS;
+    return PRODUCTS.filter((p) => p.category === selectedCategory);
+  }, [selectedCategory]);
+
+  const handleWhatsApp = (productName: string, price: string) => {
+    const text = `Olá! Vi o catálogo do site e tenho interesse em:\n\n🛍️ Produto: ${productName}\n💰 Valor: R$ ${price}\n\nPode me contar mais sobre prazo, arte e formas de pagamento?`;
+    window.open(`https://wa.me/5566984266994?text=${encodeURIComponent(text)}`, "_blank");
+  };
+
+  return (
+    <div className="min-h-screen flex flex-col bg-brand-cream">
+      <Header />
+      <main className="flex-1 pb-20">
+        <section className="px-6 py-12 text-center">
+          <div className="mx-auto max-w-4xl">
+            <h1 className="font-serif text-4xl md:text-5xl text-brand-dark mb-4">Catálogo de Produtos</h1>
+            <p className="text-muted-foreground text-sm md:text-base max-w-2xl mx-auto">
+              Escolha o produto, clique em "Quero esse" e a gente cuida do resto. Entrega em Rondonópolis-MT.
+            </p>
+          </div>
+        </section>
+
+        <section className="px-6 mb-12">
+          <div className="mx-auto max-w-7xl">
+            <div className="flex flex-nowrap md:flex-wrap overflow-x-auto pb-4 md:pb-0 gap-2 scrollbar-hide">
+              {CATEGORIES.map((cat) => (
+                <button
+                  key={cat}
+                  onClick={() => setSelectedCategory(cat === selectedCategory && cat !== "Todos" ? "Todos" : cat)}
+                  className={cn(
+                    "px-5 py-2.5 rounded-full text-sm font-medium transition-all border shrink-0",
+                    selectedCategory === cat
+                      ? "bg-brand-gold text-brand-cream border-brand-gold shadow-sm"
+                      : "bg-transparent border-border text-muted-foreground hover:border-brand-gold hover:text-brand-gold"
+                  )}
+                >
+                  {cat}
+                </button>
+              ))}
+            </div>
+          </div>
+        </section>
+
+        <section className="px-6 mb-8">
+          <div className="mx-auto max-w-7xl">
+            <div className="bg-secondary/40 rounded-xl p-4 flex flex-col md:flex-row items-center justify-center gap-4 md:gap-8 text-[12px] text-muted-foreground border border-border/40">
+              <span className="flex items-center gap-2">📍 Entrega em domicílio em Rondonópolis-MT</span>
+              <span className="hidden md:inline text-border">•</span>
+              <span className="flex items-center gap-2">🎨 Arte inclusa em todos os produtos</span>
+              <span className="hidden md:inline text-border">•</span>
+              <span className="flex items-center gap-2">✅ Você aprova antes de produzir</span>
+            </div>
+          </div>
+        </section>
+
+        <section className="px-6 mb-20">
+          <div className="mx-auto max-w-7xl">
+            <motion.div 
+              layout
+              className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4 md:gap-8"
+            >
+              <AnimatePresence mode="popLayout">
+                {filteredProducts.map((p) => (
+                  <motion.div
+                    key={p.name}
+                    layout
+                    initial={{ opacity: 0, scale: 0.9 }}
+                    animate={{ opacity: 1, scale: 1 }}
+                    exit={{ opacity: 0, scale: 0.9 }}
+                    transition={{ duration: 0.2 }}
+                    className="group bg-white rounded-2xl border border-border/40 overflow-hidden hover:shadow-xl transition-all duration-300"
+                  >
+                    <div className="aspect-square bg-brand-cream/30 relative overflow-hidden">
+                      <img 
+                        src={`https://placehold.co/400x400/fce8f3/b03578?text=${encodeURIComponent(p.name)}`} 
+                        alt={p.name}
+                        className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500"
+                      />
+                      <div className="absolute top-3 left-3">
+                        <span className="px-3 py-1 bg-brand-gold/10 text-brand-gold text-[10px] font-bold uppercase tracking-wider rounded-full backdrop-blur-md">
+                          {p.category.split(' ')[0]}
+                        </span>
+                      </div>
+                    </div>
+                    <div className="p-4 md:p-5">
+                      <h3 className="font-serif text-base md:text-lg text-brand-dark mb-1 line-clamp-1">{p.name}</h3>
+                      <div className="flex items-baseline gap-1 mb-3">
+                        <span className="text-xs font-semibold text-brand-gold">R$</span>
+                        <span className="text-xl font-bold text-brand-dark tracking-tight">{p.price}</span>
+                      </div>
+                      <p className="text-[10px] text-muted-foreground mb-4 flex items-center gap-1.5 uppercase tracking-wider font-semibold">
+                        <span className="size-1 bg-brand-gold rounded-full" /> Arte inclusa · Aprovação prévia
+                      </p>
+                      <Button 
+                        onClick={() => handleWhatsApp(p.name, p.price)}
+                        className="w-full bg-brand-gold hover:bg-brand-gold/90 text-brand-cream rounded-full py-6 group-hover:shadow-lg transition-all gap-2"
+                      >
+                        <MessageCircle className="size-4" /> Quero esse
+                      </Button>
+                    </div>
+                  </motion.div>
+                ))}
+              </AnimatePresence>
+            </motion.div>
+          </div>
+        </section>
+
+        <section className="px-6">
+          <div className="mx-auto max-w-7xl">
+            <div className="bg-brand-gold rounded-3xl p-10 md:p-16 text-center text-brand-cream shadow-2xl relative overflow-hidden">
+              <div className="absolute top-0 right-0 -mr-20 -mt-20 size-80 bg-white/10 rounded-full blur-3xl" />
+              <div className="absolute bottom-0 left-0 -ml-20 -mb-20 size-80 bg-black/10 rounded-full blur-3xl" />
+              <div className="relative z-10">
+                <h2 className="font-serif text-3xl md:text-4xl mb-4">Não achou o que procura?</h2>
+                <p className="text-brand-cream/80 mb-8 max-w-2xl mx-auto text-sm md:text-base">
+                  Personalizamos qualquer produto com a sua arte, seu logo ou sua frase. Fale com a gente e a gente resolve.
+                </p>
+                <a 
+                  href="https://wa.me/5566984266994?text=Olá%21%20Não%20encontrei%20o%20produto%20que%20quero%20no%20catálogo.%20Pode%20me%20ajudar%3F" 
+                  target="_blank" 
+                  rel="noopener noreferrer"
+                >
+                  <Button size="lg" className="bg-white text-brand-gold hover:bg-white/90 rounded-full px-10 py-7 text-lg font-bold gap-3">
+                    <MessageCircle className="size-6" /> Conversar pelo WhatsApp
+                  </Button>
+                </a>
+              </div>
+            </div>
+          </div>
+        </section>
+      </main>
+      <Footer />
+    </div>
+  );
+}

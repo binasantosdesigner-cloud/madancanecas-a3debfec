@@ -11,6 +11,7 @@ const links = [
   { to: "/produtos", search: { cat: "camisetas" }, label: "Camisetas" },
   { to: "/produtos", search: { cat: "copos" }, label: "Copos" },
   { to: "/produtos", search: { cat: "canetas" }, label: "Canetas" },
+  { to: "/catalogo", label: "Catálogo" },
   { to: "/brindes-corporativos", label: "Corporativo" },
 ] as const;
 
