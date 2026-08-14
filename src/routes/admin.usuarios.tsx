@@ -182,14 +182,19 @@ function AdminUsersPage() {
     return list;
   }, [profiles.data, search, roleFilter, rolesByUser]);
 
-  const getInitials = (name: string | null) => {
-    if (!name) return "??";
-    return name
-      .split(" ")
-      .map((n) => n[0])
-      .slice(0, 2)
-      .join("")
-      .toUpperCase();
+  const getInitials = (name: string | null, email: string | null = null) => {
+    if (name) {
+      return name
+        .split(" ")
+        .map((n) => n[0])
+        .slice(0, 2)
+        .join("")
+        .toUpperCase();
+    }
+    if (email) {
+      return email[0].toUpperCase();
+    }
+    return "??";
   };
 
   return (
@@ -316,10 +321,18 @@ function AdminUsersPage() {
                   <tr key={p.id} className="border-t border-border hover:bg-muted/30 transition-colors">
                     <td className="px-4 py-3">
                       <div className="flex items-center gap-3">
-                        <div className="h-10 w-10 rounded-full bg-[#fce8f3] text-[#e8509a] flex items-center justify-center font-bold text-xs overflow-hidden border border-[#e8509a]/20">
+                        <div className="size-9 rounded-full bg-[#fce8f3] text-[#e8509a] text-sm font-semibold flex items-center justify-center overflow-hidden border border-[#e8509a]/20">
                           {p.avatar_url ? (
-                            <img src={p.avatar_url} alt={p.full_name || ""} className="h-full w-full object-cover" />
-                          ) : getInitials(p.full_name)}
+                            <img 
+                              src={p.avatar_url} 
+                              alt={p.full_name || ""} 
+                              className="h-full w-full object-cover" 
+                              onError={(e) => {
+                                (e.target as HTMLImageElement).style.display = 'none';
+                                (e.target as HTMLImageElement).parentElement!.innerHTML = getInitials(p.full_name, p.email);
+                              }}
+                            />
+                          ) : getInitials(p.full_name, p.email)}
                         </div>
                         <span className="font-medium text-foreground">{p.full_name || "—"}</span>
                       </div>
@@ -343,11 +356,11 @@ function AdminUsersPage() {
                       )}
                     </td>
                     <td className="px-4 py-3 text-right">
-                      <div className="flex items-center justify-end gap-1">
+                      <div className="flex items-center justify-end gap-2">
                         <Button 
                           size="icon" 
                           variant="ghost" 
-                          className="h-8 w-8 text-muted-foreground hover:text-primary"
+                          className="size-8 rounded-lg flex items-center justify-center transition-colors bg-transparent border border-border text-muted-foreground hover:bg-[#fce8f3] hover:border-[#e8509a] hover:text-[#e8509a]"
                           onClick={() => {
                             setSelectedUser(p);
                             setIsDetailsOpen(true);
@@ -359,7 +372,7 @@ function AdminUsersPage() {
                         <Button 
                           size="icon" 
                           variant="ghost" 
-                          className={`h-8 w-8 ${isAdmin ? "text-[#e8509a]" : "text-muted-foreground"} hover:bg-muted`}
+                          className={`size-8 rounded-lg flex items-center justify-center transition-colors bg-transparent border border-border ${isAdmin ? "text-[#e8509a] border-[#e8509a]" : "text-muted-foreground"} hover:bg-[#fce8f3] hover:border-[#e8509a] hover:text-[#e8509a]`}
                           disabled={toggleAdmin.isPending}
                           onClick={() => toggleAdmin.mutate({ userId: p.id, makeAdmin: !isAdmin })}
                         >
@@ -372,7 +385,7 @@ function AdminUsersPage() {
                               <Button 
                                 size="icon" 
                                 variant="ghost" 
-                                className="h-8 w-8 text-muted-foreground hover:text-destructive"
+                                className="size-8 rounded-lg flex items-center justify-center transition-colors bg-transparent border border-border text-muted-foreground hover:bg-red-50 hover:border-red-300 hover:text-red-600"
                               >
                                 <Trash2 className="h-4 w-4" />
                               </Button>
@@ -425,8 +438,16 @@ function AdminUsersPage() {
                 <div className="flex flex-col items-center gap-4 mb-6">
                   <div className="h-24 w-24 rounded-full bg-[#fce8f3] text-[#e8509a] flex items-center justify-center font-bold text-2xl border-2 border-[#e8509a]/20 shadow-sm overflow-hidden">
                     {selectedUser.avatar_url ? (
-                      <img src={selectedUser.avatar_url} alt="" className="h-full w-full object-cover" />
-                    ) : getInitials(selectedUser.full_name)}
+                      <img 
+                        src={selectedUser.avatar_url} 
+                        alt="" 
+                        className="h-full w-full object-cover" 
+                        onError={(e) => {
+                          (e.target as HTMLImageElement).style.display = 'none';
+                          (e.target as HTMLImageElement).parentElement!.innerHTML = getInitials(selectedUser.full_name, selectedUser.email);
+                        }}
+                      />
+                    ) : getInitials(selectedUser.full_name, selectedUser.email)}
                   </div>
                   <div className="text-center">
                     <h3 className="font-bold text-lg">{selectedUser.full_name || "Sem nome"}</h3>
