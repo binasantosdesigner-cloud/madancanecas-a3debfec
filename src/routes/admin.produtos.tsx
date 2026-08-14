@@ -59,6 +59,69 @@ function AdminProducts() {
   const [deleteTarget, setDeleteTarget] = useState<{ id: string; title: string } | null>(null);
   const [uploadingImage, setUploadingImage] = useState(false);
 
+  // Upsell state
+  const [upsellSearch, setUpsellSearch] = useState('');
+  const [addingUpsell, setAddingUpsell] = useState(false);
+
+  const { data: currentUpsells, refetch: refetchUpsells } = useQuery({
+    enabled: !!editing?.id,
+    queryKey: ['upsells', editing?.id],
+    queryFn: async () => {
+      const { data } = await supabase
+        .from('product_upsells')
+        .select('id, display_order, upsell_product_id, products!product_upsells_upsell_product_id_fkey(id, title, price, image_url)')
+        .eq('product_id', editing!.id)
+        .order('display_order', { ascending: true });
+      return data ?? [];
+    },
+  });
+
+  const { data: searchResults } = useQuery({
+    enabled: upsellSearch.length >= 2,
+    queryKey: ['products-search', upsellSearch, editing?.id],
+    queryFn: async () => {
+      const { data } = await supabase
+        .from('products')
+        .select('id, title, price, image_url')
+        .eq('active', true)
+        .neq('id', editing?.id ?? '')
+        .ilike('title', `%${upsellSearch}%`)
+        .limit(6);
+      return data ?? [];
+    },
+  });
+
+  const addUpsell = async (upsellProductId: string) => {
+    if (!editing) return;
+    const alreadyAdded = currentUpsells?.some((u: any) => u.upsell_product_id === upsellProductId);
+    if (alreadyAdded) { toast.error('Produto já adicionado'); return; }
+    if ((currentUpsells?.length ?? 0) >= 4) { toast.error('Máximo de 4 produtos sugeridos'); return; }
+    
+    setAddingUpsell(true);
+    const { error } = await supabase
+      .from('product_upsells')
+      .insert({
+        product_id: editing.id,
+        upsell_product_id: upsellProductId,
+        display_order: (currentUpsells?.length ?? 0),
+      });
+    setAddingUpsell(false);
+    if (error) { toast.error('Erro: ' + error.message); return; }
+    toast.success('Produto sugerido adicionado!');
+    setUpsellSearch('');
+    refetchUpsells();
+  };
+
+  const removeUpsell = async (upsellId: string) => {
+    const { error } = await supabase
+      .from('product_upsells')
+      .delete()
+      .eq('id', upsellId);
+    if (error) { toast.error('Erro ao remover'); return; }
+    toast.success('Removido');
+    refetchUpsells();
+  };
+
   // Filtering states
   const [search, setSearch] = useState("");
   const [filterKind, setFilterKind] = useState<"all" | "ready" | "custom">("all");
