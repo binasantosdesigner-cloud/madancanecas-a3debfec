@@ -77,6 +77,26 @@ async function compressImage(file: File, maxKB: number): Promise<Blob> {
   });
 }
 
+function SortHeader({ label, col, sortBy, sortDir, onSort, align = 'left' }: {
+  label: string; col: string; sortBy: string; sortDir: 'asc'|'desc';
+  onSort: (col: any) => void; align?: 'left'|'center'|'right';
+}) {
+  const active = sortBy === col;
+  return (
+    <th
+      className={`p-3 cursor-pointer select-none group text-${align}`}
+      onClick={() => onSort(col)}
+    >
+      <span className={`inline-flex items-center gap-1 text-xs font-bold uppercase tracking-wider transition-colors ${active ? 'text-[#e8509a]' : 'text-muted-foreground hover:text-foreground'}`}>
+        {label}
+        <span className="text-[10px] w-3 text-center">
+          {active ? (sortDir === 'asc' ? '↑' : '↓') : <span className="opacity-0 group-hover:opacity-40">↕</span>}
+        </span>
+      </span>
+    </th>
+  );
+}
+
 function AdminProducts() {
   const qc = useQueryClient();
   const { data: products } = useQuery({
