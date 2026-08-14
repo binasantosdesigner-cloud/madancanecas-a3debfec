@@ -248,6 +248,56 @@ function AdminProducts() {
           </tbody>
         </table>
       </div>
+
+      {/* Pagination */}
+      {totalPages > 1 && (
+        <div className="flex items-center justify-between mt-6">
+          <p className="text-sm text-muted-foreground">
+            Página {page} de {totalPages}
+          </p>
+          <div className="flex items-center gap-2">
+            <Button
+              variant="outline"
+              size="icon"
+              className="size-8 rounded-lg"
+              disabled={page === 1}
+              onClick={() => setPage(page - 1)}
+            >
+              <ChevronLeft className="size-4" />
+            </Button>
+
+            {Array.from({ length: totalPages }, (_, i) => i + 1)
+              .filter(p => p === 1 || p === totalPages || Math.abs(p - page) <= 1)
+              .map((p, i, arr) => (
+                <div key={p} className="flex items-center">
+                  {i > 0 && arr[i - 1] !== p - 1 && (
+                    <span className="px-2 text-muted-foreground">...</span>
+                  )}
+                  <Button
+                    variant="outline"
+                    className={cn(
+                      "size-8 p-0 rounded-lg",
+                      page === p && "bg-[#e8509a] text-white border-[#e8509a] hover:bg-[#e8509a] hover:text-white"
+                    )}
+                    onClick={() => setPage(p)}
+                  >
+                    {p}
+                  </Button>
+                </div>
+              ))}
+
+            <Button
+              variant="outline"
+              size="icon"
+              className="size-8 rounded-lg"
+              disabled={page === totalPages}
+              onClick={() => setPage(page + 1)}
+            >
+              <ChevronRight className="size-4" />
+            </Button>
+          </div>
+        </div>
+      )}
     </div>
   );
 }
