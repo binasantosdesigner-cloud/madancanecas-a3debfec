@@ -44,14 +44,56 @@ export function Footer() {
         <div>
           <h4 className="text-xs font-bold uppercase tracking-widest mb-4 text-white">Categorias</h4>
           <ul className="space-y-2 text-sm">
-            <li><Link to="/catalogo" className="hover:opacity-75 transition-opacity text-white/85">Catálogo Digital</Link></li>
-            {categories?.map((c) => (
-              <li key={c.id}>
-                <Link to="/catalogo" className="hover:opacity-75 transition-opacity text-white/85">
-                  {c.name}
-                </Link>
-              </li>
-            ))}
+            <li>
+              <Link to="/catalogo" className="hover:opacity-75 transition-opacity text-white/85">
+                Catálogo Digital
+              </Link>
+            </li>
+            <li>
+              <Link to="/catalogo" search={{ categoria: "canecas" }} className="hover:opacity-75 transition-opacity text-white/85">
+                Canecas
+              </Link>
+            </li>
+            <li>
+              <Link to="/catalogo" search={{ categoria: "camisetas" }} className="hover:opacity-75 transition-opacity text-white/85">
+                Camisetas
+              </Link>
+            </li>
+            <li>
+              <Link to="/catalogo" search={{ categoria: "copos-e-garrafas" }} className="hover:opacity-75 transition-opacity text-white/85">
+                Copos e Garrafas
+              </Link>
+            </li>
+            <li>
+              <Link to="/catalogo" search={{ categoria: "tacas" }} className="hover:opacity-75 transition-opacity text-white/85">
+                Taças
+              </Link>
+            </li>
+            <li>
+              <Link to="/catalogo" search={{ categoria: "chaveiros" }} className="hover:opacity-75 transition-opacity text-white/85">
+                Chaveiros
+              </Link>
+            </li>
+            <li>
+              <Link to="/catalogo" search={{ categoria: "agendas-e-blocos" }} className="hover:opacity-75 transition-opacity text-white/85">
+                Agendas e Blocos
+              </Link>
+            </li>
+            <li>
+              <Link to="/catalogo" search={{ categoria: "azulejo-e-relogio" }} className="hover:opacity-75 transition-opacity text-white/85">
+                Azulejo e Relógio
+              </Link>
+            </li>
+            <li>
+              <Link to="/catalogo" search={{ categoria: "almofadas-e-toalhas" }} className="hover:opacity-75 transition-opacity text-white/85">
+                Almofadas e Toalhas
+              </Link>
+            </li>
+            <li>
+              <Link to="/catalogo" search={{ categoria: "outros" }} className="hover:opacity-75 transition-opacity text-white/85">
+                Outros
+              </Link>
+            </li>
           </ul>
         </div>
         <div>
