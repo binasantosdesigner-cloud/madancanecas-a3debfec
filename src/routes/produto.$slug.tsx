@@ -202,23 +202,50 @@ function ProdutoPage() {
 
         <div className="grid md:grid-cols-[1fr_420px] gap-12">
 
-          {/* Imagem */}
-          <div className="relative aspect-square rounded-2xl overflow-hidden bg-secondary">
-            {product.image_url ? (
-              <img
-                src={product.image_url}
-                alt={product.title}
-                className="w-full h-full object-cover"
-              />
-            ) : (
-              <div className="w-full h-full flex items-center justify-center">
-                <span className="text-xs uppercase tracking-widest text-muted-foreground/40">Madan</span>
+          {/* Galeria de Imagens */}
+          <div className="space-y-3">
+            {/* Main image with zoom button */}
+            <div
+              className="relative aspect-square rounded-2xl overflow-hidden bg-secondary cursor-zoom-in group"
+              onClick={() => productImages.length > 0 && setLightboxOpen(true)}
+            >
+              {productImages[activeImg] ? (
+                <img
+                  src={productImages[activeImg]}
+                  alt={product!.title}
+                  className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105"
+                />
+              ) : (
+                <div className="w-full h-full flex items-center justify-center text-[10px] uppercase tracking-widest text-muted-foreground/30">Madan</div>
+              )}
+              {/* Zoom hint */}
+              {productImages.length > 0 && (
+                <div className="absolute bottom-3 right-3 bg-black/40 text-white text-[10px] px-2 py-1 rounded-full flex items-center gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
+                  <ZoomIn className="size-3" /> Ampliar
+                </div>
+              )}
+              {/* Favorite button */}
+              <div className="absolute top-4 right-4">
+                <FavoriteButton productId={product!.id} />
+              </div>
+            </div>
+
+            {/* Thumbnails — only show if > 1 image */}
+            {productImages.length > 1 && (
+              <div className="flex gap-2 overflow-x-auto pb-1">
+                {productImages.map((url, idx) => (
+                  <button
+                    key={idx}
+                    onClick={() => setActiveImg(idx)}
+                    className={`shrink-0 size-16 rounded-lg overflow-hidden border-2 transition-all ${
+                      activeImg === idx ? 'border-[#e8509a] opacity-100' : 'border-border opacity-60 hover:opacity-100'
+                    }`}
+                  >
+                    <img src={url} alt="" className="w-full h-full object-cover" />
+                  </button>
+                ))}
               </div>
             )}
-            {/* Botão favoritar sobre a imagem */}
-            <div className="absolute top-4 right-4">
-              <FavoriteButton productId={product.id} />
-            </div>
           </div>
 
           {/* Informações */}
