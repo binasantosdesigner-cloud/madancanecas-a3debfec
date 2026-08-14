@@ -24,12 +24,13 @@ function ProdutoPage() {
   const { data: product, isLoading } = useQuery({
     queryKey: ["product", slug],
     queryFn: async () => {
-      const { data } = await supabase
+      const { data, error } = await supabase
         .from("products")
         .select("*, categories(name, slug)")
         .eq("slug", slug)
-        .eq("active", true)
         .maybeSingle();
+
+      if (error) throw error;
       return data;
     },
   });
