@@ -356,11 +356,11 @@ function AdminUsersPage() {
                       )}
                     </td>
                     <td className="px-4 py-3 text-right">
-                      <div className="flex items-center justify-end gap-1">
+                      <div className="flex items-center justify-end gap-2">
                         <Button 
                           size="icon" 
                           variant="ghost" 
-                          className="h-8 w-8 text-muted-foreground hover:text-primary"
+                          className="size-8 rounded-lg flex items-center justify-center transition-colors bg-transparent border border-border text-muted-foreground hover:bg-[#fce8f3] hover:border-[#e8509a] hover:text-[#e8509a]"
                           onClick={() => {
                             setSelectedUser(p);
                             setIsDetailsOpen(true);
@@ -369,23 +369,13 @@ function AdminUsersPage() {
                           <Eye className="h-4 w-4" />
                         </Button>
 
-                        <Button 
-                          size="icon" 
-                          variant="ghost" 
-                          className={`h-8 w-8 ${isAdmin ? "text-[#e8509a]" : "text-muted-foreground"} hover:bg-muted`}
-                          disabled={toggleAdmin.isPending}
-                          onClick={() => toggleAdmin.mutate({ userId: p.id, makeAdmin: !isAdmin })}
-                        >
-                          {isAdmin ? <ShieldOff className="h-4 w-4" /> : <Shield className="h-4 w-4" />}
-                        </Button>
-
                         {currentUser?.id !== p.id && (
                           <AlertDialog>
                             <AlertDialogTrigger asChild>
                               <Button 
                                 size="icon" 
                                 variant="ghost" 
-                                className="h-8 w-8 text-muted-foreground hover:text-destructive"
+                                className="size-8 rounded-lg flex items-center justify-center transition-colors bg-transparent border border-border text-muted-foreground hover:bg-red-50 hover:border-red-300 hover:text-red-600"
                               >
                                 <Trash2 className="h-4 w-4" />
                               </Button>
