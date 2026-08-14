@@ -167,14 +167,14 @@ function CatalogoPage() {
                       exit={{ opacity: 0, scale: 0.9 }}
                       transition={{ duration: 0.2 }}
                     >
-                      <ProductCard 
-                        id={product.id}
-                        title={product.title}
-                        price={Number(product.price)}
-                        image={product.image_url}
-                        category={product.categories?.name}
-                        slug={product.slug}
-                      />
+                      <ProductCard p={{
+                        id: product.id,
+                        title: product.title,
+                        price: Number(product.price),
+                        image_url: product.image_url,
+                        slug: product.slug,
+                        kind: product.kind || 'ready'
+                      }} />
                     </motion.div>
                   ))}
                 </AnimatePresence>
