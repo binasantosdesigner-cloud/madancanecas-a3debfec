@@ -60,6 +60,7 @@ export function Header() {
             target="_blank"
             rel="noopener noreferrer"
             aria-label="Instagram @madancanecas"
+            title="Instagram @madancanecas"
             className="hidden sm:inline-flex"
           >
             <Button variant="ghost" size="icon" className="text-accent hover:text-accent hover:bg-accent/10">
@@ -78,12 +79,21 @@ export function Header() {
               </Button>
             </Link>
           )}
-          <Link to={user ? "/conta" : "/login"} aria-label="Conta">
+          <Link
+            to={user ? "/conta" : "/login"}
+            aria-label={user ? "Minha conta" : "Entrar / Criar conta"}
+            title={user ? "Minha conta" : "Entrar / Criar conta"}
+          >
             <Button variant="ghost" size="icon" className="text-accent hover:text-accent hover:bg-accent/10">
               <User className="size-5" />
             </Button>
           </Link>
-          <Link to="/carrinho" className="relative" aria-label="Carrinho">
+          <Link
+            to="/carrinho"
+            className="relative"
+            aria-label="Carrinho"
+            title={count > 0 ? `Carrinho (${count} item${count !== 1 ? 's' : ''})` : "Carrinho"}
+          >
             <Button variant="ghost" size="icon" className="text-accent hover:text-accent hover:bg-accent/10">
               <ShoppingBag className="size-5" />
             </Button>
@@ -95,7 +105,7 @@ export function Header() {
           </Link>
           <Sheet>
             <SheetTrigger asChild className="md:hidden">
-              <Button variant="ghost" size="icon"><Menu className="size-5" /></Button>
+              <Button variant="ghost" size="icon" title="Menu"><Menu className="size-5" /></Button>
             </SheetTrigger>
             <SheetContent side="right" className="w-72">
               <SheetTitle className="sr-only">Menu de Navegação</SheetTitle>
