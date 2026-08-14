@@ -20,7 +20,7 @@ import {
   User, Package, CreditCard, ShoppingCart, Heart, Palette, MapPin,
   Bell, Award, HelpCircle, Settings, LogOut, LayoutDashboard,
   Camera, Plus, Pencil, Trash2, Check, Brush, ArrowRight,
-  CheckCircle2, Clock
+  CheckCircle2, Clock, ChevronDown
 } from "lucide-react";
 import { ArtApprovalsSection, useArtApprovals } from "@/components/account/ArtApprovalsSection";
 
@@ -707,21 +707,113 @@ function AddressDialog({ open, onOpenChange, editing }: { open: boolean; onOpenC
 /* ---------------- Ajuda ---------------- */
 
 function AjudaSection() {
-  const links = [
-    { to: "/politica-de-trocas", label: "Política de Trocas e Devoluções" },
-    { to: "/cuidados-com-os-produtos", label: "Como cuidar dos produtos" },
-    { to: "/perguntas-frequentes", label: "Perguntas Frequentes" },
-    { to: "/sobre-nos", label: "Sobre a Madan" },
+  const [openTopic, setOpenTopic] = useState<string | null>(null);
+
+  const helpTopics = [
+    {
+      id: "trocas",
+      title: "Política de Trocas e Devoluções",
+      content: `Aceitamos solicitações de troca em até 7 dias corridos após o recebimento do produto nos seguintes casos:
+      
+  - Produto chegou com defeito de fabricação (impressão borrada, peça danificada, item errado)
+  - Houve erro nosso no pedido (arte diferente da aprovada, produto trocado)
+  - O produto chegou avariado durante o transporte
+  
+  Como solicitar: Entre em contato pelo WhatsApp informando o número do pedido, descrição do problema e foto do produto com o defeito. Analisaremos em até 2 dias úteis.
+  
+  Não realizamos trocas por: arrependimento após produção, erros na arte aprovada pelo cliente, ou danos por mau uso.`
+    },
+    {
+      id: "cuidados",
+      title: "Como cuidar dos produtos",
+      content: `**Canecas:** Lave preferencialmente à mão com esponja macia. Não use esponja de aço ou produtos abrasivos. Se usar lava-louças, prefira ciclos suaves.
+  
+  **Camisetas:** Lave ao avesso em água fria. Não use alvejante. Seque à sombra e passe ferro pelo avesso.
+  
+  **Garrafas e Copos Térmicos:** Lave à mão — não vão ao lava-louças. Deixe secar com a tampa aberta.
+  
+  **Taças:** Lave à mão com cuidado e seque imediatamente com pano seco.`
+    },
+    {
+      id: "faq",
+      title: "Perguntas Frequentes",
+      content: `**Como faço um pedido?**
+  Adicione produtos ao carrinho ou fale diretamente pelo WhatsApp. Nossa equipe cria um design exclusivo para aprovação antes da produção.
+  
+  **Qual o prazo de produção?**
+  Em média 5 a 10 dias úteis após aprovação da arte.
+  
+  **Vocês entregam fora de Rondonópolis?**
+  No momento fazemos entrega apenas em Rondonópolis-MT. Consulte pelo WhatsApp.
+  
+  **Quais formas de pagamento são aceitas?**
+  PIX (50% antecipado + 50% na entrega).
+  
+  **Posso enviar minha própria arte?**
+  Sim! Aceitamos PNG, JPG ou PDF em alta resolução (mín. 300 DPI).`
+    },
+    {
+      id: "sobre",
+      title: "Sobre a Madan",
+      content: `A Madan nasceu da vontade de transformar objetos do dia a dia em memórias afetivas. Somos uma marca de Rondonópolis-MT especializada em presentes personalizados com arte exclusiva e acabamento premium.
+  
+  Trabalhamos com canecas, camisetas, garrafas, taças, copos e muito mais — todos personalizados com atenção aos detalhes e embalados com cuidado especial.
+  
+  **Nossos diferenciais:**
+  - Arte exclusiva criada especialmente para cada pedido
+  - Você aprova a arte antes de qualquer produção
+  - Embalagem especial em todos os pedidos
+  - Entrega pessoal em Rondonópolis-MT
+  
+  📱 WhatsApp: (66) 98426-6994
+  📧 madan.canecas@gmail.com
+  📷 @madancanecas`
+    },
   ];
+
   return (
     <SectionCard title="Central de Ajuda">
-      <div className="grid sm:grid-cols-2 gap-3">
-        {links.map((l) => (
-          <Link key={l.to} to={l.to} className="p-4 rounded-xl border border-border bg-background hover:border-accent/50 transition flex items-center justify-between gap-3">
-            <span className="text-sm">{l.label}</span>
-            <HelpCircle className="h-4 w-4 text-accent shrink-0" />
-          </Link>
+      <div className="space-y-3">
+        {helpTopics.map((topic) => (
+          <div
+            key={topic.id}
+            className={`rounded-xl border transition-all duration-200 ${
+              openTopic === topic.id
+                ? "border-[#e8509a]/40 bg-[#fce8f3]/20"
+                : "border-border bg-background"
+            }`}
+          >
+            <div
+              className="flex justify-between items-center cursor-pointer p-4"
+              onClick={() => setOpenTopic(openTopic === topic.id ? null : topic.id)}
+            >
+              <h3 className="text-sm font-medium">{topic.title}</h3>
+              <ChevronDown
+                className={`h-4 w-4 text-accent transition-transform duration-200 ${
+                  openTopic === topic.id ? "rotate-180" : ""
+                }`}
+              />
+            </div>
+            {openTopic === topic.id && (
+              <div className="p-4 pt-0 text-sm text-muted-foreground leading-relaxed whitespace-pre-line">
+                {topic.content}
+              </div>
+            )}
+          </div>
         ))}
+      </div>
+
+      <div className="mt-8 pt-6 border-t border-border flex flex-col items-center gap-4 text-center">
+        <p className="text-sm text-muted-foreground">Não encontrou o que procura?</p>
+        <Button
+          variant="outline"
+          className="rounded-full text-sm"
+          asChild
+        >
+          <a href="https://wa.me/5566984266994" target="_blank" rel="noopener noreferrer">
+            💬 Falar com a Madan
+          </a>
+        </Button>
       </div>
     </SectionCard>
   );
