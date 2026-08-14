@@ -55,7 +55,8 @@ function AdminProducts() {
 
   const [open, setOpen] = useState(false);
   const [editing, setEditing] = useState<any>(null);
-  const [form, setForm] = useState<any>({ title: "", price: 0, kind: "ready", description: "", category_id: "", image_url: "", active: true, featured: false });
+  const [form, setForm] = useState<any>({ title: "", price: 0, kind: "ready", description: "", category_id: "", image_url: "", images: [], active: true, featured: false });
+  const [images, setImages] = useState<{url: string, isPrimary: boolean}[]>([]);
   const [homeSection, setHomeSection] = useState<'none' | 'ready' | 'custom'>('none');
   const [deleteTarget, setDeleteTarget] = useState<{ id: string; title: string } | null>(null);
   const [uploadingImage, setUploadingImage] = useState(false);
@@ -148,13 +149,25 @@ function AdminProducts() {
 
   const openNew = () => { 
     setEditing(null); 
-    setForm({ title: "", price: 0, kind: "ready", description: "", category_id: cats?.[0]?.id ?? "", image_url: "", active: true, featured: false }); 
+    setForm({ title: "", price: 0, kind: "ready", description: "", category_id: cats?.[0]?.id ?? "", image_url: "", images: [], active: true, featured: false }); 
+    setImages([]);
     setHomeSection('none');
     setOpen(true); 
   };
   const openEdit = (p: any) => { 
     setEditing(p); 
     setForm({ ...p }); 
+    
+    // Populate images state from JSONB array
+    const productImages = (p.images as any[]) ?? [];
+    if (productImages.length > 0) {
+      setImages(productImages);
+    } else if (p.image_url) {
+      setImages([{ url: p.image_url, isPrimary: true }]);
+    } else {
+      setImages([]);
+    }
+
     if (p.featured === true && p.kind === 'ready') setHomeSection('ready');
     else if (p.featured === true && p.kind === 'custom') setHomeSection('custom');
     else setHomeSection('none');
@@ -246,7 +259,9 @@ function AdminProducts() {
       slug, 
       price: Number(form.price),
       featured: homeSection !== 'none',
-      kind: homeSection === 'none' ? form.kind : homeSection
+      kind: homeSection === 'none' ? form.kind : homeSection,
+      images: images,
+      image_url: images.find(i => i.isPrimary)?.url ?? images[0]?.url ?? null
     };
     delete (payload as any).categories;
     const { error } = editing
@@ -323,51 +338,110 @@ function AdminProducts() {
                 </Select>
               </div>
               <div className="space-y-2"><Label>Descrição</Label><Textarea value={form.description ?? ""} onChange={(e) => setForm({ ...form, description: e.target.value })} /></div>
-              {/* Image Upload */}
-              <div className="space-y-2">
-                <Label>Imagem do produto</Label>
-                
-                {form.image_url && (
-                  <div className="relative w-full aspect-video rounded-xl overflow-hidden border border-border bg-secondary">
-                    <img src={form.image_url} alt="preview" className="w-full h-full object-contain" />
-                    <button
-                      type="button"
-                      onClick={() => setForm({ ...form, image_url: '' })}
-                      className="absolute top-2 right-2 size-7 rounded-full bg-black/50 text-white flex items-center justify-center hover:bg-black/70 transition-colors"
-                    >
-                      <X className="size-3.5" />
-                    </button>
+              {/* Multi-image Manager */}
+              <div className="space-y-3">
+                <div className="flex items-center justify-between">
+                  <Label>Imagens do produto</Label>
+                  <span className="text-xs text-muted-foreground">{images.length}/5</span>
+                </div>
+
+                {/* Existing images grid */}
+                {images.length > 0 && (
+                  <div className="grid grid-cols-5 gap-2">
+                    {images.map((img, idx) => (
+                      <div key={idx} className="relative group aspect-square">
+                        <img
+                          src={img.url}
+                          alt=""
+                          className={`w-full h-full object-cover rounded-lg border-2 transition-all ${
+                            img.isPrimary ? 'border-[#e8509a]' : 'border-border'
+                          }`}
+                        />
+                        {/* Primary badge */}
+                        {img.isPrimary && (
+                          <span className="absolute top-1 left-1 text-[9px] bg-[#e8509a] text-white px-1 rounded font-medium">
+                            Capa
+                          </span>
+                        )}
+                        {/* Actions overlay */}
+                        <div className="absolute inset-0 bg-black/50 rounded-lg opacity-0 group-hover:opacity-100 transition-opacity flex flex-col items-center justify-center gap-1">
+                          {!img.isPrimary && (
+                            <button
+                              type="button"
+                              onClick={() => setImages(prev => prev.map((im, i) => ({...im, isPrimary: i === idx})))}
+                              className="text-[9px] text-white bg-[#e8509a] px-1.5 py-0.5 rounded font-medium"
+                            >
+                              Definir capa
+                            </button>
+                          )}
+                          <button
+                            type="button"
+                            onClick={() => {
+                              const newImgs = images.filter((_, i) => i !== idx);
+                              // If removed was primary, set first as primary
+                              if (img.isPrimary && newImgs.length > 0) newImgs[0].isPrimary = true;
+                              setImages(newImgs);
+                            }}
+                            className="text-[9px] text-white bg-red-500 px-1.5 py-0.5 rounded font-medium"
+                          >
+                            Remover
+                          </button>
+                        </div>
+                      </div>
+                    ))}
                   </div>
                 )}
 
-                <label className={cn(
-                  "flex flex-col items-center justify-center gap-2 w-full py-6 border-2 border-dashed border-border rounded-xl cursor-pointer transition-colors hover:border-[#e8509a] hover:bg-[#fce8f3]/30",
-                  uploadingImage && "opacity-50 pointer-events-none",
-                  form.image_url && "hidden"
-                )}>
-                  <Upload className="size-6 text-muted-foreground" />
-                  <div className="text-center">
-                    <p className="text-sm font-medium">{uploadingImage ? "Comprimindo e enviando..." : "Clique para fazer upload"}</p>
-                    <p className="text-xs text-muted-foreground mt-0.5">JPG ou WebP · Máx. 1MB · Será comprimido automaticamente</p>
-                  </div>
-                  <input
-                    type="file"
-                    accept="image/jpeg,image/jpg,image/webp,image/png"
-                    className="sr-only"
-                    disabled={uploadingImage}
-                    onChange={handleImageUpload}
-                  />
-                </label>
-                
-                {form.image_url && (
-                  <button
-                    type="button"
-                    onClick={() => setForm({ ...form, image_url: '' })}
-                    className="text-xs text-muted-foreground hover:text-red-500 transition-colors"
-                  >
-                    Remover imagem
-                  </button>
+                {/* Upload button — only show if < 5 images */}
+                {images.length < 5 && (
+                  <label className={`flex items-center justify-center gap-2 w-full py-4 border-2 border-dashed border-border rounded-xl cursor-pointer transition-colors hover:border-[#e8509a] hover:bg-[#fce8f3]/20 ${uploadingImage ? 'opacity-50 pointer-events-none' : ''}`}>
+                    <Upload className="size-4 text-muted-foreground" />
+                    <span className="text-sm text-muted-foreground">
+                      {uploadingImage ? 'Enviando...' : `Adicionar imagem (${images.length}/5)`}
+                    </span>
+                    <input
+                      type="file"
+                      accept="image/jpeg,image/jpg,image/webp,image/png"
+                      multiple
+                      className="sr-only"
+                      disabled={uploadingImage}
+                      onChange={async (e) => {
+                        const files = Array.from(e.target.files ?? []);
+                        const remaining = 5 - images.length;
+                        const toUpload = files.slice(0, remaining);
+                        if (toUpload.length === 0) return;
+                        setUploadingImage(true);
+                        const uploaded: {url: string, isPrimary: boolean}[] = [];
+                        for (const file of toUpload) {
+                          try {
+                            const compressed = await compressImage(file, 1024);
+                            const ext = compressed.type === 'image/webp' ? 'webp' : 'jpg';
+                            const path = `product-${Date.now()}-${Math.random().toString(36).slice(2)}.${ext}`;
+                            const { error } = await supabase.storage.from('product-images').upload(path, compressed, { upsert: true });
+                            if (!error) {
+                              const { data: urlData } = supabase.storage.from('product-images').getPublicUrl(path);
+                              uploaded.push({ url: urlData.publicUrl, isPrimary: false });
+                            } else {
+                              console.error("Upload error:", error);
+                              toast.error(`Erro ao subir ${file.name}`);
+                            }
+                          } catch (err) {
+                            console.error("Processing error:", err);
+                          }
+                        }
+                        setImages(prev => {
+                          const combined = [...prev, ...uploaded];
+                          // If no primary yet, set first as primary
+                          if (!combined.some(i => i.isPrimary) && combined.length > 0) combined[0].isPrimary = true;
+                          return combined;
+                        });
+                        setUploadingImage(false);
+                        if (files.length > remaining) toast.error(`Apenas ${remaining} imagem(ns) adicionada(s). Limite: 5.`);
+                      }}
+                    />
+                  </label>
                 )}
+                <p className="text-xs text-muted-foreground">A imagem marcada como "Capa" aparece primeiro. Passe o mouse sobre uma imagem para definir capa ou remover.</p>
               </div>
               
 

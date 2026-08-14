@@ -412,6 +412,7 @@ export type Database = {
           featured: boolean
           id: string
           image_url: string | null
+          images: Json
           kind: Database["public"]["Enums"]["product_kind"]
           price: number
           slug: string
@@ -427,6 +428,7 @@ export type Database = {
           featured?: boolean
           id?: string
           image_url?: string | null
+          images?: Json
           kind?: Database["public"]["Enums"]["product_kind"]
           price: number
           slug: string
@@ -442,6 +444,7 @@ export type Database = {
           featured?: boolean
           id?: string
           image_url?: string | null
+          images?: Json
           kind?: Database["public"]["Enums"]["product_kind"]
           price?: number
           slug?: string
