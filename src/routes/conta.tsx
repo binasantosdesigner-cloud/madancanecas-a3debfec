@@ -3,6 +3,7 @@ import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { useEffect, useState, useRef } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/lib/auth";
+import { useFavorites } from "@/lib/favorites";
 import { Header } from "@/components/site/Header";
 import { Footer } from "@/components/site/Footer";
 import { Button } from "@/components/ui/button";
@@ -139,7 +140,7 @@ function AccountPage() {
             {section === "enderecos" && <EnderecosSection />}
             {section === "ajuda" && <AjudaSection />}
             {section === "carrinho" && <PlaceholderLink to="/carrinho" title="Meu Carrinho" desc="Gerencie os itens que você adicionou para finalizar a compra." cta="Abrir carrinho" />}
-            {section === "favoritos" && <ComingSoon title="Favoritos" desc="Em breve você poderá salvar produtos para comprar depois." />}
+            {section === "favoritos" && <FavoritosSection />}
             {section === "projetos" && <ComingSoon title="Projetos Personalizados" desc="Acompanhe aprovações de arte e o histórico das suas personalizações." />}
             {section === "pagamentos" && <PagamentosSection onNavigate={setSection} />}
             {section === "notificacoes" && <ComingSoon title="Notificações" desc="Aqui aparecerão atualizações de pedidos, artes para aprovar e novidades." />}

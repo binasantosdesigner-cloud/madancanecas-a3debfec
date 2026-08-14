@@ -19,6 +19,7 @@ function formatPhone(val: string) {
 
 export function WhatsappRequiredModal({ userId, onSaved }: Props) {
   const [phone, setPhone] = useState("");
+  const [optIn, setOptIn] = useState(true); // marcado por padrão
   const [loading, setLoading] = useState(false);
 
   const save = async () => {
@@ -30,7 +31,11 @@ export function WhatsappRequiredModal({ userId, onSaved }: Props) {
     setLoading(true);
     const { error } = await supabase
       .from("profiles")
-      .update({ phone: digits })
+      .update({
+        phone: digits,
+        whatsapp_opt_in: optIn,
+        whatsapp_opt_in_at: optIn ? new Date().toISOString() : null,
+      })
       .eq("id", userId);
     setLoading(false);
     if (error) {
@@ -80,6 +85,19 @@ export function WhatsappRequiredModal({ userId, onSaved }: Props) {
             className="text-center text-lg tracking-widest"
           />
         </div>
+
+        <label className="flex items-start gap-3 cursor-pointer mt-2 mb-6">
+          <input
+            type="checkbox"
+            checked={optIn}
+            onChange={(e) => setOptIn(e.target.checked)}
+            className="mt-0.5 accent-[#e8509a] size-4 shrink-0"
+          />
+          <span className="text-xs text-muted-foreground leading-relaxed text-left">
+            Concordo em receber mensagens sobre pedidos, novidades e promoções da Madan via WhatsApp.
+            Você pode cancelar a qualquer momento.
+          </span>
+        </label>
 
         {/* Botão — sem alternativa de fechar */}
         <Button
