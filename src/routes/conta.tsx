@@ -289,6 +289,14 @@ function formatBRPhone(val: string): string {
   return `(${digits.slice(0, 2)}) ${digits.slice(2, 3)} ${digits.slice(3, 7)}-${digits.slice(7)}`;
 }
 
+function formatCPF(val: string): string {
+  const digits = val.replace(/\D/g, "").slice(0, 11);
+  if (digits.length <= 3) return digits;
+  if (digits.length <= 6) return `${digits.slice(0, 3)}.${digits.slice(3)}`;
+  if (digits.length <= 9) return `${digits.slice(0, 3)}.${digits.slice(3, 6)}.${digits.slice(6)}`;
+  return `${digits.slice(0, 3)}.${digits.slice(3, 6)}.${digits.slice(6, 9)}-${digits.slice(9)}`;
+}
+
 function PerfilSection() {
   const { user } = useAuth();
   const { profile, avatarUrl, refresh } = useProfile();
@@ -300,7 +308,7 @@ function PerfilSection() {
     if (profile) setForm({
       full_name: profile.full_name ?? "",
       phone: formatBRPhone(profile.phone ?? ""),
-      cpf: (profile as any).cpf ?? "",
+      cpf: formatCPF((profile as any).cpf ?? ""),
     });
   }, [profile]);
 
@@ -387,7 +395,14 @@ function PerfilSection() {
           />
         </Field>
         <Field label="CPF">
-          <Input value={form.cpf} onChange={(e) => setForm(f => ({ ...f, cpf: e.target.value }))} maxLength={14} placeholder="000.000.000-00" />
+          <Input 
+            type="text"
+            inputMode="numeric"
+            value={form.cpf} 
+            onChange={(e) => setForm(f => ({ ...f, cpf: formatCPF(e.target.value) }))} 
+            maxLength={14} 
+            placeholder="000.000.000-00" 
+          />
         </Field>
         <div className="sm:col-span-2 flex flex-wrap gap-3 pt-2">
           <Button type="submit" disabled={save.isPending}>{save.isPending ? "Salvando..." : "Salvar alterações"}</Button>
