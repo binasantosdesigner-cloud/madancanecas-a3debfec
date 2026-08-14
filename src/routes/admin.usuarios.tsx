@@ -438,8 +438,16 @@ function AdminUsersPage() {
                 <div className="flex flex-col items-center gap-4 mb-6">
                   <div className="h-24 w-24 rounded-full bg-[#fce8f3] text-[#e8509a] flex items-center justify-center font-bold text-2xl border-2 border-[#e8509a]/20 shadow-sm overflow-hidden">
                     {selectedUser.avatar_url ? (
-                      <img src={selectedUser.avatar_url} alt="" className="h-full w-full object-cover" />
-                    ) : getInitials(selectedUser.full_name)}
+                      <img 
+                        src={selectedUser.avatar_url} 
+                        alt="" 
+                        className="h-full w-full object-cover" 
+                        onError={(e) => {
+                          (e.target as HTMLImageElement).style.display = 'none';
+                          (e.target as HTMLImageElement).parentElement!.innerHTML = getInitials(selectedUser.full_name, selectedUser.email);
+                        }}
+                      />
+                    ) : getInitials(selectedUser.full_name, selectedUser.email)}
                   </div>
                   <div className="text-center">
                     <h3 className="font-bold text-lg">{selectedUser.full_name || "Sem nome"}</h3>
