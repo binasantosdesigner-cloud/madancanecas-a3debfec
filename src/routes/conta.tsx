@@ -281,6 +281,14 @@ function DashboardSection({ onNavigate }: { onNavigate: (s: SectionId) => void }
 
 /* ---------------- Perfil ---------------- */
 
+function formatBRPhone(val: string): string {
+  const digits = val.replace(/\D/g, "").slice(0, 11);
+  if (digits.length <= 2) return digits;
+  if (digits.length <= 6) return `(${digits.slice(0, 2)}) ${digits.slice(2)}`;
+  if (digits.length <= 10) return `(${digits.slice(0, 2)}) ${digits.slice(2, 6)}-${digits.slice(6)}`;
+  return `(${digits.slice(0, 2)}) ${digits.slice(2, 3)} ${digits.slice(3, 7)}-${digits.slice(7)}`;
+}
+
 function PerfilSection() {
   const { user } = useAuth();
   const { profile, avatarUrl, refresh } = useProfile();
@@ -291,7 +299,7 @@ function PerfilSection() {
   useEffect(() => {
     if (profile) setForm({
       full_name: profile.full_name ?? "",
-      phone: profile.phone ?? "",
+      phone: formatBRPhone(profile.phone ?? ""),
       cpf: (profile as any).cpf ?? "",
     });
   }, [profile]);
@@ -370,7 +378,13 @@ function PerfilSection() {
           <Input value={user?.email ?? ""} disabled />
         </Field>
         <Field label="Telefone">
-          <Input value={form.phone} onChange={(e) => setForm(f => ({ ...f, phone: e.target.value }))} maxLength={20} placeholder="(00) 00000-0000" />
+          <Input 
+            type="tel"
+            value={form.phone} 
+            onChange={(e) => setForm(f => ({ ...f, phone: formatBRPhone(e.target.value) }))} 
+            maxLength={16} 
+            placeholder="(66) 9 8426-6994" 
+          />
         </Field>
         <Field label="CPF">
           <Input value={form.cpf} onChange={(e) => setForm(f => ({ ...f, cpf: e.target.value }))} maxLength={14} placeholder="000.000.000-00" />
