@@ -20,7 +20,7 @@ import {
   User, Package, CreditCard, ShoppingCart, Heart, Palette, MapPin,
   Bell, Award, HelpCircle, Settings, LogOut, LayoutDashboard,
   Camera, Plus, Pencil, Trash2, Check, Brush, ArrowRight,
-  CheckCircle2, Clock
+  CheckCircle2, Clock, ChevronDown
 } from "lucide-react";
 import { ArtApprovalsSection, useArtApprovals } from "@/components/account/ArtApprovalsSection";
 
