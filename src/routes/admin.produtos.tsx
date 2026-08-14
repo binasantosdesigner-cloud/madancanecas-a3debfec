@@ -1,7 +1,7 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { useState, useEffect } from "react";
-import { Pencil, Trash2, Plus, Heart, Star, Search, ChevronLeft, ChevronRight } from "lucide-react";
+import { Pencil, Trash2, Plus, Heart, Star, Search, ChevronLeft, ChevronRight, X, Upload } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { Switch } from "@/components/ui/switch";
 
@@ -57,6 +57,7 @@ function AdminProducts() {
   const [editing, setEditing] = useState<any>(null);
   const [form, setForm] = useState<any>({ title: "", price: 0, kind: "ready", description: "", category_id: "", image_url: "", active: true, featured: false });
   const [deleteTarget, setDeleteTarget] = useState<{ id: string; title: string } | null>(null);
+  const [uploadingImage, setUploadingImage] = useState(false);
 
   // Filtering states
   const [search, setSearch] = useState("");
@@ -85,6 +86,83 @@ function AdminProducts() {
   const openEdit = (p: any) => { setEditing(p); setForm({ ...p }); setOpen(true); };
 
 
+  const handleImageUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+
+    // Validate type
+    const validTypes = ['image/jpeg', 'image/jpg', 'image/webp', 'image/png'];
+    if (!validTypes.includes(file.type)) {
+      toast.error('Formato inválido. Use JPG, WebP ou PNG.');
+      return;
+    }
+
+    setUploadingImage(true);
+
+    try {
+      // Compress using canvas
+      const compressed = await compressImage(file, 1024); // max 1MB
+      
+      const ext = compressed.type === 'image/webp' ? 'webp' : 'jpg';
+      const path = `product-${Date.now()}-${Math.random().toString(36).slice(2)}.${ext}`;
+      
+      const { error } = await supabase.storage
+        .from('products')
+        .upload(path, compressed, { upsert: true, contentType: compressed.type });
+      
+      if (error) throw error;
+      
+      const { data: urlData } = supabase.storage.from('products').getPublicUrl(path);
+      setForm({ ...form, image_url: urlData.publicUrl });
+      toast.success('Imagem enviada!');
+    } catch (err: any) {
+      toast.error('Erro no upload: ' + (err.message ?? 'tente novamente'));
+    } finally {
+      setUploadingImage(false);
+    }
+  };
+
+  // Canvas-based compression — keeps quality, targets max size in KB
+  async function compressImage(file: File, maxKB: number): Promise<Blob> {
+    return new Promise((resolve) => {
+      const img = new Image();
+      const url = URL.createObjectURL(file);
+      img.onload = () => {
+        URL.revokeObjectURL(url);
+        const canvas = document.createElement('canvas');
+        
+        // Max dimension 1200px
+        const MAX_DIM = 1200;
+        let { width, height } = img;
+        if (width > MAX_DIM || height > MAX_DIM) {
+          const ratio = Math.min(MAX_DIM / width, MAX_DIM / height);
+          width = Math.round(width * ratio);
+          height = Math.round(height * ratio);
+        }
+        
+        canvas.width = width;
+        canvas.height = height;
+        const ctx = canvas.getContext('2d')!;
+        ctx.drawImage(img, 0, 0, width, height);
+        
+        // Try webp first for better compression
+        const tryCompress = (quality: number, format: string) => {
+          canvas.toBlob((blob) => {
+            if (!blob) { resolve(new Blob([file])); return; }
+            if (blob.size <= maxKB * 1024 || quality <= 0.5) {
+              resolve(blob);
+            } else {
+              tryCompress(quality - 0.1, format);
+            }
+          }, format, quality);
+        };
+        
+        tryCompress(0.85, 'image/webp');
+      };
+      img.src = url;
+    });
+  }
+
   const save = async () => {
     const slug = (form.title as string).toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "").replace(/[^a-z0-9]+/g, "-").replace(/^-|-$/g, "");
     const payload = { ...form, slug, price: Number(form.price) };
@@ -108,7 +186,7 @@ function AdminProducts() {
         <h1 className="font-serif text-3xl">Produtos</h1>
         <Dialog open={open} onOpenChange={setOpen}>
           <DialogTrigger asChild><Button onClick={openNew}><Plus className="mr-2 size-4" />Novo</Button></DialogTrigger>
-          <DialogContent className="max-w-lg">
+          <DialogContent className="max-w-lg w-full max-h-[90vh] overflow-y-auto">
             <DialogHeader><DialogTitle>{editing ? "Editar" : "Novo"} Produto</DialogTitle></DialogHeader>
             <div className="space-y-4">
               <div className="space-y-2"><Label>Título</Label><Input value={form.title} onChange={(e) => setForm({ ...form, title: e.target.value })} /></div>
@@ -135,7 +213,52 @@ function AdminProducts() {
                 </Select>
               </div>
               <div className="space-y-2"><Label>Descrição</Label><Textarea value={form.description ?? ""} onChange={(e) => setForm({ ...form, description: e.target.value })} /></div>
-              <div className="space-y-2"><Label>URL da Imagem</Label><Input value={form.image_url ?? ""} onChange={(e) => setForm({ ...form, image_url: e.target.value })} /></div>
+              {/* Image Upload */}
+              <div className="space-y-2">
+                <Label>Imagem do produto</Label>
+                
+                {form.image_url && (
+                  <div className="relative w-full aspect-video rounded-xl overflow-hidden border border-border bg-secondary">
+                    <img src={form.image_url} alt="preview" className="w-full h-full object-contain" />
+                    <button
+                      type="button"
+                      onClick={() => setForm({ ...form, image_url: '' })}
+                      className="absolute top-2 right-2 size-7 rounded-full bg-black/50 text-white flex items-center justify-center hover:bg-black/70 transition-colors"
+                    >
+                      <X className="size-3.5" />
+                    </button>
+                  </div>
+                )}
+
+                <label className={cn(
+                  "flex flex-col items-center justify-center gap-2 w-full py-6 border-2 border-dashed border-border rounded-xl cursor-pointer transition-colors hover:border-[#e8509a] hover:bg-[#fce8f3]/30",
+                  uploadingImage && "opacity-50 pointer-events-none",
+                  form.image_url && "hidden"
+                )}>
+                  <Upload className="size-6 text-muted-foreground" />
+                  <div className="text-center">
+                    <p className="text-sm font-medium">{uploadingImage ? "Comprimindo e enviando..." : "Clique para fazer upload"}</p>
+                    <p className="text-xs text-muted-foreground mt-0.5">JPG ou WebP · Máx. 1MB · Será comprimido automaticamente</p>
+                  </div>
+                  <input
+                    type="file"
+                    accept="image/jpeg,image/jpg,image/webp,image/png"
+                    className="sr-only"
+                    disabled={uploadingImage}
+                    onChange={handleImageUpload}
+                  />
+                </label>
+                
+                {form.image_url && (
+                  <button
+                    type="button"
+                    onClick={() => setForm({ ...form, image_url: '' })}
+                    className="text-xs text-muted-foreground hover:text-red-500 transition-colors"
+                  >
+                    Remover imagem
+                  </button>
+                )}
+              </div>
               
               <div className="flex items-center justify-between py-3 border-t border-border mt-2">
                 <div>
