@@ -65,9 +65,9 @@ function CatalogoPage() {
 
   const handleCategoryClick = (catSlug: string) => {
     if (catSlug === "Todos") {
-      navigate({ search: (prev) => ({ ...prev, categoria: undefined }) });
+      navigate({ to: "/catalogo", search: { categoria: undefined } });
     } else {
-      navigate({ search: (prev) => ({ ...prev, categoria: catSlug }) });
+      navigate({ to: "/catalogo", search: { categoria: catSlug } });
     }
   };
 
