@@ -1,5 +1,6 @@
-import { useState, useMemo } from "react";
-import { createFileRoute } from "@tanstack/react-router";
+import { useMemo } from "react";
+import { createFileRoute, useNavigate } from "@tanstack/react-router";
+import { z } from "zod";
 import { Header } from "@/components/site/Header";
 import { Footer } from "@/components/site/Footer";
 import { Button } from "@/components/ui/button";
@@ -7,7 +8,12 @@ import { cn } from "@/lib/utils";
 import { MessageCircle } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 
+const catalogoSearchSchema = z.object({
+  categoria: z.string().optional(),
+});
+
 export const Route = createFileRoute("/catalogo")({
+  validateSearch: catalogoSearchSchema,
   component: CatalogoPage,
 });
 
@@ -98,12 +104,39 @@ const PRODUCTS: Product[] = [
 ];
 
 function CatalogoPage() {
-  const [selectedCategory, setSelectedCategory] = useState("Todos");
+  const { categoria } = Route.useSearch();
+  const navigate = useNavigate({ from: "/catalogo" });
+
+  const slugToCategory: Record<string, string> = {
+    "canecas": "Canecas",
+    "camisetas": "Camisetas",
+    "copos-e-garrafas": "Copos e Garrafas",
+    "tacas": "Taças",
+    "chaveiros": "Chaveiros",
+    "agendas-e-blocos": "Agendas e Blocos",
+    "azulejo-e-relogio": "Azulejo e Relógio",
+    "almofadas-e-toalhas": "Almofada e Toalhas",
+    "outros": "Outros",
+  };
+
+  const categoryToSlug: Record<string, string> = Object.fromEntries(
+    Object.entries(slugToCategory).map(([k, v]) => [v, k])
+  );
+
+  const activeCategory = (categoria && slugToCategory[categoria]) || "Todos";
 
   const filteredProducts = useMemo(() => {
-    if (selectedCategory === "Todos") return PRODUCTS;
-    return PRODUCTS.filter((p) => p.category === selectedCategory);
-  }, [selectedCategory]);
+    if (activeCategory === "Todos") return PRODUCTS;
+    return PRODUCTS.filter((p) => p.category === activeCategory);
+  }, [activeCategory]);
+
+  const handleCategoryClick = (cat: string) => {
+    if (cat === "Todos") {
+      navigate({ search: {} });
+    } else {
+      navigate({ search: { categoria: categoryToSlug[cat] } });
+    }
+  };
 
   const handleWhatsApp = (productName: string, price: string) => {
     const text = `Olá! Vi o catálogo do site e tenho interesse em:\n\n🛍️ Produto: ${productName}\n💰 Valor: R$ ${price}\n\nPode me contar mais sobre prazo, arte e formas de pagamento?`;
@@ -129,10 +162,10 @@ function CatalogoPage() {
               {CATEGORIES.map((cat) => (
                 <button
                   key={cat}
-                  onClick={() => setSelectedCategory(cat === selectedCategory && cat !== "Todos" ? "Todos" : cat)}
+                  onClick={() => handleCategoryClick(cat)}
                   className={cn(
                     "px-5 py-2.5 rounded-full text-sm font-medium transition-all border shrink-0",
-                    selectedCategory === cat
+                    activeCategory === cat
                       ? "bg-brand-gold text-brand-cream border-brand-gold shadow-sm"
                       : "bg-transparent border-border text-muted-foreground hover:border-brand-gold hover:text-brand-gold"
                   )}
