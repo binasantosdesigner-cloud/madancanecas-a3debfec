@@ -107,6 +107,117 @@ function CartPage() {
     setShowPix(true);
   };
 
+  if (showPix) {
+    return (
+      <div className="min-h-screen flex flex-col">
+        <Header />
+        <main className="flex-1 mx-auto max-w-lg px-6 py-12 w-full text-center">
+          <div className="rounded-2xl border border-border bg-background p-8 space-y-6">
+            <div className="mx-auto size-16 rounded-full bg-green-100 flex items-center justify-center">
+              <CheckCircle2 className="size-8 text-green-600" />
+            </div>
+
+            <div>
+              <h1 className="font-serif text-2xl">Pedido realizado!</h1>
+              <p className="mt-2 text-sm text-muted-foreground">
+                Para confirmar, pague o sinal de <strong>{Math.round(pixPercent * 100)}%</strong> via PIX agora.
+              </p>
+            </div>
+
+            <div className="rounded-xl bg-accent/10 p-4">
+              <p className="text-sm text-muted-foreground">Valor do sinal ({Math.round(pixPercent * 100)}%)</p>
+              <p className="text-3xl font-bold text-accent mt-1">{brl(amountDue)}</p>
+              <p className="text-xs text-muted-foreground mt-1">Total do pedido: {brl(total)}</p>
+            </div>
+
+            <div className="flex flex-col items-center gap-3">
+              <p className="text-sm font-medium">Escaneie o QR Code:</p>
+              <img
+                src={`https://api.qrserver.com/v1/create-qr-code/?size=200x200&data=${encodeURIComponent(
+                  buildPixPayload({
+                    key: pixSettings?.pix_key ?? '46960905000104',
+                    keyType: pixSettings?.pix_key_type ?? 'cnpj',
+                    name: pixSettings?.pix_beneficiary ?? 'ELMADAN QUEIROZ SILVEIRA BENITES',
+                    city: pixSettings?.pix_city ?? 'Rondonopolis',
+                    amount: amountDue,
+                    txid: orderId?.replace(/-/g, '').slice(0, 25) ?? 'MADAN',
+                  })
+                )}`}
+                alt="QR Code PIX"
+                className="rounded-xl border border-border"
+                width={200}
+                height={200}
+              />
+            </div>
+
+            <div className="space-y-2">
+              <p className="text-sm font-medium">Ou copie o código PIX:</p>
+              <div className="flex gap-2">
+                <input
+                  readOnly
+                  value={buildPixPayload({
+                    key: pixSettings?.pix_key ?? '46960905000104',
+                    keyType: pixSettings?.pix_key_type ?? 'cnpj',
+                    name: pixSettings?.pix_beneficiary ?? 'ELMADAN QUEIROZ SILVEIRA BENITES',
+                    city: pixSettings?.pix_city ?? 'Rondonopolis',
+                    amount: amountDue,
+                    txid: orderId?.replace(/-/g, '').slice(0, 25) ?? 'MADAN',
+                  })}
+                  className="flex-1 text-xs font-mono rounded-lg border border-border bg-secondary px-3 py-2 truncate"
+                />
+                <Button
+                  size="sm"
+                  variant="outline"
+                  onClick={() => {
+                    navigator.clipboard.writeText(buildPixPayload({
+                      key: pixSettings?.pix_key ?? '46960905000104',
+                      keyType: pixSettings?.pix_key_type ?? 'cnpj',
+                      name: pixSettings?.pix_beneficiary ?? 'ELMADAN QUEIROZ SILVEIRA BENITES',
+                      city: pixSettings?.pix_city ?? 'Rondonopolis',
+                      amount: amountDue,
+                      txid: orderId?.replace(/-/g, '').slice(0, 25) ?? 'MADAN',
+                    }));
+                    toast.success('Código copiado!');
+                  }}
+                >
+                  <Copy className="size-4" />
+                </Button>
+              </div>
+            </div>
+
+            <p className="text-xs text-muted-foreground">
+              Após o pagamento, nossa equipe confirmará e iniciará a produção.
+              Você receberá uma notificação pelo WhatsApp.
+            </p>
+
+            <div className="space-y-3">
+              <a
+                href={`https://wa.me/${pixSettings?.whatsapp_number ?? '5566984266994'}?text=${encodeURIComponent(
+                  `Olá! Acabei de fazer o pedido #${orderId?.slice(0, 8)} no site e realizei o pagamento do PIX de R$ ${amountDue.toFixed(2).replace('.', ',')}. Pode confirmar?`
+                )}`}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="flex items-center justify-center gap-2 w-full rounded-full bg-[#25d366] text-white py-3 text-sm font-medium hover:opacity-90 transition-opacity"
+                onClick={() => { clear(); }}
+              >
+                <MessageCircle className="size-4" />
+                Confirmar pagamento pelo WhatsApp
+              </a>
+              <Button
+                variant="ghost"
+                className="w-full text-sm"
+                onClick={() => { clear(); navigate({ to: '/conta' }); }}
+              >
+                Ver meus pedidos
+              </Button>
+            </div>
+          </div>
+        </main>
+        <Footer />
+      </div>
+    );
+  }
+
   if (items.length === 0) {
     return (
       <div className="min-h-screen flex flex-col">
@@ -179,11 +290,10 @@ function CartPage() {
             <div className="border-t border-border pt-4 flex justify-between font-semibold">
               <span>Total</span><span>{brl(total)}</span>
             </div>
-            <Button onClick={handleCheckout} disabled={loading} size="lg" className="w-full rounded-full bg-whatsapp hover:bg-whatsapp/90 text-white">
-              <MessageCircle className="mr-2 size-4" />
-              {loading ? "Processando..." : "Finalizar no WhatsApp"}
+            <Button onClick={handleCheckout} disabled={loading} size="lg" className="w-full rounded-full bg-primary hover:bg-primary/90 text-white">
+              {loading ? "Processando..." : "Pagar Sinal via PIX"}
             </Button>
-            <p className="text-[11px] text-muted-foreground text-center">Você será redirecionado para conversar com nossa equipe.</p>
+            <p className="text-[11px] text-muted-foreground text-center">Você verá os dados do PIX para o pagamento do sinal.</p>
           </aside>
         </div>
       </main>
