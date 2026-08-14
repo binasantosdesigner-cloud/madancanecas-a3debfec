@@ -200,11 +200,18 @@ function AdminProducts() {
   const [filterCategory, setFilterCategory] = useState("all");
   const [filterFeatured, setFilterFeatured] = useState(false);
   const [page, setPage] = useState(1);
+  const [sortBy, setSortBy] = useState<'title' | 'category' | 'price' | 'favorites'>('title');
+  const [sortDir, setSortDir] = useState<'asc' | 'desc'>('asc');
   const ITEMS_PER_PAGE = 20;
+
+  const handleSort = (col: typeof sortBy) => {
+    if (sortBy === col) setSortDir(d => d === 'asc' ? 'desc' : 'asc');
+    else { setSortBy(col); setSortDir('asc'); }
+  };
 
   useEffect(() => {
     setPage(1);
-  }, [search, filterKind, filterCategory, filterFeatured]);
+  }, [search, filterKind, filterCategory, filterFeatured, sortBy, sortDir]);
 
   const filtered = (products ?? []).filter((p: any) => {
     const matchSearch = !search || p.title.toLowerCase().includes(search.toLowerCase());
