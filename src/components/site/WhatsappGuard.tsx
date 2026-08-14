@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useCallback } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/lib/auth";
 import { WhatsappRequiredModal } from "@/components/site/WhatsappRequiredModal";
@@ -6,24 +6,32 @@ import { WhatsappRequiredModal } from "@/components/site/WhatsappRequiredModal";
 export function WhatsappGuard({ children }: { children: React.ReactNode }) {
   const { user, profile, loading } = useAuth();
   const [showModal, setShowModal] = useState(false);
+  const { user: authUser, profile: authProfile, loading: authLoading, fetchUserData } = useAuth();
 
   useEffect(() => {
-    if (!loading && user && profile && !profile.phone) {
+    if (!authLoading && authUser && authProfile && !authProfile.phone) {
       setShowModal(true);
     } else {
       setShowModal(false);
     }
-  }, [loading, user, profile]);
+  }, [authLoading, authUser, authProfile]);
 
-  if (loading) return null;
+  const handleSaved = useCallback(async () => {
+    if (authUser?.id && fetchUserData) {
+      await fetchUserData(authUser.id);
+    }
+    setShowModal(false);
+  }, [authUser?.id, fetchUserData]);
+
+  if (authLoading) return null;
 
   return (
     <>
       {children}
-      {showModal && user && (
+      {showModal && authUser && (
         <WhatsappRequiredModal 
-          userId={user.id} 
-          onSaved={() => setShowModal(false)} 
+          userId={authUser.id} 
+          onSaved={handleSaved} 
         />
       )}
     </>

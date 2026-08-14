@@ -9,6 +9,7 @@ interface AuthCtx {
   roleLoading: boolean;
   isAdmin: boolean;
   profile: any;
+  fetchUserData: (userId: string) => Promise<void>;
   signOut: () => Promise<void>;
 }
 
@@ -24,7 +25,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   useEffect(() => {
     let mounted = true;
 
-    const fetchUserData = (userId: string) => {
+    const fetchUserData = async (userId: string) => {
       setRoleLoading(true);
       setTimeout(async () => {
         const [roleRes, profileRes] = await Promise.all([
@@ -86,6 +87,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       roleLoading,
       isAdmin,
       profile,
+      fetchUserData,
       signOut: async () => { await supabase.auth.signOut(); },
     }}>
       {children}
