@@ -37,7 +37,9 @@ function AdminSettings() {
       
       const map: Record<string, string> = {};
       data?.forEach(item => {
-        map[item.key] = item.value;
+        if (item.key) {
+          map[item.key] = item.value || "";
+        }
       });
       return map;
     },
