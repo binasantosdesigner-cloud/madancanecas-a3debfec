@@ -18,7 +18,7 @@ export const Route = createFileRoute("/catalogo")({
 });
 function CatalogoPage() {
     const { categoria } = Route.useSearch();
-    const navigate = useNavigate({ from: "/catalogo" });
+    const navigate = useNavigate();
     useEffect(() => {
         window.scrollTo(0, 0);
     }, []);
@@ -50,7 +50,7 @@ function CatalogoPage() {
     const activeCategory = useMemo(() => {
         if (!categoria)
             return "Todos";
-        const found = categories.find(c => c.slug === categoria);
+        const found = categories.find((c) => c.slug === categoria);
         return found ? found.name : "Todos";
     }, [categoria, categories]);
     const filteredProducts = useMemo(() => {
@@ -60,10 +60,10 @@ function CatalogoPage() {
     }, [activeCategory, products]);
     const handleCategoryClick = (catSlug) => {
         if (catSlug === "Todos") {
-            navigate({ search: {} });
+            navigate({ to: "/catalogo", search: { categoria: undefined } });
         }
         else {
-            navigate({ search: { categoria: catSlug } });
+            navigate({ to: "/catalogo", search: { categoria: catSlug } });
         }
     };
     const handleWhatsApp = (productName, price) => {
