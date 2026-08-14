@@ -100,6 +100,19 @@ function ProdutoPage() {
     },
   });
 
+  const { data: upsells = [] } = useQuery({
+    enabled: !!product?.id,
+    queryKey: ['upsells', product?.id],
+    queryFn: async () => {
+      const { data } = await supabase
+        .from('product_upsells')
+        .select('upsell_product_id, display_order, products!product_upsells_upsell_product_id_fkey(id, title, slug, price, image_url, kind)')
+        .eq('product_id', product!.id)
+        .order('display_order', { ascending: true });
+      return (data ?? []).map((u: any) => u.products).filter(Boolean);
+    },
+  });
+
   const handleAdd = () => {
     if (!product) return;
     add({
