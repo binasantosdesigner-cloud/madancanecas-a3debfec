@@ -1,6 +1,6 @@
 import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
 import { useQuery } from "@tanstack/react-query";
-import { useState } from "react";
+import { useState, useMemo } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { Header } from "@/components/site/Header";
 import { Footer } from "@/components/site/Footer";
@@ -10,7 +10,7 @@ import { useCart } from "@/lib/cart";
 import { FavoriteButton } from "@/components/site/FavoriteButton";
 import { brl } from "@/lib/format";
 import { toast } from "sonner";
-import { Minus, Plus, ShoppingCart, MessageCircle, ArrowLeft } from "lucide-react";
+import { Minus, Plus, ShoppingCart, MessageCircle, ArrowLeft, ZoomIn, X, ChevronLeft, ChevronRight } from "lucide-react";
 
 export const Route = createFileRoute("/produto/$slug")({ component: ProdutoPage });
 
@@ -85,6 +85,8 @@ function ProdutoPage() {
   const { add } = useCart();
   const [qty, setQty] = useState(1);
   const [obs, setObs] = useState("");
+  const [activeImg, setActiveImg] = useState(0);
+  const [lightboxOpen, setLightboxOpen] = useState(false);
 
   const { data: product, isLoading } = useQuery({
     queryKey: ["product", slug],
@@ -112,6 +114,14 @@ function ProdutoPage() {
       return (data ?? []).map((u: any) => u.products).filter(Boolean);
     },
   });
+
+  const productImages = useMemo(() => {
+    if (!product) return [];
+    const imgs = (product.images as any[]) ?? [];
+    if (imgs.length > 0) return imgs.map((i: any) => i.url);
+    if (product.image_url) return [product.image_url];
+    return [];
+  }, [product]);
 
   const handleAdd = () => {
     if (!product) return;
@@ -341,6 +351,69 @@ function ProdutoPage() {
           </section>
         )}
       </main>
+
+      {/* Lightbox Modal */}
+      {lightboxOpen && productImages.length > 0 && (
+        <div
+          className="fixed inset-0 z-[9999] bg-black/90 flex items-center justify-center p-4"
+          onClick={() => setLightboxOpen(false)}
+        >
+          {/* Close button */}
+          <button
+            className="absolute top-4 right-4 size-10 rounded-full bg-white/10 text-white flex items-center justify-center hover:bg-white/20 transition-colors"
+            onClick={() => setLightboxOpen(false)}
+          >
+            <X className="size-5" />
+          </button>
+
+          {/* Prev */}
+          {productImages.length > 1 && (
+            <button
+              className="absolute left-4 top-1/2 -translate-y-1/2 size-10 rounded-full bg-white/10 text-white flex items-center justify-center hover:bg-white/20 transition-colors"
+              onClick={(e) => { e.stopPropagation(); setActiveImg(i => (i - 1 + productImages.length) % productImages.length); }}
+            >
+              <ChevronLeft className="size-5" />
+            </button>
+          )}
+
+          {/* Main image */}
+          <img
+            src={productImages[activeImg]}
+            alt=""
+            className="max-w-full max-h-full object-contain rounded-xl"
+            onClick={(e) => e.stopPropagation()}
+          />
+
+          {/* Next */}
+          {productImages.length > 1 && (
+            <button
+              className="absolute right-4 top-1/2 -translate-y-1/2 size-10 rounded-full bg-white/10 text-white flex items-center justify-center hover:bg-white/20 transition-colors"
+              onClick={(e) => { e.stopPropagation(); setActiveImg(i => (i + 1) % productImages.length); }}
+            >
+              <ChevronRight className="size-5" />
+            </button>
+          )}
+
+          {/* Dot indicators */}
+          {productImages.length > 1 && (
+            <div className="absolute bottom-4 left-1/2 -translate-x-1/2 flex gap-2">
+              {productImages.map((_, idx) => (
+                <button
+                  key={idx}
+                  onClick={(e) => { e.stopPropagation(); setActiveImg(idx); }}
+                  className={`size-2 rounded-full transition-all ${activeImg === idx ? 'bg-white w-4' : 'bg-white/40'}`}
+                />
+              ))}
+            </div>
+          )}
+
+          {/* Counter */}
+          <span className="absolute top-4 left-1/2 -translate-x-1/2 text-white/60 text-sm">
+            {activeImg + 1} / {productImages.length}
+          </span>
+        </div>
+      )}
+
       <Footer />
     </div>
   );
