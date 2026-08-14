@@ -14,6 +14,71 @@ import { Minus, Plus, ShoppingCart, MessageCircle, ArrowLeft } from "lucide-reac
 
 export const Route = createFileRoute("/produto/$slug")({ component: ProdutoPage });
 
+function UpsellCard({ product: p }: { product: any }) {
+  const { add } = useCart();
+  const [added, setAdded] = useState(false);
+
+  const handleAdd = () => {
+    add({
+      id: p.id,
+      productId: p.id,
+      title: p.title,
+      price: Number(p.price),
+      quantity: 1,
+      image: p.image_url,
+    });
+    setAdded(true);
+    toast.success(`${p.title} adicionado! 🛍️`);
+    setTimeout(() => setAdded(false), 2000);
+  };
+
+  return (
+    <div className="group flex flex-col rounded-2xl border border-border bg-background overflow-hidden hover:border-[#e8509a]/40 hover:shadow-md transition-all duration-300">
+      {/* Imagem */}
+      <Link
+        to="/produto/$slug"
+        params={{ slug: p.slug }}
+        className="block aspect-square bg-secondary overflow-hidden"
+      >
+        {p.image_url ? (
+          <img
+            src={p.image_url}
+            alt={p.title}
+            className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
+          />
+        ) : (
+          <div className="w-full h-full flex items-center justify-center text-[10px] uppercase tracking-widest text-muted-foreground/30">
+            Madan
+          </div>
+        )}
+      </Link>
+
+      {/* Info */}
+      <div className="p-3 flex flex-col gap-2 flex-1">
+        <Link
+          to="/produto/$slug"
+          params={{ slug: p.slug }}
+          className="text-sm font-medium leading-tight hover:text-[#e8509a] transition-colors line-clamp-2"
+        >
+          {p.title}
+        </Link>
+        <p className="text-sm font-semibold text-[#e8509a]">{brl(Number(p.price))}</p>
+
+        <button
+          onClick={handleAdd}
+          className={`mt-auto w-full rounded-full py-2 text-xs font-medium transition-all ${
+            added
+              ? 'bg-green-500 text-white'
+              : 'bg-[#e8509a] text-white hover:bg-[#d4458c]'
+          }`}
+        >
+          {added ? '✓ Adicionado!' : '+ Adicionar'}
+        </button>
+      </div>
+    </div>
+  );
+}
+
 function ProdutoPage() {
   const { slug } = Route.useParams();
   const navigate = useNavigate();
@@ -32,6 +97,19 @@ function ProdutoPage() {
 
       if (error) throw error;
       return data;
+    },
+  });
+
+  const { data: upsells = [] } = useQuery({
+    enabled: !!product?.id,
+    queryKey: ['upsells', product?.id],
+    queryFn: async () => {
+      const { data } = await supabase
+        .from('product_upsells')
+        .select('upsell_product_id, display_order, products!product_upsells_upsell_product_id_fkey(id, title, slug, price, image_url, kind)')
+        .eq('product_id', product!.id)
+        .order('display_order', { ascending: true });
+      return (data ?? []).map((u: any) => u.products).filter(Boolean);
     },
   });
 
@@ -236,6 +314,32 @@ function ProdutoPage() {
 
           </div>
         </div>
+
+        {/* SEÇÃO UPSELL */}
+        {upsells.length > 0 && (
+          <section className="mt-16 pt-12 border-t border-border">
+            <div className="text-center mb-8">
+              <span className="inline-block text-xs font-bold uppercase tracking-[0.2em] text-[#a57840] bg-[#a57840]/10 px-3 py-1 rounded-full mb-3">
+                Complete seu presente
+              </span>
+              <h2 className="font-serif text-2xl">Que tal adicionar também?</h2>
+              <p className="text-sm text-muted-foreground mt-1">
+                Produtos que combinam muito bem com {product?.title}
+              </p>
+            </div>
+
+            <div className={`grid gap-6 ${
+              upsells.length === 1 ? 'grid-cols-1 max-w-xs mx-auto' :
+              upsells.length === 2 ? 'grid-cols-2 max-w-lg mx-auto' :
+              upsells.length === 3 ? 'grid-cols-3' :
+              'grid-cols-2 md:grid-cols-4'
+            }`}>
+              {upsells.map((up: any) => (
+                <UpsellCard key={up.id} product={up} />
+              ))}
+            </div>
+          </section>
+        )}
       </main>
       <Footer />
     </div>
