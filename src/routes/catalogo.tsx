@@ -1,12 +1,14 @@
 import { useMemo, useEffect } from "react";
 import { createFileRoute, useNavigate, Link } from "@tanstack/react-router";
+import { useQuery } from "@tanstack/react-query";
 import { z } from "zod";
 import { Header } from "@/components/site/Header";
 import { Footer } from "@/components/site/Footer";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
-import { MessageCircle } from "lucide-react";
+import { MessageCircle, Loader2 } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
+import { supabase } from "@/integrations/supabase/client";
 
 const catalogoSearchSchema = z.object({
   categoria: z.string().optional(),
@@ -17,92 +19,6 @@ export const Route = createFileRoute("/catalogo")({
   component: CatalogoPage,
 });
 
-type Product = {
-  name: string;
-  price: string;
-  category: string;
-};
-
-const CATEGORIES = [
-  "Todos",
-  "Canecas",
-  "Camisetas",
-  "Copos e Garrafas",
-  "Taças",
-  "Chaveiros",
-  "Agendas e Blocos",
-  "Azulejo e Relógio",
-  "Almofada e Toalhas",
-  "Outros",
-];
-
-const PRODUCTS: Product[] = [
-  // Canecas
-  { name: "Caneca Polímero", price: "35,00", category: "Canecas" },
-  { name: "Caneca Branca Porcelana", price: "35,00", category: "Canecas" },
-  { name: "Caneca Colorida", price: "45,00", category: "Canecas" },
-  { name: "Caneca Colorida Coração", price: "49,90", category: "Canecas" },
-  { name: "Caneca Preta", price: "49,00", category: "Canecas" },
-  { name: "Caneca Mágica", price: "55,00", category: "Canecas" },
-  { name: "Caneca com Colher", price: "55,00", category: "Canecas" },
-  { name: "Caneca Mármore", price: "55,00", category: "Canecas" },
-  { name: "Caneca com Glitter", price: "54,90", category: "Canecas" },
-  { name: "Caneca de Porcelana Neon Rosa", price: "55,00", category: "Canecas" },
-  { name: "Caneca de Chopp — Vidro", price: "68,00", category: "Canecas" },
-  { name: "Caneca de Chopp — Alumínio", price: "32,00", category: "Canecas" },
-  { name: "Caneca de Chopp — Acrílico", price: "12,50", category: "Canecas" },
-  { name: "Torre de Xícaras (2 un.)", price: "88,00", category: "Canecas" },
-  { name: "Torre de Xícaras (4 un.)", price: "149,00", category: "Canecas" },
-  // Camisetas
-  { name: "Camiseta Adulto Unissex", price: "45,00", category: "Camisetas" },
-  { name: "Camiseta Infantil", price: "40,00", category: "Camisetas" },
-  { name: "Baby Look", price: "45,00", category: "Camisetas" },
-  // Copos e Garrafas
-  { name: "Copo Long Drink", price: "8,00", category: "Copos e Garrafas" },
-  { name: "Copo Térmico Inox", price: "75,00", category: "Copos e Garrafas" },
-  { name: "Squeeze Inox 500ml", price: "85,00", category: "Copos e Garrafas" },
-  { name: "Squeeze de Alumínio", price: "65,00", category: "Copos e Garrafas" },
-  { name: "Garrafa Aquaplus", price: "18,90", category: "Copos e Garrafas" },
-  { name: "Garrafa Acqua Bio", price: "22,00", category: "Copos e Garrafas" },
-  { name: "Garrafa Térmica Inox", price: "80,00", category: "Copos e Garrafas" },
-  // Taças
-  { name: "Taça Gin Colorida", price: "14,50", category: "Taças" },
-  // Chaveiros
-  { name: "Chaveiro Acrílico", price: "7,00", category: "Chaveiros" },
-  { name: "Chaveiro Acrílico Coração", price: "7,00", category: "Chaveiros" },
-  { name: "Chaveiro Button Redondo", price: "7,50", category: "Chaveiros" },
-  { name: "Chaveiro Polímero Retangular", price: "7,00", category: "Chaveiros" },
-  { name: "Chaveiro de Metal", price: "17,00", category: "Chaveiros" },
-  // Agendas e Blocos
-  { name: "Agenda Capa Pet", price: "45,00", category: "Agendas e Blocos" },
-  { name: "Agenda Coração", price: "45,00", category: "Agendas e Blocos" },
-  { name: "Caderno Personalizado", price: "45,00", category: "Agendas e Blocos" },
-  { name: "Bloco de Anotação", price: "17,00", category: "Agendas e Blocos" },
-  { name: "Bloco de Notas com Post-it", price: "17,00", category: "Agendas e Blocos" },
-  // Azulejo e Relógio
-  { name: "Azulejo 20x20", price: "40,00", category: "Azulejo e Relógio" },
-  { name: "Azulejo 20x30", price: "40,00", category: "Azulejo e Relógio" },
-  { name: "Relógio Quadrado MDF 20x20", price: "45,00", category: "Azulejo e Relógio" },
-  // Almofada e Toalhas
-  { name: "Toalha Lavabinho 21x38cm", price: "15,00", category: "Almofada e Toalhas" },
-  { name: "Toalha Lavabinho 21x40cm", price: "12,00", category: "Almofada e Toalhas" },
-  { name: "Toalha Lavabo 29x45cm", price: "20,00", category: "Almofada e Toalhas" },
-  { name: "Toalha Aveludada 30x50cm", price: "22,00", category: "Almofada e Toalhas" },
-  { name: "Toalha de Rosto 45x70cm", price: "28,00", category: "Almofada e Toalhas" },
-  { name: "Toalha de Rosto 50x70cm", price: "39,90", category: "Almofada e Toalhas" },
-  { name: "Toalha Fitness 27x80cm", price: "28,00", category: "Almofada e Toalhas" },
-  // Outros
-  { name: "Mousepad", price: "15,00", category: "Outros" },
-  { name: "Ecobag", price: "30,00", category: "Outros" },
-  { name: "Caneta", price: "3,50", category: "Outros" },
-  { name: "Azulejo Decorativo", price: "40,00", category: "Outros" },
-  { name: "Placa Decorativa", price: "25,00", category: "Outros" },
-  { name: "Body Infantil", price: "40,00", category: "Outros" },
-  { name: "Naninha com Bichinho", price: "35,00", category: "Outros" },
-  { name: "Caixa MDF 25x25x10cm", price: "35,00", category: "Outros" },
-  { name: "Papel de Arroz", price: "7,00", category: "Outros" },
-];
-
 function CatalogoPage() {
   const { categoria } = Route.useSearch();
   const navigate = useNavigate({ from: "/catalogo" });
@@ -111,39 +27,53 @@ function CatalogoPage() {
     window.scrollTo(0, 0);
   }, []);
 
-  const slugToCategory: Record<string, string> = {
-    "canecas": "Canecas",
-    "camisetas": "Camisetas",
-    "copos-e-garrafas": "Copos e Garrafas",
-    "tacas": "Taças",
-    "chaveiros": "Chaveiros",
-    "agendas-e-blocos": "Agendas e Blocos",
-    "azulejo-e-relogio": "Azulejo e Relógio",
-    "almofadas-e-toalhas": "Almofada e Toalhas",
-    "outros": "Outros",
-  };
+  const { data: categories = [], isLoading: loadingCategories } = useQuery({
+    queryKey: ["categories"],
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from("categories")
+        .select("*")
+        .order("display_order", { ascending: true });
+      if (error) throw error;
+      return data;
+    },
+  });
 
-  const categoryToSlug: Record<string, string> = Object.fromEntries(
-    Object.entries(slugToCategory).map(([k, v]) => [v, k])
-  );
+  const { data: products = [], isLoading: loadingProducts } = useQuery({
+    queryKey: ["products"],
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from("products")
+        .select("*, categories(name, slug)")
+        .eq("active", true)
+        .order("created_at", { ascending: false });
+      if (error) throw error;
+      return data;
+    },
+  });
 
-  const activeCategory = (categoria && slugToCategory[categoria]) || "Todos";
+  const activeCategory = useMemo(() => {
+    if (!categoria) return "Todos";
+    const found = categories.find(c => c.slug === categoria);
+    return found ? found.name : "Todos";
+  }, [categoria, categories]);
 
   const filteredProducts = useMemo(() => {
-    if (activeCategory === "Todos") return PRODUCTS;
-    return PRODUCTS.filter((p) => p.category === activeCategory);
-  }, [activeCategory]);
+    if (activeCategory === "Todos") return products;
+    return products.filter((p: any) => p.categories?.name === activeCategory);
+  }, [activeCategory, products]);
 
-  const handleCategoryClick = (cat: string) => {
-    if (cat === "Todos") {
+  const handleCategoryClick = (catSlug: string) => {
+    if (catSlug === "Todos") {
       navigate({ search: {} });
     } else {
-      navigate({ search: { categoria: categoryToSlug[cat] } });
+      navigate({ search: { categoria: catSlug } });
     }
   };
 
-  const handleWhatsApp = (productName: string, price: string) => {
-    const text = `Olá! Vi o catálogo do site e tenho interesse em:\n\n🛍️ Produto: ${productName}\n💰 Valor: R$ ${price}\n\nPode me contar mais sobre prazo, arte e formas de pagamento?`;
+  const handleWhatsApp = (productName: string, price: number) => {
+    const formattedPrice = new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL' }).format(price);
+    const text = `Olá! Vi o catálogo do site e tenho interesse em:\n\n🛍️ Produto: ${productName}\n💰 Valor: ${formattedPrice}\n\nPode me contar mais sobre prazo, arte e formas de pagamento?`;
     window.open(`https://wa.me/5566984266994?text=${encodeURIComponent(text)}`, "_blank");
   };
 
