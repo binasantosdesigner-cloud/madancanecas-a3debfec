@@ -321,10 +321,18 @@ function AdminUsersPage() {
                   <tr key={p.id} className="border-t border-border hover:bg-muted/30 transition-colors">
                     <td className="px-4 py-3">
                       <div className="flex items-center gap-3">
-                        <div className="h-10 w-10 rounded-full bg-[#fce8f3] text-[#e8509a] flex items-center justify-center font-bold text-xs overflow-hidden border border-[#e8509a]/20">
+                        <div className="size-9 rounded-full bg-[#fce8f3] text-[#e8509a] text-sm font-semibold flex items-center justify-center overflow-hidden border border-[#e8509a]/20">
                           {p.avatar_url ? (
-                            <img src={p.avatar_url} alt={p.full_name || ""} className="h-full w-full object-cover" />
-                          ) : getInitials(p.full_name)}
+                            <img 
+                              src={p.avatar_url} 
+                              alt={p.full_name || ""} 
+                              className="h-full w-full object-cover" 
+                              onError={(e) => {
+                                (e.target as HTMLImageElement).style.display = 'none';
+                                (e.target as HTMLImageElement).parentElement!.innerHTML = getInitials(p.full_name, p.email);
+                              }}
+                            />
+                          ) : getInitials(p.full_name, p.email)}
                         </div>
                         <span className="font-medium text-foreground">{p.full_name || "—"}</span>
                       </div>
