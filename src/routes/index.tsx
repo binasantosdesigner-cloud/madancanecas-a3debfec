@@ -11,19 +11,6 @@ import { ProductCard, type ProductCardData } from "@/components/site/ProductCard
 import { Button } from "@/components/ui/button";
 import heroImg from "@/assets/hero-mug.jpg";
 import corpImg from "@/assets/corporate-banner.jpg";
-import catCanecas from "@/assets/cat-canecas.jpg";
-import catCamisetas from "@/assets/cat-camisetas.jpg";
-import catCopos from "@/assets/cat-copos.jpg";
-import catCanetas from "@/assets/cat-canetas.jpg";
-
-export const Route = createFileRoute("/")({ component: HomePage });
-
-const cats = [
-  { slug: "canecas", name: "Canecas", img: catCanecas },
-  { slug: "camisetas", name: "Camisetas", img: catCamisetas },
-  { slug: "copos", name: "Copos", img: catCopos },
-  { slug: "canetas", name: "Canetas", img: catCanetas },
-];
 
 const WPP = (msg: string) => `https://wa.me/5566984266994?text=${encodeURIComponent(msg)}`;
 
