@@ -1,6 +1,6 @@
 import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
 import { useQuery } from "@tanstack/react-query";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Trash2, MessageCircle, CheckCircle2, Copy } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { useCart } from "@/lib/cart";
@@ -59,6 +59,28 @@ function CartPage() {
   const [loading, setLoading] = useState(false);
   const [showPix, setShowPix] = useState(false);
   const [orderId, setOrderId] = useState<string | null>(null);
+  
+  useEffect(() => {
+    if (!user) return;
+    supabase
+      .from('profiles')
+      .select('full_name, phone')
+      .eq('id', user.id)
+      .maybeSingle()
+      .then(({ data }) => {
+        if (!data) return;
+        if (data.full_name && !name) setName(data.full_name);
+        if (data.phone && !phone) {
+          // Format phone as (xx) x xxxx-xxxx
+          const d = data.phone.replace(/\D/g, '').slice(0, 11);
+          let formatted = d;
+          if (d.length > 10) formatted = `(${d.slice(0,2)}) ${d.slice(2,3)} ${d.slice(3,7)}-${d.slice(7)}`;
+          else if (d.length > 6) formatted = `(${d.slice(0,2)}) ${d.slice(2,6)}-${d.slice(6)}`;
+          else if (d.length > 2) formatted = `(${d.slice(0,2)}) ${d.slice(2)}`;
+          setPhone(formatted);
+        }
+      });
+  }, [user]);
 
   const { data: pixSettings } = useQuery({
     queryKey: ['pix_settings'],
