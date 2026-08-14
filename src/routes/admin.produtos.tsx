@@ -97,7 +97,6 @@ function AdminProducts() {
   };
 
   const del = async (id: string) => {
-    if (!confirm("Excluir produto?")) return;
     const { error } = await supabase.from("products").delete().eq("id", id);
     if (error) toast.error(error.message);
     else { toast.success("Excluído"); qc.invalidateQueries({ queryKey: ["admin-products"] }); }
