@@ -15,6 +15,37 @@ import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import { brl } from "@/lib/format";
 import { toast } from "sonner";
 
+function buildPixPayload({
+  key, keyType, name, city, amount, txid,
+}: {
+  key: string; keyType: string; name: string;
+  city: string; amount: number; txid: string;
+}): string {
+  const fmt = (id: string, val: string) => {
+    const len = val.length.toString().padStart(2, '0');
+    return `${id}${len}${val}`;
+  };
+  const merchantAccountInfo = fmt('00', 'BR.GOV.BCB.PIX') + fmt('01', key);
+  const payload = [
+    fmt('00', '01'),
+    fmt('26', merchantAccountInfo),
+    fmt('52', '0000'),
+    fmt('53', '986'),
+    fmt('54', amount.toFixed(2)),
+    fmt('58', 'BR'),
+    fmt('59', name.slice(0, 25).toUpperCase()),
+    fmt('60', city.slice(0, 15).toUpperCase()),
+    fmt('62', fmt('05', txid.slice(0, 25).replace(/\W/g, '').toUpperCase())),
+  ].join('');
+  const withCrc = payload + '6304';
+  let crc = 0xFFFF;
+  for (const c of withCrc) {
+    crc ^= c.charCodeAt(0) << 8;
+    for (let i = 0; i < 8; i++) crc = crc & 0x8000 ? (crc << 1) ^ 0x1021 : crc << 1;
+  }
+  return withCrc + (crc & 0xFFFF).toString(16).toUpperCase().padStart(4, '0');
+}
+
 export const Route = createFileRoute("/carrinho")({ component: CartPage });
 
 function CartPage() {
@@ -26,36 +57,54 @@ function CartPage() {
   const [delivery, setDelivery] = useState("retirada");
   const [notes, setNotes] = useState("");
   const [loading, setLoading] = useState(false);
+  const [showPix, setShowPix] = useState(false);
+  const [orderId, setOrderId] = useState<string | null>(null);
 
-  const { data: settings } = useQuery({
-    queryKey: ["whatsapp_number"],
-    queryFn: async () => (await supabase.from("settings").select("value").eq("key", "whatsapp_number").maybeSingle()).data,
+  const { data: pixSettings } = useQuery({
+    queryKey: ['pix_settings'],
+    queryFn: async () => {
+      const { data } = await supabase
+        .from('settings')
+        .select('key, value')
+        .in('key', ['pix_key', 'pix_key_type', 'pix_beneficiary', 'pix_city', 'pix_percent_due', 'whatsapp_number']);
+      return Object.fromEntries((data ?? []).map(r => [r.key, r.value]));
+    },
   });
 
+  const pixPercent = Number(pixSettings?.pix_percent_due ?? 50) / 100;
+  const amountDue = Math.ceil(total * pixPercent * 100) / 100;
+
   const handleCheckout = async () => {
-    if (!user) { toast.error("Faça login para finalizar"); navigate({ to: "/login" }); return; }
-    if (!name.trim()) { toast.error("Informe seu nome"); return; }
+    if (!user) { toast.error('Faça login para finalizar'); navigate({ to: '/login' }); return; }
+    if (!name.trim()) { toast.error('Informe seu nome'); return; }
     if (items.length === 0) return;
 
     setLoading(true);
-    const { error } = await supabase.from("orders").insert({
-      user_id: user.id,
-      customer_name: name,
-      customer_phone: phone,
-      delivery_type: delivery,
-      notes,
-      items: items as any,
-      total,
-      status: "pending",
-    });
-    setLoading(false);
-    if (error) { toast.error("Erro ao salvar pedido: " + error.message); return; }
+    const txid = `MADAN${Date.now()}`;
 
-    const msg = buildWhatsAppMessage({ customerName: name, items, total, delivery: delivery === "retirada" ? "Retirada na loja" : "Entrega", notes });
-    const phoneNum = settings?.value || "5511999999999";
-    window.open(whatsappLink(phoneNum, msg), "_blank");
-    clear();
-    navigate({ to: "/conta" });
+    const { data: order, error } = await supabase
+      .from('orders')
+      .insert({
+        user_id: user.id,
+        customer_name: name,
+        customer_phone: phone,
+        delivery_type: delivery,
+        notes,
+        items: items as any,
+        total,
+        status: 'pending',
+        payment_status: 'pending',
+        amount_due: amountDue,
+        amount_paid: 0,
+      })
+      .select()
+      .single();
+
+    setLoading(false);
+    if (error || !order) { toast.error('Erro ao salvar pedido: ' + error?.message); return; }
+
+    setOrderId(order.id);
+    setShowPix(true);
   };
 
   if (items.length === 0) {
