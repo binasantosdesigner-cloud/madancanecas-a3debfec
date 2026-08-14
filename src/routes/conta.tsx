@@ -141,7 +141,7 @@ function AccountPage() {
             {section === "carrinho" && <PlaceholderLink to="/carrinho" title="Meu Carrinho" desc="Gerencie os itens que você adicionou para finalizar a compra." cta="Abrir carrinho" />}
             {section === "favoritos" && <ComingSoon title="Favoritos" desc="Em breve você poderá salvar produtos para comprar depois." />}
             {section === "projetos" && <ComingSoon title="Projetos Personalizados" desc="Acompanhe aprovações de arte e o histórico das suas personalizações." />}
-            {section === "pagamentos" && <ComingSoon title="Pagamentos" desc="Em breve: acompanhe pagamentos pendentes, recibos e histórico financeiro." />}
+            {section === "pagamentos" && <PagamentosSection onNavigate={setSection} />}
             {section === "notificacoes" && <ComingSoon title="Notificações" desc="Aqui aparecerão atualizações de pedidos, artes para aprovar e novidades." />}
             {section === "beneficios" && <ComingSoon title="Benefícios" desc="Programa de fidelidade Bronze, Prata e Ouro chegando em breve." />}
             {section === "config" && <ComingSoon title="Configurações" desc="Preferências de comunicação e exclusão de conta em breve." />}
