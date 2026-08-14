@@ -86,7 +86,7 @@ function AccountPage() {
                     : "bg-card border-border text-foreground/70 hover:border-accent/50"
                 }`}
               >
-                <m.icon className="h-4 w-4" />
+                {m.icon && <m.icon className="h-4 w-4" />}
                 {m.label}
               </button>
             ))}
