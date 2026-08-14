@@ -182,14 +182,19 @@ function AdminUsersPage() {
     return list;
   }, [profiles.data, search, roleFilter, rolesByUser]);
 
-  const getInitials = (name: string | null) => {
-    if (!name) return "??";
-    return name
-      .split(" ")
-      .map((n) => n[0])
-      .slice(0, 2)
-      .join("")
-      .toUpperCase();
+  const getInitials = (name: string | null, email: string | null = null) => {
+    if (name) {
+      return name
+        .split(" ")
+        .map((n) => n[0])
+        .slice(0, 2)
+        .join("")
+        .toUpperCase();
+    }
+    if (email) {
+      return email[0].toUpperCase();
+    }
+    return "??";
   };
 
   return (
