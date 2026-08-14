@@ -274,6 +274,8 @@ export type Database = {
       }
       orders: {
         Row: {
+          amount_due: number | null
+          amount_paid: number
           created_at: string
           customer_name: string
           customer_phone: string | null
@@ -281,12 +283,18 @@ export type Database = {
           id: string
           items: Json
           notes: string | null
+          paid_at: string | null
+          payment_confirmed_by: string | null
+          payment_notes: string | null
+          payment_status: string
           status: Database["public"]["Enums"]["order_status"]
           total: number
           updated_at: string
           user_id: string
         }
         Insert: {
+          amount_due?: number | null
+          amount_paid?: number
           created_at?: string
           customer_name: string
           customer_phone?: string | null
@@ -294,12 +302,18 @@ export type Database = {
           id?: string
           items?: Json
           notes?: string | null
+          paid_at?: string | null
+          payment_confirmed_by?: string | null
+          payment_notes?: string | null
+          payment_status?: string
           status?: Database["public"]["Enums"]["order_status"]
           total?: number
           updated_at?: string
           user_id: string
         }
         Update: {
+          amount_due?: number | null
+          amount_paid?: number
           created_at?: string
           customer_name?: string
           customer_phone?: string | null
@@ -307,6 +321,10 @@ export type Database = {
           id?: string
           items?: Json
           notes?: string | null
+          paid_at?: string | null
+          payment_confirmed_by?: string | null
+          payment_notes?: string | null
+          payment_status?: string
           status?: Database["public"]["Enums"]["order_status"]
           total?: number
           updated_at?: string
