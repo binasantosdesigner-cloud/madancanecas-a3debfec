@@ -47,6 +47,29 @@ function AdminProducts() {
   const [editing, setEditing] = useState<any>(null);
   const [form, setForm] = useState<any>({ title: "", price: 0, kind: "ready", description: "", category_id: "", image_url: "", active: true, featured: false });
 
+  // Filtering states
+  const [search, setSearch] = useState("");
+  const [filterKind, setFilterKind] = useState<"all" | "ready" | "custom">("all");
+  const [filterCategory, setFilterCategory] = useState("all");
+  const [filterFeatured, setFilterFeatured] = useState(false);
+  const [page, setPage] = useState(1);
+  const ITEMS_PER_PAGE = 20;
+
+  useEffect(() => {
+    setPage(1);
+  }, [search, filterKind, filterCategory, filterFeatured]);
+
+  const filtered = (products ?? []).filter((p: any) => {
+    const matchSearch = !search || p.title.toLowerCase().includes(search.toLowerCase());
+    const matchKind = filterKind === "all" || p.kind === filterKind;
+    const matchCat = filterCategory === "all" || p.category_id === filterCategory;
+    const matchFeat = !filterFeatured || p.featured === true;
+    return matchSearch && matchKind && matchCat && matchFeat;
+  });
+
+  const totalPages = Math.max(1, Math.ceil(filtered.length / ITEMS_PER_PAGE));
+  const paginated = filtered.slice((page - 1) * ITEMS_PER_PAGE, page * ITEMS_PER_PAGE);
+
   const openNew = () => { setEditing(null); setForm({ title: "", price: 0, kind: "ready", description: "", category_id: cats?.[0]?.id ?? "", image_url: "", active: true, featured: false }); setOpen(true); };
   const openEdit = (p: any) => { setEditing(p); setForm({ ...p }); setOpen(true); };
 
