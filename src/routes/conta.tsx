@@ -118,7 +118,7 @@ function AccountPage() {
                       : "text-foreground/75 hover:bg-muted/60"
                   }`}
                 >
-                  <m.icon className="h-4 w-4 shrink-0" />
+                  {m.icon && <m.icon className="h-4 w-4 shrink-0" />}
                   <span className="truncate">{m.label}</span>
                 </button>
               ))}
