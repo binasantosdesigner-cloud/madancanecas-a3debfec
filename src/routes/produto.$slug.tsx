@@ -14,6 +14,71 @@ import { Minus, Plus, ShoppingCart, MessageCircle, ArrowLeft } from "lucide-reac
 
 export const Route = createFileRoute("/produto/$slug")({ component: ProdutoPage });
 
+function UpsellCard({ product: p }: { product: any }) {
+  const { add } = useCart();
+  const [added, setAdded] = useState(false);
+
+  const handleAdd = () => {
+    add({
+      id: p.id,
+      productId: p.id,
+      title: p.title,
+      price: Number(p.price),
+      quantity: 1,
+      image: p.image_url,
+    });
+    setAdded(true);
+    toast.success(`${p.title} adicionado! 🛍️`);
+    setTimeout(() => setAdded(false), 2000);
+  };
+
+  return (
+    <div className="group flex flex-col rounded-2xl border border-border bg-background overflow-hidden hover:border-[#e8509a]/40 hover:shadow-md transition-all duration-300">
+      {/* Imagem */}
+      <Link
+        to="/produto/$slug"
+        params={{ slug: p.slug }}
+        className="block aspect-square bg-secondary overflow-hidden"
+      >
+        {p.image_url ? (
+          <img
+            src={p.image_url}
+            alt={p.title}
+            className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
+          />
+        ) : (
+          <div className="w-full h-full flex items-center justify-center text-[10px] uppercase tracking-widest text-muted-foreground/30">
+            Madan
+          </div>
+        )}
+      </Link>
+
+      {/* Info */}
+      <div className="p-3 flex flex-col gap-2 flex-1">
+        <Link
+          to="/produto/$slug"
+          params={{ slug: p.slug }}
+          className="text-sm font-medium leading-tight hover:text-[#e8509a] transition-colors line-clamp-2"
+        >
+          {p.title}
+        </Link>
+        <p className="text-sm font-semibold text-[#e8509a]">{brl(Number(p.price))}</p>
+
+        <button
+          onClick={handleAdd}
+          className={`mt-auto w-full rounded-full py-2 text-xs font-medium transition-all ${
+            added
+              ? 'bg-green-500 text-white'
+              : 'bg-[#e8509a] text-white hover:bg-[#d4458c]'
+          }`}
+        >
+          {added ? '✓ Adicionado!' : '+ Adicionar'}
+        </button>
+      </div>
+    </div>
+  );
+}
+
 function ProdutoPage() {
   const { slug } = Route.useParams();
   const navigate = useNavigate();
