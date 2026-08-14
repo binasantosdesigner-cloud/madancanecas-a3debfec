@@ -251,7 +251,7 @@ function AdminProducts() {
 
                 <td className="p-3 text-right">
                   <Button size="icon" variant="ghost" onClick={() => openEdit(p)}><Pencil className="size-4" /></Button>
-                  <Button size="icon" variant="ghost" onClick={() => del(p.id)}><Trash2 className="size-4" /></Button>
+                  <Button size="icon" variant="ghost" onClick={() => setDeleteTarget({ id: p.id, title: p.title })}><Trash2 className="size-4" /></Button>
                 </td>
               </tr>
             ))}
