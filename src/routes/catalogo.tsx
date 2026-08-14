@@ -1,4 +1,4 @@
-import { useMemo } from "react";
+import { useMemo, useEffect } from "react";
 import { createFileRoute, useNavigate, Link } from "@tanstack/react-router";
 import { z } from "zod";
 import { Header } from "@/components/site/Header";
@@ -106,6 +106,10 @@ const PRODUCTS: Product[] = [
 function CatalogoPage() {
   const { categoria } = Route.useSearch();
   const navigate = useNavigate({ from: "/catalogo" });
+  
+  useEffect(() => {
+    window.scrollTo(0, 0);
+  }, []);
 
   const slugToCategory: Record<string, string> = {
     "canecas": "Canecas",
