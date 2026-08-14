@@ -308,6 +308,35 @@ function AdminProducts() {
           </div>
         </div>
       )}
+
+      <AlertDialog open={!!deleteTarget} onOpenChange={(open) => !open && setDeleteTarget(null)}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle className="flex items-center gap-2">
+              <Trash2 className="size-5 text-red-500" />
+              Excluir produto?
+            </AlertDialogTitle>
+            <AlertDialogDescription>
+              Você está prestes a excluir <strong>"{deleteTarget?.title}"</strong>.
+              Esta ação não pode ser desfeita. O produto será removido permanentemente do catálogo.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel>Cancelar</AlertDialogCancel>
+            <AlertDialogAction
+              className="bg-red-500 hover:bg-red-600 text-white"
+              onClick={() => {
+                if (deleteTarget) {
+                  del(deleteTarget.id);
+                  setDeleteTarget(null);
+                }
+              }}
+            >
+              Sim, excluir produto
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </div>
   );
 }
