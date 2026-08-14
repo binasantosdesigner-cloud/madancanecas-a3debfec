@@ -369,6 +369,16 @@ function AdminUsersPage() {
                           <Eye className="h-4 w-4" />
                         </Button>
 
+                        <Button 
+                          size="icon" 
+                          variant="ghost" 
+                          className={`size-8 rounded-lg flex items-center justify-center transition-colors bg-transparent border border-border ${isAdmin ? "text-[#e8509a] border-[#e8509a]" : "text-muted-foreground"} hover:bg-[#fce8f3] hover:border-[#e8509a] hover:text-[#e8509a]`}
+                          disabled={toggleAdmin.isPending}
+                          onClick={() => toggleAdmin.mutate({ userId: p.id, makeAdmin: !isAdmin })}
+                        >
+                          {isAdmin ? <ShieldOff className="h-4 w-4" /> : <Shield className="h-4 w-4" />}
+                        </Button>
+
                         {currentUser?.id !== p.id && (
                           <AlertDialog>
                             <AlertDialogTrigger asChild>
