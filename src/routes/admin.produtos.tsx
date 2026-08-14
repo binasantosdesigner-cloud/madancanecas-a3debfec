@@ -221,8 +221,19 @@ function AdminProducts() {
     return matchSearch && matchKind && matchCat && matchFeat;
   });
 
-  const totalPages = Math.max(1, Math.ceil(filtered.length / ITEMS_PER_PAGE));
-  const paginated = filtered.slice((page - 1) * ITEMS_PER_PAGE, page * ITEMS_PER_PAGE);
+  const sorted = [...filtered].sort((a, b) => {
+    let valA: any, valB: any;
+    if (sortBy === 'title') { valA = a.title.toLowerCase(); valB = b.title.toLowerCase(); }
+    else if (sortBy === 'category') { valA = (a.categories?.name ?? '').toLowerCase(); valB = (b.categories?.name ?? '').toLowerCase(); }
+    else if (sortBy === 'price') { valA = Number(a.price); valB = Number(b.price); }
+    else if (sortBy === 'favorites') { valA = favCounts?.[a.id] ?? 0; valB = favCounts?.[b.id] ?? 0; }
+    if (valA < valB) return sortDir === 'asc' ? -1 : 1;
+    if (valA > valB) return sortDir === 'asc' ? 1 : -1;
+    return 0;
+  });
+
+  const totalPages = Math.max(1, Math.ceil(sorted.length / ITEMS_PER_PAGE));
+  const paginated = sorted.slice((page - 1) * ITEMS_PER_PAGE, page * ITEMS_PER_PAGE);
 
   const openNew = () => { 
     setEditing(null); 
