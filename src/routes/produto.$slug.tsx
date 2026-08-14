@@ -312,8 +312,6 @@ function ProdutoPage() {
               <span>🚴 Entrega em Rondonópolis-MT</span>
             </div>
 
-            </div>
-
           </div>
         </div>
 
