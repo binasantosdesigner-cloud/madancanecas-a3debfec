@@ -1,7 +1,7 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { useState, useEffect } from "react";
-import { Pencil, Trash2, Plus, Heart, Star, Search, ChevronLeft, ChevronRight, X, Upload } from "lucide-react";
+import { Pencil, Trash2, Plus, Heart, Star, Search, ChevronLeft, ChevronRight, X, Upload, Check } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { Switch } from "@/components/ui/switch";
 
@@ -56,6 +56,7 @@ function AdminProducts() {
   const [open, setOpen] = useState(false);
   const [editing, setEditing] = useState<any>(null);
   const [form, setForm] = useState<any>({ title: "", price: 0, kind: "ready", description: "", category_id: "", image_url: "", active: true, featured: false });
+  const [homeSection, setHomeSection] = useState<'none' | 'ready' | 'custom'>('none');
   const [deleteTarget, setDeleteTarget] = useState<{ id: string; title: string } | null>(null);
   const [uploadingImage, setUploadingImage] = useState(false);
 
@@ -145,8 +146,20 @@ function AdminProducts() {
   const totalPages = Math.max(1, Math.ceil(filtered.length / ITEMS_PER_PAGE));
   const paginated = filtered.slice((page - 1) * ITEMS_PER_PAGE, page * ITEMS_PER_PAGE);
 
-  const openNew = () => { setEditing(null); setForm({ title: "", price: 0, kind: "ready", description: "", category_id: cats?.[0]?.id ?? "", image_url: "", active: true, featured: false }); setOpen(true); };
-  const openEdit = (p: any) => { setEditing(p); setForm({ ...p }); setOpen(true); };
+  const openNew = () => { 
+    setEditing(null); 
+    setForm({ title: "", price: 0, kind: "ready", description: "", category_id: cats?.[0]?.id ?? "", image_url: "", active: true, featured: false }); 
+    setHomeSection('none');
+    setOpen(true); 
+  };
+  const openEdit = (p: any) => { 
+    setEditing(p); 
+    setForm({ ...p }); 
+    if (p.featured === true && p.kind === 'ready') setHomeSection('ready');
+    else if (p.featured === true && p.kind === 'custom') setHomeSection('custom');
+    else setHomeSection('none');
+    setOpen(true); 
+  };
 
 
   const handleImageUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -228,7 +241,13 @@ function AdminProducts() {
 
   const save = async () => {
     const slug = (form.title as string).toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "").replace(/[^a-z0-9]+/g, "-").replace(/^-|-$/g, "");
-    const payload = { ...form, slug, price: Number(form.price) };
+    const payload = { 
+      ...form, 
+      slug, 
+      price: Number(form.price),
+      featured: homeSection !== 'none',
+      kind: homeSection === 'none' ? form.kind : homeSection
+    };
     delete (payload as any).categories;
     const { error } = editing
       ? await supabase.from("products").update(payload).eq("id", editing.id)
@@ -253,20 +272,48 @@ function AdminProducts() {
             <DialogHeader><DialogTitle>{editing ? "Editar" : "Novo"} Produto</DialogTitle></DialogHeader>
             <div className="space-y-4">
               <div className="space-y-2"><Label>Título</Label><Input value={form.title} onChange={(e) => setForm({ ...form, title: e.target.value })} /></div>
-              <div className="grid grid-cols-2 gap-4">
+              <div className="grid grid-cols-1 gap-4">
                 <div className="space-y-2"><Label>Preço</Label><Input type="number" step="0.01" value={form.price} onChange={(e) => setForm({ ...form, price: e.target.value })} /></div>
+                
                 <div className="space-y-2">
-                  <Label>Tipo do produto</Label>
-                  <Select value={form.kind} onValueChange={(v) => setForm({ ...form, kind: v })}>
-                    <SelectTrigger><SelectValue /></SelectTrigger>
-                    <SelectContent>
-                      <SelectItem value="ready">Pronto para venda</SelectItem>
-                      <SelectItem value="custom">Personalizável</SelectItem>
-                    </SelectContent>
-                  </Select>
-                  <p className="text-[11px] text-muted-foreground">Define em qual seção da página inicial este produto aparece.</p>
+                  <Label>Exibição na página inicial</Label>
+                  <div className="grid grid-cols-1 gap-2">
+                    {[
+                      { value: 'none', label: 'Não exibir na home', desc: 'Aparece apenas no catálogo', icon: '🚫' },
+                      { value: 'ready', label: 'Prontos para você', desc: 'Seção de produtos prontos (máx. 6)', icon: '🛍️' },
+                      { value: 'custom', label: 'Personalize do seu jeito', desc: 'Seção de personalizáveis (máx. 4)', icon: '✏️' },
+                    ].map((opt) => (
+                      <label
+                        key={opt.value}
+                        className={cn(
+                          "flex items-center gap-3 p-3 rounded-xl border-2 cursor-pointer transition-all",
+                          homeSection === opt.value
+                            ? "border-[#e8509a] bg-[#fce8f3]/30"
+                            : "border-border hover:border-[#e8509a]/40"
+                        )}
+                      >
+                        <input
+                          type="radio"
+                          name="homeSection"
+                          value={opt.value}
+                          checked={homeSection === opt.value}
+                          onChange={() => setHomeSection(opt.value as any)}
+                          className="sr-only"
+                        />
+                        <span className="text-lg shrink-0">{opt.icon}</span>
+                        <div className="flex-1">
+                          <p className="text-sm font-medium">{opt.label}</p>
+                          <p className="text-xs text-muted-foreground">{opt.desc}</p>
+                        </div>
+                        {homeSection === opt.value && (
+                          <div className="size-5 rounded-full bg-[#e8509a] flex items-center justify-center shrink-0">
+                            <Check className="size-3 text-white" />
+                          </div>
+                        )}
+                      </label>
+                    ))}
+                  </div>
                 </div>
-
               </div>
               <div className="space-y-2">
                 <Label>Categoria</Label>
@@ -323,18 +370,6 @@ function AdminProducts() {
                 )}
               </div>
               
-              <div className="flex items-center justify-between py-3 border-t border-border mt-2">
-                <div>
-                  <Label className="text-sm font-medium">Produto em destaque</Label>
-                  <p className="text-[11px] text-muted-foreground mt-0.5">
-                    Produtos destacados aparecem primeiro nas seções da página inicial. Máx. 6 prontos e 4 personalizáveis.
-                  </p>
-                </div>
-                <Switch 
-                  checked={form.featured || false} 
-                  onCheckedChange={(v) => setForm({ ...form, featured: v })}
-                />
-              </div>
 
               <Button onClick={save} className="w-full">Salvar</Button>
 
@@ -526,11 +561,17 @@ function AdminProducts() {
                   ) : "—"}
                 </td>
                 <td className="p-3 text-center">
-                  {p.featured ? (
-                    <span className="inline-flex items-center justify-center size-6 rounded-full bg-[#fce8f3] text-[#e8509a]" title="Em destaque na Home">
-                      <Star className="size-3.5 fill-[#e8509a]" />
+                  {p.featured && p.kind === 'ready' ? (
+                    <span className="inline-flex items-center px-2 py-0.5 rounded-full text-[10px] font-bold bg-blue-50 text-blue-700 uppercase tracking-wider">
+                      🛍️ Prontos
                     </span>
-                  ) : "—"}
+                  ) : p.featured && p.kind === 'custom' ? (
+                    <span className="inline-flex items-center px-2 py-0.5 rounded-full text-[10px] font-bold bg-purple-50 text-purple-700 uppercase tracking-wider">
+                      ✏️ Personalize
+                    </span>
+                  ) : (
+                    <span className="text-muted-foreground">—</span>
+                  )}
                 </td>
 
                 <td className="p-3 text-right">
