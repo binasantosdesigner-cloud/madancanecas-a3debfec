@@ -77,6 +77,26 @@ async function compressImage(file: File, maxKB: number): Promise<Blob> {
   });
 }
 
+function SortHeader({ label, col, sortBy, sortDir, onSort, align = 'left' }: {
+  label: string; col: string; sortBy: string; sortDir: 'asc'|'desc';
+  onSort: (col: any) => void; align?: 'left'|'center'|'right';
+}) {
+  const active = sortBy === col;
+  return (
+    <th
+      className={`p-3 cursor-pointer select-none group text-${align}`}
+      onClick={() => onSort(col)}
+    >
+      <span className={`inline-flex items-center gap-1 text-xs font-bold uppercase tracking-wider transition-colors ${active ? 'text-[#e8509a]' : 'text-muted-foreground hover:text-foreground'}`}>
+        {label}
+        <span className="text-[10px] w-3 text-center">
+          {active ? (sortDir === 'asc' ? '↑' : '↓') : <span className="opacity-0 group-hover:opacity-40">↕</span>}
+        </span>
+      </span>
+    </th>
+  );
+}
+
 function AdminProducts() {
   const qc = useQueryClient();
   const { data: products } = useQuery({
@@ -180,11 +200,18 @@ function AdminProducts() {
   const [filterCategory, setFilterCategory] = useState("all");
   const [filterFeatured, setFilterFeatured] = useState(false);
   const [page, setPage] = useState(1);
+  const [sortBy, setSortBy] = useState<'title' | 'category' | 'price' | 'favorites'>('title');
+  const [sortDir, setSortDir] = useState<'asc' | 'desc'>('asc');
   const ITEMS_PER_PAGE = 20;
+
+  const handleSort = (col: typeof sortBy) => {
+    if (sortBy === col) setSortDir(d => d === 'asc' ? 'desc' : 'asc');
+    else { setSortBy(col); setSortDir('asc'); }
+  };
 
   useEffect(() => {
     setPage(1);
-  }, [search, filterKind, filterCategory, filterFeatured]);
+  }, [search, filterKind, filterCategory, filterFeatured, sortBy, sortDir]);
 
   const filtered = (products ?? []).filter((p: any) => {
     const matchSearch = !search || p.title.toLowerCase().includes(search.toLowerCase());
@@ -194,8 +221,19 @@ function AdminProducts() {
     return matchSearch && matchKind && matchCat && matchFeat;
   });
 
-  const totalPages = Math.max(1, Math.ceil(filtered.length / ITEMS_PER_PAGE));
-  const paginated = filtered.slice((page - 1) * ITEMS_PER_PAGE, page * ITEMS_PER_PAGE);
+  const sorted = [...filtered].sort((a, b) => {
+    let valA: any, valB: any;
+    if (sortBy === 'title') { valA = a.title.toLowerCase(); valB = b.title.toLowerCase(); }
+    else if (sortBy === 'category') { valA = (a.categories?.name ?? '').toLowerCase(); valB = (b.categories?.name ?? '').toLowerCase(); }
+    else if (sortBy === 'price') { valA = Number(a.price); valB = Number(b.price); }
+    else if (sortBy === 'favorites') { valA = favCounts?.[a.id] ?? 0; valB = favCounts?.[b.id] ?? 0; }
+    if (valA < valB) return sortDir === 'asc' ? -1 : 1;
+    if (valA > valB) return sortDir === 'asc' ? 1 : -1;
+    return 0;
+  });
+
+  const totalPages = Math.max(1, Math.ceil(sorted.length / ITEMS_PER_PAGE));
+  const paginated = sorted.slice((page - 1) * ITEMS_PER_PAGE, page * ITEMS_PER_PAGE);
 
   const openNew = () => { 
     setEditing(null); 
@@ -645,7 +683,17 @@ function AdminProducts() {
 
       <div className="bg-card border border-border rounded-xl overflow-hidden">
         <table className="w-full text-sm">
-          <thead className="bg-secondary/50"><tr><th className="text-left p-3">Produto</th><th className="text-left p-3">Categoria</th><th className="text-left p-3">Tipo</th><th className="text-left p-3">Preço</th><th className="text-center p-3">❤️</th><th className="text-center p-3">Destaque</th><th className="text-right p-3">Ações</th></tr></thead>
+          <thead className="bg-secondary/50">
+            <tr>
+              <SortHeader label="Produto" col="title" sortBy={sortBy} sortDir={sortDir} onSort={handleSort} />
+              <SortHeader label="Categoria" col="category" sortBy={sortBy} sortDir={sortDir} onSort={handleSort} />
+              <th className="text-left p-3 text-xs font-bold uppercase tracking-wider text-muted-foreground">Tipo</th>
+              <SortHeader label="Preço" col="price" sortBy={sortBy} sortDir={sortDir} onSort={handleSort} />
+              <SortHeader label="❤️" col="favorites" sortBy={sortBy} sortDir={sortDir} onSort={handleSort} align="center" />
+              <th className="text-center p-3 text-xs font-bold uppercase tracking-wider text-muted-foreground">Destaque</th>
+              <th className="text-right p-3 text-xs font-bold uppercase tracking-wider text-muted-foreground">Ações</th>
+            </tr>
+          </thead>
           <tbody>
             {paginated.map((p: any) => (
               <tr key={p.id} className="border-t border-border">
