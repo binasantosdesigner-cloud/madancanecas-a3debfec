@@ -145,11 +145,71 @@ function AdminProducts() {
           </DialogContent>
         </Dialog>
       </div>
+
+      {/* Toolbar */}
+      <div className="space-y-4 mb-6">
+        <div className="relative">
+          <Search className="absolute left-3 top-1/2 -translate-y-1/2 size-4 text-muted-foreground" />
+          <Input 
+            placeholder="Buscar produto..." 
+            className="pl-10" 
+            value={search}
+            onChange={(e) => setSearch(e.target.value)}
+          />
+        </div>
+
+        <div className="flex flex-wrap items-center gap-4">
+          <div className="flex bg-muted p-1 rounded-lg">
+            {(["all", "ready", "custom"] as const).map((k) => (
+              <button
+                key={k}
+                onClick={() => setFilterKind(k)}
+                className={cn(
+                  "px-4 py-1.5 text-xs font-medium rounded-md transition-all",
+                  filterKind === k ? "bg-[#e8509a] text-white shadow-sm" : "text-muted-foreground hover:text-foreground"
+                )}
+              >
+                {k === "all" ? "Todos" : k === "ready" ? "Pronto" : "Personalizável"}
+              </button>
+            ))}
+          </div>
+
+          <Select value={filterCategory} onValueChange={setFilterCategory}>
+            <SelectTrigger className="w-[200px]">
+              <SelectValue placeholder="Todas as categorias" />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="all">Todas as categorias</SelectItem>
+              {cats?.map((c) => (
+                <SelectItem key={c.id} value={c.id}>{c.name}</SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
+
+          <Button
+            variant="outline"
+            size="sm"
+            onClick={() => setFilterFeatured(!filterFeatured)}
+            className={cn(
+              "h-10 px-4 transition-all",
+              filterFeatured ? "bg-amber-100 text-amber-700 border-amber-300 hover:bg-amber-200" : "bg-background"
+            )}
+          >
+            <Star className={cn("size-4 mr-2", filterFeatured && "fill-amber-700")} />
+            Destaque
+          </Button>
+
+          <span className="text-xs text-muted-foreground ml-auto">
+            {filtered.length} produto{filtered.length !== 1 ? "s" : ""}
+          </span>
+        </div>
+      </div>
+
       <div className="bg-card border border-border rounded-xl overflow-hidden">
         <table className="w-full text-sm">
-          <thead className="bg-secondary/50"><tr><th className="text-left p-3">Produto</th><th className="text-left p-3">Categoria</th><th className="text-left p-3">Tipo</th><th className="text-left p-3">Preço</th><th className="text-center p-3">❤️</th><th className="text-center p-3">Destaque</th><th></th></tr></thead>
+          <thead className="bg-secondary/50"><tr><th className="text-left p-3">Produto</th><th className="text-left p-3">Categoria</th><th className="text-left p-3">Tipo</th><th className="text-left p-3">Preço</th><th className="text-center p-3">❤️</th><th className="text-center p-3">Destaque</th><th className="text-right p-3">Ações</th></tr></thead>
           <tbody>
-            {products?.map((p: any) => (
+            {paginated.map((p: any) => (
               <tr key={p.id} className="border-t border-border">
                 <td className="p-3 font-medium">{p.title}</td>
                 <td className="p-3 text-muted-foreground">{p.categories?.name ?? "—"}</td>
