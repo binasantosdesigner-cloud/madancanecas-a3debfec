@@ -312,8 +312,36 @@ function ProdutoPage() {
               <span>🚴 Entrega em Rondonópolis-MT</span>
             </div>
 
+            </div>
+
           </div>
         </div>
+
+        {/* SEÇÃO UPSELL */}
+        {upsells.length > 0 && (
+          <section className="mt-16 pt-12 border-t border-border">
+            <div className="text-center mb-8">
+              <span className="inline-block text-xs font-bold uppercase tracking-[0.2em] text-[#a57840] bg-[#a57840]/10 px-3 py-1 rounded-full mb-3">
+                Complete seu presente
+              </span>
+              <h2 className="font-serif text-2xl">Que tal adicionar também?</h2>
+              <p className="text-sm text-muted-foreground mt-1">
+                Produtos que combinam muito bem com {product?.title}
+              </p>
+            </div>
+
+            <div className={`grid gap-6 ${
+              upsells.length === 1 ? 'grid-cols-1 max-w-xs mx-auto' :
+              upsells.length === 2 ? 'grid-cols-2 max-w-lg mx-auto' :
+              upsells.length === 3 ? 'grid-cols-3' :
+              'grid-cols-2 md:grid-cols-4'
+            }`}>
+              {upsells.map((up: any) => (
+                <UpsellCard key={up.id} product={up} />
+              ))}
+            </div>
+          </section>
+        )}
       </main>
       <Footer />
     </div>
