@@ -58,7 +58,7 @@ const statusTone: Record<string, string> = {
 };
 
 function AccountPage() {
-  const { user, loading, signOut } = useAuth();
+  const { user, loading, signOut, isAdmin } = useAuth();
   const navigate = useNavigate();
   const [section, setSection] = useState<SectionId>("dashboard");
 
@@ -95,6 +95,17 @@ function AccountPage() {
           {/* Desktop sidebar */}
           <aside className="hidden lg:block">
             <div className="sticky top-24 rounded-2xl border border-border bg-card p-2">
+              {isAdmin && (
+                <div className="mb-4 pb-4 border-b border-border/60">
+                  <Link
+                    to="/admin"
+                    className="flex items-center gap-3 w-full rounded-xl px-4 py-3 text-sm font-medium bg-accent/10 text-accent hover:bg-accent/20 transition-colors"
+                  >
+                    <LayoutDashboard className="size-4 shrink-0" />
+                    Painel Administrativo
+                  </Link>
+                </div>
+              )}
               {MENU.map((m) => (
                 <button
                   key={m.id}

@@ -1,15 +1,15 @@
 import { Link } from "@tanstack/react-router";
-import { ShoppingBag, User, Menu, Instagram } from "lucide-react";
+import { ShoppingBag, User, Menu, Instagram, LayoutDashboard } from "lucide-react";
 import { useCart } from "@/lib/cart";
 import { useAuth } from "@/lib/auth";
 import { Button } from "@/components/ui/button";
-import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet";
+import { Sheet, SheetContent, SheetTrigger, SheetTitle } from "@/components/ui/sheet";
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 
 export function Header() {
   const { count } = useCart();
-  const { user } = useAuth();
+  const { user, isAdmin } = useAuth();
 
   const { data: categories } = useQuery({
     queryKey: ["categories"],
@@ -31,9 +31,13 @@ export function Header() {
     <header className="sticky top-0 z-40 border-b border-border/60 bg-background/80 backdrop-blur-md">
       <div className="mx-auto flex h-20 max-w-7xl items-center justify-between gap-4 px-6">
         <div className="flex items-center gap-10">
-          <Link to="/" className="flex flex-col leading-none">
-            <span className="font-serif text-2xl tracking-tight">Madan</span>
-            <span className="text-[10px] uppercase tracking-[0.2em] text-muted-foreground">Canecas & Personalizados</span>
+          <Link to="/" className="flex items-center" aria-label="Madan Canecas & Personalizados">
+            <img
+              src="https://itfknwsdynturbwgaqnc.supabase.co/storage/v1/object/public/assets/Logo-colorida-MADAN.webp"
+              alt="Madan Canecas & Personalizados"
+              className="h-12 w-auto object-contain"
+              loading="eager"
+            />
           </Link>
           <nav className="hidden md:flex gap-7 text-sm">
             {links.map((l, i) => (
@@ -62,6 +66,18 @@ export function Header() {
               <Instagram className="size-5" />
             </Button>
           </a>
+          {isAdmin && (
+            <Link to="/admin" aria-label="Painel Admin">
+              <Button
+                variant="ghost"
+                size="sm"
+                className="hidden sm:inline-flex items-center gap-1.5 text-xs font-medium text-accent hover:text-accent hover:bg-accent/10 border border-accent/30 rounded-full px-3"
+              >
+                <LayoutDashboard className="size-3.5" />
+                Admin
+              </Button>
+            </Link>
+          )}
           <Link to={user ? "/conta" : "/login"} aria-label="Conta">
             <Button variant="ghost" size="icon" className="text-accent hover:text-accent hover:bg-accent/10">
               <User className="size-5" />
@@ -82,6 +98,7 @@ export function Header() {
               <Button variant="ghost" size="icon"><Menu className="size-5" /></Button>
             </SheetTrigger>
             <SheetContent side="right" className="w-72">
+              <SheetTitle className="sr-only">Menu de Navegação</SheetTitle>
               <nav className="mt-8 flex flex-col gap-4">
                 {links.map((l, i) => (
                   <Link
@@ -94,6 +111,15 @@ export function Header() {
                     {l.label}
                   </Link>
                 ))}
+                {isAdmin && (
+                  <Link
+                    to="/admin"
+                    className="text-base nav-link inline-flex items-center gap-2 w-fit text-accent font-medium"
+                  >
+                    <LayoutDashboard className="size-4" />
+                    Painel Admin
+                  </Link>
+                )}
               </nav>
             </SheetContent>
           </Sheet>

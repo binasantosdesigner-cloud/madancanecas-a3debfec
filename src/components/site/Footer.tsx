@@ -21,9 +21,12 @@ export function Footer() {
     <footer className="mt-24 border-t-2 border-accent/30 bg-secondary/40">
       <div className="mx-auto max-w-7xl px-6 py-16 grid gap-12 md:grid-cols-4">
         <div>
-          <h3 className="font-serif text-2xl">
-            <span className="text-accent">Madan</span>
-          </h3>
+          <img
+            src="https://itfknwsdynturbwgaqnc.supabase.co/storage/v1/object/public/assets/Logo-branca-MADAN.webp"
+            alt="Madan Canecas & Personalizados"
+            className="h-16 w-auto object-contain"
+            loading="lazy"
+          />
           <p className="mt-4 text-sm text-muted-foreground max-w-xs">
             Presentes personalizados feitos à mão, com acabamento premium e atendimento humano via WhatsApp.
           </p>
