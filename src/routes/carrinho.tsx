@@ -1,7 +1,7 @@
 import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
 import { useQuery } from "@tanstack/react-query";
 import { useState } from "react";
-import { Trash2, MessageCircle } from "lucide-react";
+import { Trash2, MessageCircle, CheckCircle2, Copy } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { useCart } from "@/lib/cart";
 import { useAuth } from "@/lib/auth";
@@ -13,7 +13,6 @@ import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import { brl } from "@/lib/format";
-import { buildWhatsAppMessage, whatsappLink } from "@/lib/whatsapp";
 import { toast } from "sonner";
 
 export const Route = createFileRoute("/carrinho")({ component: CartPage });
