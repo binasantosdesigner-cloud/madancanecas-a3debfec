@@ -4,6 +4,8 @@ import { Toaster } from "@/components/ui/sonner";
 import { AuthProvider } from "@/lib/auth";
 import { CartProvider } from "@/lib/cart";
 import { WhatsAppFloat } from "@/components/site/WhatsAppFloat";
+import { WhatsappGuard } from "@/components/site/WhatsappGuard";
+
 
 function NotFoundComponent() {
   return (
@@ -57,10 +59,12 @@ function RootComponent() {
     <QueryClientProvider client={queryClient}>
       <AuthProvider>
         <CartProvider>
-          <HeadContent />
-          <Outlet />
-          <Toaster position="top-center" />
-          <WhatsAppFloat />
+          <WhatsappGuard>
+            <HeadContent />
+            <Outlet />
+            <Toaster position="top-center" />
+            <WhatsAppFloat />
+          </WhatsappGuard>
         </CartProvider>
       </AuthProvider>
     </QueryClientProvider>
