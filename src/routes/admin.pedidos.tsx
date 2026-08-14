@@ -2,8 +2,13 @@ import { createFileRoute } from "@tanstack/react-router";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { Button } from "@/components/ui/button";
+import { Badge } from "@/components/ui/badge";
 import { brl } from "@/lib/format";
 import { toast } from "sonner";
+import { CheckCircle2, Loader2 } from "lucide-react";
+import { useState } from "react";
+import { useAuth } from "@/lib/auth";
 
 export const Route = createFileRoute("/admin/pedidos")({ component: AdminOrders });
 
@@ -18,6 +23,9 @@ type OrderStatus = typeof statuses[number]["v"];
 
 function AdminOrders() {
   const qc = useQueryClient();
+  const { user } = useAuth();
+  const [confirming, setConfirming] = useState<string | null>(null);
+
   const { data: orders } = useQuery({
     queryKey: ["admin-all-orders"],
     queryFn: async () => (await supabase.from("orders").select("*").order("created_at", { ascending: false })).data ?? [],
@@ -27,6 +35,27 @@ function AdminOrders() {
     const { error } = await supabase.from("orders").update({ status }).eq("id", id);
     if (error) toast.error(error.message);
     else { toast.success("Status atualizado"); qc.invalidateQueries({ queryKey: ["admin-all-orders"] }); }
+  };
+
+  const confirmPayment = async (orderId: string, amount: number) => {
+    setConfirming(orderId);
+    const { error } = await supabase
+      .from('orders')
+      .update({
+        payment_status: 'paid',
+        amount_paid: amount,
+        paid_at: new Date().toISOString(),
+        payment_confirmed_by: user?.id,
+        status: 'in_production',
+      })
+      .eq('id', orderId);
+    setConfirming(null);
+    if (error) {
+      toast.error('Erro ao confirmar: ' + error.message);
+    } else {
+      toast.success('Pagamento confirmado! Pedido movido para produção.');
+      qc.invalidateQueries({ queryKey: ['admin-all-orders'] });
+    }
   };
 
   return (
@@ -41,12 +70,36 @@ function AdminOrders() {
                 <p className="font-medium mt-1">{o.customer_name} · {o.customer_phone || "—"}</p>
                 <p className="text-xs text-muted-foreground">Entrega: {o.delivery_type}</p>
               </div>
-              <div className="flex items-center gap-3">
-                <span className="font-semibold">{brl(Number(o.total))}</span>
-                <Select value={o.status} onValueChange={(v) => updateStatus(o.id, v as OrderStatus)}>
-                  <SelectTrigger className="w-44"><SelectValue /></SelectTrigger>
-                  <SelectContent>{statuses.map((s) => <SelectItem key={s.v} value={s.v}>{s.l}</SelectItem>)}</SelectContent>
-                </Select>
+              <div className="flex flex-col items-end gap-3">
+                <div className="flex items-center gap-3">
+                  <span className="font-semibold">{brl(Number(o.total))}</span>
+                  {o.payment_status === 'paid' ? (
+                    <Badge className="bg-green-100 text-green-700 border-0">PIX confirmado</Badge>
+                  ) : (
+                    <Badge className="bg-amber-100 text-amber-700 border-0">Aguardando PIX</Badge>
+                  )}
+                  <Select value={o.status} onValueChange={(v) => updateStatus(o.id, v as OrderStatus)}>
+                    <SelectTrigger className="w-44"><SelectValue /></SelectTrigger>
+                    <SelectContent>{statuses.map((s) => <SelectItem key={s.v} value={s.v}>{s.l}</SelectItem>)}</SelectContent>
+                  </Select>
+                </div>
+                
+                {o.payment_status === 'pending' && (
+                  <Button
+                    size="sm"
+                    variant="outline"
+                    className="text-green-700 border-green-300 hover:bg-green-50 gap-1.5"
+                    onClick={() => confirmPayment(o.id, Number(o.amount_due))}
+                    disabled={confirming === o.id}
+                  >
+                    {confirming === o.id ? (
+                      <Loader2 className="size-3.5 animate-spin" />
+                    ) : (
+                      <CheckCircle2 className="size-3.5" />
+                    )}
+                    Confirmar pagamento
+                  </Button>
+                )}
               </div>
             </div>
             <div className="mt-4 border-t border-border pt-4 space-y-2 text-sm">

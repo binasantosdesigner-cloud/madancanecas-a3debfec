@@ -30,6 +30,9 @@ export function Footer() {
           <p className="mt-4 text-sm text-white/80 max-w-xs">
             Presentes personalizados feitos à mão, com acabamento premium e atendimento humano via WhatsApp.
           </p>
+          <p className="mt-3 text-xs text-white/50">
+            CNPJ: 46.960.905/0001-04
+          </p>
           <a
             href={INSTAGRAM_URL}
             target="_blank"
