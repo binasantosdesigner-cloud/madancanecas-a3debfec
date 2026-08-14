@@ -59,6 +59,69 @@ function AdminProducts() {
   const [deleteTarget, setDeleteTarget] = useState<{ id: string; title: string } | null>(null);
   const [uploadingImage, setUploadingImage] = useState(false);
 
+  // Upsell state
+  const [upsellSearch, setUpsellSearch] = useState('');
+  const [addingUpsell, setAddingUpsell] = useState(false);
+
+  const { data: currentUpsells, refetch: refetchUpsells } = useQuery({
+    enabled: !!editing?.id,
+    queryKey: ['upsells', editing?.id],
+    queryFn: async () => {
+      const { data } = await supabase
+        .from('product_upsells')
+        .select('id, display_order, upsell_product_id, products!product_upsells_upsell_product_id_fkey(id, title, price, image_url)')
+        .eq('product_id', editing!.id)
+        .order('display_order', { ascending: true });
+      return data ?? [];
+    },
+  });
+
+  const { data: searchResults } = useQuery({
+    enabled: upsellSearch.length >= 2,
+    queryKey: ['products-search', upsellSearch, editing?.id],
+    queryFn: async () => {
+      const { data } = await supabase
+        .from('products')
+        .select('id, title, price, image_url')
+        .eq('active', true)
+        .neq('id', editing?.id ?? '')
+        .ilike('title', `%${upsellSearch}%`)
+        .limit(6);
+      return data ?? [];
+    },
+  });
+
+  const addUpsell = async (upsellProductId: string) => {
+    if (!editing) return;
+    const alreadyAdded = currentUpsells?.some((u: any) => u.upsell_product_id === upsellProductId);
+    if (alreadyAdded) { toast.error('Produto já adicionado'); return; }
+    if ((currentUpsells?.length ?? 0) >= 4) { toast.error('Máximo de 4 produtos sugeridos'); return; }
+    
+    setAddingUpsell(true);
+    const { error } = await supabase
+      .from('product_upsells')
+      .insert({
+        product_id: editing.id,
+        upsell_product_id: upsellProductId,
+        display_order: (currentUpsells?.length ?? 0),
+      });
+    setAddingUpsell(false);
+    if (error) { toast.error('Erro: ' + error.message); return; }
+    toast.success('Produto sugerido adicionado!');
+    setUpsellSearch('');
+    refetchUpsells();
+  };
+
+  const removeUpsell = async (upsellId: string) => {
+    const { error } = await supabase
+      .from('product_upsells')
+      .delete()
+      .eq('id', upsellId);
+    if (error) { toast.error('Erro ao remover'); return; }
+    toast.success('Removido');
+    refetchUpsells();
+  };
+
   // Filtering states
   const [search, setSearch] = useState("");
   const [filterKind, setFilterKind] = useState<"all" | "ready" | "custom">("all");
@@ -274,6 +337,104 @@ function AdminProducts() {
               </div>
 
               <Button onClick={save} className="w-full">Salvar</Button>
+
+              {/* Upsell section - only in edit mode */}
+              {editing && (
+                <div className="border-t border-border pt-5 mt-2 space-y-4">
+                  <div>
+                    <h3 className="text-sm font-semibold">Produtos sugeridos</h3>
+                    <p className="text-xs text-muted-foreground mt-0.5">
+                      Aparecem na página do produto como "Complete seu presente". Máx. 4.
+                    </p>
+                  </div>
+
+                  {/* Current upsells list */}
+                  {(currentUpsells?.length ?? 0) > 0 && (
+                    <div className="space-y-2">
+                      {currentUpsells!.map((u: any) => {
+                        const p = u.products;
+                        return (
+                          <div key={u.id} className="flex items-center gap-3 p-2.5 rounded-xl border border-border bg-secondary/30">
+                            <div className="size-10 rounded-lg bg-secondary overflow-hidden shrink-0">
+                              {p?.image_url
+                                ? <img src={p.image_url} alt="" className="w-full h-full object-cover" />
+                                : <div className="w-full h-full flex items-center justify-center text-[9px] text-muted-foreground/40 uppercase">Madan</div>
+                              }
+                            </div>
+                            <div className="flex-1 min-w-0">
+                              <p className="text-sm font-medium truncate">{p?.title}</p>
+                              <p className="text-xs text-[#e8509a]">{p ? brl(Number(p.price)) : ''}</p>
+                            </div>
+                            <button
+                              onClick={() => removeUpsell(u.id)}
+                              className="size-7 rounded-lg flex items-center justify-center text-muted-foreground hover:text-red-500 hover:bg-red-50 transition-colors"
+                            >
+                              <X className="size-3.5" />
+                            </button>
+                          </div>
+                        );
+                      })}
+                    </div>
+                  )}
+
+                  {/* Search input to add new upsells */}
+                  {(currentUpsells?.length ?? 0) < 4 && (
+                    <div className="relative">
+                      <div className="relative">
+                        <Search className="absolute left-3 top-1/2 -translate-y-1/2 size-3.5 text-muted-foreground" />
+                        <Input
+                          value={upsellSearch}
+                          onChange={(e) => setUpsellSearch(e.target.value)}
+                          placeholder="Buscar produto para sugerir..."
+                          className="pl-8 text-sm"
+                        />
+                      </div>
+
+                      {/* Results dropdown */}
+                      {upsellSearch.length >= 2 && searchResults && searchResults.length > 0 && (
+                        <div className="absolute top-full left-0 right-0 mt-1 bg-background border border-border rounded-xl shadow-lg z-50 overflow-hidden">
+                          {searchResults
+                            .filter((r: any) => !currentUpsells?.some((u: any) => u.upsell_product_id === r.id))
+                            .map((r: any) => (
+                              <button
+                                key={r.id}
+                                onClick={() => addUpsell(r.id)}
+                                disabled={addingUpsell}
+                                className="w-full flex items-center gap-3 px-3 py-2.5 hover:bg-secondary transition-colors text-left"
+                              >
+                                <div className="size-8 rounded-md bg-secondary overflow-hidden shrink-0">
+                                  {r.image_url
+                                    ? <img src={r.image_url} alt="" className="w-full h-full object-cover" />
+                                    : <div className="w-full h-full flex items-center justify-center text-[8px] text-muted-foreground/40">M</div>
+                                  }
+                                </div>
+                                <div className="flex-1 min-w-0">
+                                  <p className="text-sm truncate">{r.title}</p>
+                                  <p className="text-xs text-[#e8509a]">{brl(Number(r.price))}</p>
+                                </div>
+                                <Plus className="size-4 text-muted-foreground shrink-0" />
+                              </button>
+                            ))
+                          }
+                          {searchResults.filter((r: any) => !currentUpsells?.some((u: any) => u.upsell_product_id === r.id)).length === 0 && (
+                            <p className="text-xs text-muted-foreground text-center py-3">Todos os resultados já foram adicionados</p>
+                          )}
+                        </div>
+                      )}
+
+                      {upsellSearch.length >= 2 && (!searchResults || searchResults.length === 0) && (
+                        <p className="text-xs text-muted-foreground mt-1 px-1">Nenhum produto encontrado</p>
+                      )}
+                    </div>
+                  )}
+
+                  {(currentUpsells?.length ?? 0) >= 4 && (
+                    <p className="text-xs text-muted-foreground text-center py-2 bg-secondary/40 rounded-lg">
+                      Máximo de 4 produtos atingido
+                    </p>
+                  )}
+                </div>
+              )}
             </div>
           </DialogContent>
         </Dialog>
