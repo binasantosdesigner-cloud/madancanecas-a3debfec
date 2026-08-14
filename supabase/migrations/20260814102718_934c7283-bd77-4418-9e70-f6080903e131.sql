@@ -1,0 +1,2 @@
+INSERT INTO public.products (title, slug, price, description, category_id, active, kind)
+VALUES ('Caneca Polímero', 'caneca-polimero', 35.00, 'Caneca de polímero resistente para personalização.', '893635a9-1cfb-44c6-9da8-cabadf3fb86b', true, 'custom');
