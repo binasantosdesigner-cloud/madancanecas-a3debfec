@@ -24,18 +24,13 @@ function ProdutoPage() {
   const { data: product, isLoading } = useQuery({
     queryKey: ["product", slug],
     queryFn: async () => {
-      console.log("Fetching product with slug:", slug);
       const { data, error } = await supabase
         .from("products")
         .select("*, categories(name, slug)")
         .eq("slug", slug)
         .maybeSingle();
 
-      if (error) {
-        console.error("Supabase error:", error);
-        throw error;
-      }
-      console.log("Product data received:", data);
+      if (error) throw error;
       return data;
     },
   });
