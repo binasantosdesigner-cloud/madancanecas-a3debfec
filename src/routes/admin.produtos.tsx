@@ -14,6 +14,16 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { brl } from "@/lib/format";
 import { toast } from "sonner";
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from "@/components/ui/alert-dialog";
 
 export const Route = createFileRoute("/admin/produtos")({ component: AdminProducts });
 
@@ -46,6 +56,7 @@ function AdminProducts() {
   const [open, setOpen] = useState(false);
   const [editing, setEditing] = useState<any>(null);
   const [form, setForm] = useState<any>({ title: "", price: 0, kind: "ready", description: "", category_id: "", image_url: "", active: true, featured: false });
+  const [deleteTarget, setDeleteTarget] = useState<{ id: string; title: string } | null>(null);
 
   // Filtering states
   const [search, setSearch] = useState("");
@@ -86,7 +97,6 @@ function AdminProducts() {
   };
 
   const del = async (id: string) => {
-    if (!confirm("Excluir produto?")) return;
     const { error } = await supabase.from("products").delete().eq("id", id);
     if (error) toast.error(error.message);
     else { toast.success("Excluído"); qc.invalidateQueries({ queryKey: ["admin-products"] }); }
@@ -241,7 +251,7 @@ function AdminProducts() {
 
                 <td className="p-3 text-right">
                   <Button size="icon" variant="ghost" onClick={() => openEdit(p)}><Pencil className="size-4" /></Button>
-                  <Button size="icon" variant="ghost" onClick={() => del(p.id)}><Trash2 className="size-4" /></Button>
+                  <Button size="icon" variant="ghost" onClick={() => setDeleteTarget({ id: p.id, title: p.title })}><Trash2 className="size-4" /></Button>
                 </td>
               </tr>
             ))}
@@ -298,6 +308,35 @@ function AdminProducts() {
           </div>
         </div>
       )}
+
+      <AlertDialog open={!!deleteTarget} onOpenChange={(open) => !open && setDeleteTarget(null)}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle className="flex items-center gap-2">
+              <Trash2 className="size-5 text-red-500" />
+              Excluir produto?
+            </AlertDialogTitle>
+            <AlertDialogDescription>
+              Você está prestes a excluir <strong>"{deleteTarget?.title}"</strong>.
+              Esta ação não pode ser desfeita. O produto será removido permanentemente do catálogo.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel>Cancelar</AlertDialogCancel>
+            <AlertDialogAction
+              className="bg-red-500 hover:bg-red-600 text-white"
+              onClick={() => {
+                if (deleteTarget) {
+                  del(deleteTarget.id);
+                  setDeleteTarget(null);
+                }
+              }}
+            >
+              Sim, excluir produto
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </div>
   );
 }
