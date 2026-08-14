@@ -22,32 +22,29 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const [isAdmin, setIsAdmin] = useState(false);
   const [profile, setProfile] = useState<any>(null);
 
+  const fetchUserData = async (userId: string) => {
+    setRoleLoading(true);
+    const [roleRes, profileRes] = await Promise.all([
+      supabase
+        .from("user_roles")
+        .select("role")
+        .eq("user_id", userId)
+        .eq("role", "admin")
+        .maybeSingle(),
+      supabase
+        .from("profiles")
+        .select("*")
+        .eq("id", userId)
+        .maybeSingle()
+    ]);
+    
+    setIsAdmin(!roleRes.error && !!roleRes.data);
+    setProfile(profileRes.data || null);
+    setRoleLoading(false);
+  };
+
   useEffect(() => {
     let mounted = true;
-
-    const fetchUserData = async (userId: string) => {
-      setRoleLoading(true);
-      setTimeout(async () => {
-        const [roleRes, profileRes] = await Promise.all([
-          supabase
-            .from("user_roles")
-            .select("role")
-            .eq("user_id", userId)
-            .eq("role", "admin")
-            .maybeSingle(),
-          supabase
-            .from("profiles")
-            .select("*")
-            .eq("id", userId)
-            .maybeSingle()
-        ]);
-        
-        if (!mounted) return;
-        setIsAdmin(!roleRes.error && !!roleRes.data);
-        setProfile(profileRes.data || null);
-        setRoleLoading(false);
-      }, 0);
-    };
 
     const { data: sub } = supabase.auth.onAuthStateChange((_e, s) => {
       if (!mounted) return;
