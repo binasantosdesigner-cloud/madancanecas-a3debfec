@@ -27,6 +27,56 @@ import {
 
 export const Route = createFileRoute("/admin/produtos")({ component: AdminProducts });
 
+// Global error monitoring
+if (typeof window !== 'undefined') {
+  window.addEventListener('error', (e) => console.error('Runtime error in AdminProdutos:', e));
+}
+
+// Canvas-based compression — moved outside to prevent re-definitions
+async function compressImage(file: File, maxKB: number): Promise<Blob> {
+  return new Promise((resolve) => {
+    const img = new Image();
+    const url = URL.createObjectURL(file);
+    img.onload = () => {
+      URL.revokeObjectURL(url);
+      const canvas = document.createElement('canvas');
+      
+      // Max dimension 1200px
+      const MAX_DIM = 1200;
+      let { width, height } = img;
+      if (width > MAX_DIM || height > MAX_DIM) {
+        const ratio = Math.min(MAX_DIM / width, MAX_DIM / height);
+        width = Math.round(width * ratio);
+        height = Math.round(height * ratio);
+      }
+      
+      canvas.width = width;
+      canvas.height = height;
+      const ctx = canvas.getContext('2d')!;
+      ctx.drawImage(img, 0, 0, width, height);
+      
+      // Try webp first for better compression
+      const tryCompress = (quality: number, format: string) => {
+        canvas.toBlob((blob) => {
+          if (!blob) { resolve(new Blob([file])); return; }
+          if (blob.size <= maxKB * 1024 || quality <= 0.5) {
+            resolve(blob);
+          } else {
+            tryCompress(quality - 0.1, format);
+          }
+        }, format, quality);
+      };
+      
+      tryCompress(0.85, 'image/webp');
+    };
+    img.onerror = () => {
+      URL.revokeObjectURL(url);
+      resolve(new Blob([file]));
+    };
+    img.src = url;
+  });
+}
+
 function AdminProducts() {
   const qc = useQueryClient();
   const { data: products } = useQuery({
@@ -155,23 +205,38 @@ function AdminProducts() {
     setOpen(true); 
   };
   const openEdit = (p: any) => { 
-    setEditing(p); 
-    setForm({ ...p }); 
-    
-    // Populate images state from JSONB array
-    const productImages = (p.images as any[]) ?? [];
-    if (productImages.length > 0) {
-      setImages(productImages);
-    } else if (p.image_url) {
-      setImages([{ url: p.image_url, isPrimary: true }]);
-    } else {
-      setImages([]);
-    }
+    try {
+      setEditing(p); 
+      setForm({ ...p }); 
+      
+      // Safe fallback for images initialization
+      const productImages = (() => {
+        try {
+          const raw = p.images;
+          if (Array.isArray(raw)) return raw;
+          if (typeof raw === 'string') return JSON.parse(raw);
+          return [];
+        } catch {
+          return [];
+        }
+      })();
 
-    if (p.featured === true && p.kind === 'ready') setHomeSection('ready');
-    else if (p.featured === true && p.kind === 'custom') setHomeSection('custom');
-    else setHomeSection('none');
-    setOpen(true); 
+      if (productImages.length > 0) {
+        setImages(productImages);
+      } else if (p.image_url) {
+        setImages([{ url: p.image_url, isPrimary: true }]);
+      } else {
+        setImages([]);
+      }
+
+      if (p.featured === true && p.kind === 'ready') setHomeSection('ready');
+      else if (p.featured === true && p.kind === 'custom') setHomeSection('custom');
+      else setHomeSection('none');
+      setOpen(true); 
+    } catch (err) {
+      console.error("Error opening edit modal:", err);
+      toast.error("Erro ao carregar dados do produto");
+    }
   };
 
 
@@ -211,46 +276,6 @@ function AdminProducts() {
     }
   };
 
-  // Canvas-based compression — keeps quality, targets max size in KB
-  async function compressImage(file: File, maxKB: number): Promise<Blob> {
-    return new Promise((resolve) => {
-      const img = new Image();
-      const url = URL.createObjectURL(file);
-      img.onload = () => {
-        URL.revokeObjectURL(url);
-        const canvas = document.createElement('canvas');
-        
-        // Max dimension 1200px
-        const MAX_DIM = 1200;
-        let { width, height } = img;
-        if (width > MAX_DIM || height > MAX_DIM) {
-          const ratio = Math.min(MAX_DIM / width, MAX_DIM / height);
-          width = Math.round(width * ratio);
-          height = Math.round(height * ratio);
-        }
-        
-        canvas.width = width;
-        canvas.height = height;
-        const ctx = canvas.getContext('2d')!;
-        ctx.drawImage(img, 0, 0, width, height);
-        
-        // Try webp first for better compression
-        const tryCompress = (quality: number, format: string) => {
-          canvas.toBlob((blob) => {
-            if (!blob) { resolve(new Blob([file])); return; }
-            if (blob.size <= maxKB * 1024 || quality <= 0.5) {
-              resolve(blob);
-            } else {
-              tryCompress(quality - 0.1, format);
-            }
-          }, format, quality);
-        };
-        
-        tryCompress(0.85, 'image/webp');
-      };
-      img.src = url;
-    });
-  }
 
   const save = async () => {
     const slug = (form.title as string).toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "").replace(/[^a-z0-9]+/g, "-").replace(/^-|-$/g, "");
@@ -406,37 +431,47 @@ function AdminProducts() {
                       className="sr-only"
                       disabled={uploadingImage}
                       onChange={async (e) => {
-                        const files = Array.from(e.target.files ?? []);
-                        const remaining = 5 - images.length;
-                        const toUpload = files.slice(0, remaining);
-                        if (toUpload.length === 0) return;
-                        setUploadingImage(true);
-                        const uploaded: {url: string, isPrimary: boolean}[] = [];
-                        for (const file of toUpload) {
-                          try {
-                            const compressed = await compressImage(file, 1024);
-                            const ext = compressed.type === 'image/webp' ? 'webp' : 'jpg';
-                            const path = `product-${Date.now()}-${Math.random().toString(36).slice(2)}.${ext}`;
-                            const { error } = await supabase.storage.from('product-images').upload(path, compressed, { upsert: true });
-                            if (!error) {
-                              const { data: urlData } = supabase.storage.from('product-images').getPublicUrl(path);
-                              uploaded.push({ url: urlData.publicUrl, isPrimary: false });
-                            } else {
-                              console.error("Upload error:", error);
-                              toast.error(`Erro ao subir ${file.name}`);
+                        try {
+                          const files = Array.from(e.target.files ?? []);
+                          const remaining = 5 - images.length;
+                          const toUpload = files.slice(0, remaining);
+                          if (toUpload.length === 0) return;
+                          
+                          setUploadingImage(true);
+                          const uploaded: {url: string, isPrimary: boolean}[] = [];
+                          
+                          for (const file of toUpload) {
+                            try {
+                              const compressed = await compressImage(file, 1024);
+                              const ext = compressed.type === 'image/webp' ? 'webp' : 'jpg';
+                              const path = `product-${Date.now()}-${Math.random().toString(36).slice(2)}.${ext}`;
+                              
+                              const { error } = await supabase.storage.from('product-images').upload(path, compressed, { upsert: true });
+                              
+                              if (!error) {
+                                const { data: urlData } = supabase.storage.from('product-images').getPublicUrl(path);
+                                uploaded.push({ url: urlData.publicUrl, isPrimary: false });
+                              } else {
+                                console.error("Upload error:", error);
+                                toast.error(`Erro ao subir ${file.name}`);
+                              }
+                            } catch (err) {
+                              console.error("Processing error:", err);
                             }
-                          } catch (err) {
-                            console.error("Processing error:", err);
                           }
+                          
+                          setImages(prev => {
+                            const combined = [...prev, ...uploaded];
+                            if (!combined.some(i => i.isPrimary) && combined.length > 0) combined[0].isPrimary = true;
+                            return combined;
+                          });
+                          
+                          if (files.length > remaining) toast.error(`Apenas ${remaining} imagem(ns) adicionada(s). Limite: 5.`);
+                        } catch (err: any) {
+                          toast.error('Erro no upload: ' + (err.message ?? 'tente novamente'));
+                        } finally {
+                          setUploadingImage(false);
                         }
-                        setImages(prev => {
-                          const combined = [...prev, ...uploaded];
-                          // If no primary yet, set first as primary
-                          if (!combined.some(i => i.isPrimary) && combined.length > 0) combined[0].isPrimary = true;
-                          return combined;
-                        });
-                        setUploadingImage(false);
-                        if (files.length > remaining) toast.error(`Apenas ${remaining} imagem(ns) adicionada(s). Limite: 5.`);
                       }}
                     />
                   </label>
