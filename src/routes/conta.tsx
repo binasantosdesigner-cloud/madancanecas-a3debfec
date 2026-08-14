@@ -86,7 +86,7 @@ function AccountPage() {
                     : "bg-card border-border text-foreground/70 hover:border-accent/50"
                 }`}
               >
-                <m.icon className="h-4 w-4" />
+                {(() => { const Icon = m.icon; return <Icon className="h-4 w-4" />; })()}
                 {m.label}
               </button>
             ))}
@@ -118,7 +118,7 @@ function AccountPage() {
                       : "text-foreground/75 hover:bg-muted/60"
                   }`}
                 >
-                  <m.icon className="h-4 w-4 shrink-0" />
+                  {(() => { const Icon = m.icon; return <Icon className="h-4 w-4 shrink-0" />; })()}
                   <span className="truncate">{m.label}</span>
                 </button>
               ))}
