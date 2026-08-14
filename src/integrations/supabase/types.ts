@@ -272,6 +272,35 @@ export type Database = {
         }
         Relationships: []
       }
+      favorites: {
+        Row: {
+          created_at: string
+          id: string
+          product_id: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          product_id: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          product_id?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "favorites_product_id_fkey"
+            columns: ["product_id"]
+            isOneToOne: false
+            referencedRelation: "products"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       orders: {
         Row: {
           amount_due: number | null
@@ -397,6 +426,8 @@ export type Database = {
           full_name: string | null
           id: string
           phone: string | null
+          whatsapp_opt_in: boolean
+          whatsapp_opt_in_at: string | null
         }
         Insert: {
           avatar_url?: string | null
@@ -406,6 +437,8 @@ export type Database = {
           full_name?: string | null
           id: string
           phone?: string | null
+          whatsapp_opt_in?: boolean
+          whatsapp_opt_in_at?: string | null
         }
         Update: {
           avatar_url?: string | null
@@ -415,6 +448,8 @@ export type Database = {
           full_name?: string | null
           id?: string
           phone?: string | null
+          whatsapp_opt_in?: boolean
+          whatsapp_opt_in_at?: string | null
         }
         Relationships: []
       }

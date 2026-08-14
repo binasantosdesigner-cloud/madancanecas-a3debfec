@@ -3,6 +3,7 @@ import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { useEffect, useState, useRef } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/lib/auth";
+import { useFavorites } from "@/lib/favorites";
 import { Header } from "@/components/site/Header";
 import { Footer } from "@/components/site/Footer";
 import { Button } from "@/components/ui/button";
@@ -139,7 +140,7 @@ function AccountPage() {
             {section === "enderecos" && <EnderecosSection />}
             {section === "ajuda" && <AjudaSection />}
             {section === "carrinho" && <PlaceholderLink to="/carrinho" title="Meu Carrinho" desc="Gerencie os itens que você adicionou para finalizar a compra." cta="Abrir carrinho" />}
-            {section === "favoritos" && <ComingSoon title="Favoritos" desc="Em breve você poderá salvar produtos para comprar depois." />}
+            {section === "favoritos" && <FavoritosSection />}
             {section === "projetos" && <ComingSoon title="Projetos Personalizados" desc="Acompanhe aprovações de arte e o histórico das suas personalizações." />}
             {section === "pagamentos" && <PagamentosSection onNavigate={setSection} />}
             {section === "notificacoes" && <ComingSoon title="Notificações" desc="Aqui aparecerão atualizações de pedidos, artes para aprovar e novidades." />}
@@ -758,5 +759,66 @@ function SkeletonCard() {
     <div className="rounded-2xl border border-border bg-card p-8 space-y-3">
       {[...Array(3)].map((_, i) => <div key={i} className="h-16 rounded-lg bg-muted/60 animate-pulse" />)}
     </div>
+  );
+}
+
+function FavoritosSection() {
+  const { user } = useAuth();
+  const { toggle } = useFavorites();
+
+  const { data: favProducts, isLoading } = useQuery({
+    enabled: !!user,
+    queryKey: ["favorites-full", user?.id],
+    queryFn: async () => {
+      const { data: favs } = await supabase
+        .from("favorites")
+        .select("product_id, products(id, title, slug, price, image_url)")
+        .eq("user_id", user!.id);
+      return (favs ?? []).map((f: any) => f.products).filter(Boolean);
+    },
+  });
+
+  if (isLoading) return <SkeletonCard />;
+
+  return (
+    <SectionCard title="Meus Favoritos">
+      {(favProducts?.length ?? 0) === 0 ? (
+        <EmptyState
+          text="Você ainda não favoritou nenhum produto."
+          ctaTo="/catalogo"
+          ctaText="Explorar catálogo"
+        />
+      ) : (
+        <div className="grid grid-cols-2 sm:grid-cols-3 gap-4">
+          {favProducts!.map((p: any) => (
+            <div key={p.id} className="relative group">
+              <Link to="/produto/$slug" params={{ slug: p.slug }}
+                className="block rounded-xl overflow-hidden bg-secondary aspect-square">
+                {p.image_url ? (
+                  <img src={p.image_url} alt={p.title}
+                    className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500" />
+                ) : (
+                  <div className="w-full h-full flex items-center justify-center text-[10px] uppercase tracking-widest text-muted-foreground/40">Madan</div>
+                )}
+              </Link>
+              <button
+                onClick={() => toggle(p.id)}
+                className="absolute top-2 right-2 size-7 rounded-full bg-white/90 flex items-center justify-center text-[#e8509a]"
+                aria-label="Remover dos favoritos"
+              >
+                <Heart className="size-3.5 fill-[#e8509a]" />
+              </button>
+              <div className="mt-2">
+                <Link to="/produto/$slug" params={{ slug: p.slug }}
+                  className="text-sm font-medium hover:text-[#e8509a] transition-colors line-clamp-1">
+                  {p.title}
+                </Link>
+                <p className="text-sm text-[#e8509a] font-semibold mt-0.5">{brl(Number(p.price))}</p>
+              </div>
+            </div>
+          ))}
+        </div>
+      )}
+    </SectionCard>
   );
 }

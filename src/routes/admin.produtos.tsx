@@ -1,7 +1,7 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { useState } from "react";
-import { Pencil, Trash2, Plus } from "lucide-react";
+import { Pencil, Trash2, Plus, Heart } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -23,6 +23,21 @@ function AdminProducts() {
   const { data: cats } = useQuery({
     queryKey: ["admin-cats"],
     queryFn: async () => (await supabase.from("categories").select("*").order("display_order")).data ?? [],
+  });
+
+  // Query adicional para contar favoritos por produto
+  const { data: favCounts } = useQuery({
+    queryKey: ["admin", "fav-counts"],
+    queryFn: async () => {
+      const { data } = await supabase
+        .from("favorites")
+        .select("product_id");
+      const counts: Record<string, number> = {};
+      (data ?? []).forEach((f) => {
+        counts[f.product_id] = (counts[f.product_id] ?? 0) + 1;
+      });
+      return counts;
+    },
   });
 
   const [open, setOpen] = useState(false);
@@ -86,7 +101,7 @@ function AdminProducts() {
       </div>
       <div className="bg-card border border-border rounded-xl overflow-hidden">
         <table className="w-full text-sm">
-          <thead className="bg-secondary/50"><tr><th className="text-left p-3">Produto</th><th className="text-left p-3">Categoria</th><th className="text-left p-3">Tipo</th><th className="text-left p-3">Preço</th><th></th></tr></thead>
+          <thead className="bg-secondary/50"><tr><th className="text-left p-3">Produto</th><th className="text-left p-3">Categoria</th><th className="text-left p-3">Tipo</th><th className="text-left p-3">Preço</th><th className="text-center p-3">❤️</th><th></th></tr></thead>
           <tbody>
             {products?.map((p: any) => (
               <tr key={p.id} className="border-t border-border">
@@ -94,6 +109,14 @@ function AdminProducts() {
                 <td className="p-3 text-muted-foreground">{p.categories?.name ?? "—"}</td>
                 <td className="p-3"><span className="text-xs uppercase tracking-widest">{p.kind === "custom" ? "Personalizável" : "Pronto"}</span></td>
                 <td className="p-3">{brl(Number(p.price))}</td>
+                <td className="p-3 text-sm text-muted-foreground text-center">
+                  {favCounts?.[p.id] ? (
+                    <span className="inline-flex items-center gap-1 text-[#e8509a]">
+                      <Heart className="size-3 fill-[#e8509a]" />
+                      {favCounts[p.id]}
+                    </span>
+                  ) : "—"}
+                </td>
                 <td className="p-3 text-right">
                   <Button size="icon" variant="ghost" onClick={() => openEdit(p)}><Pencil className="size-4" /></Button>
                   <Button size="icon" variant="ghost" onClick={() => del(p.id)}><Trash2 className="size-4" /></Button>
