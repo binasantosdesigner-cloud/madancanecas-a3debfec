@@ -419,6 +419,20 @@ function OrderRow({ order, compact }: { order: any; compact?: boolean }) {
           {statusLabel[order.status] ?? order.status}
         </Badge>
       </div>
+
+      {/* Status de pagamento */}
+      <div className="mt-3 flex items-center gap-2">
+        {order.payment_status === 'paid' ? (
+          <span className="inline-flex items-center gap-1.5 text-xs text-green-700 bg-green-100 px-2.5 py-1 rounded-full font-medium">
+            <CheckCircle2 className="size-3" /> Pagamento confirmado
+          </span>
+        ) : (
+          <span className="inline-flex items-center gap-1.5 text-xs text-amber-700 bg-amber-100 px-2.5 py-1 rounded-full font-medium">
+            <Clock className="size-3" /> Aguardando confirmação do sinal
+          </span>
+        )}
+      </div>
+
       {!compact && (
         <div className="mt-4 text-sm text-muted-foreground space-y-0.5">
           {(order.items as any[]).map((i: any, k: number) => <div key={k}>{i.quantity}x {i.title}</div>)}
@@ -434,11 +448,81 @@ function OrderRow({ order, compact }: { order: any; compact?: boolean }) {
           ))}
         </div>
       )}
-      <div className="mt-4 flex flex-wrap justify-between gap-3 border-t border-border pt-4">
-        <span className="text-sm text-muted-foreground">Total</span>
-        <span className="font-semibold">{brl(Number(order.total))}</span>
+
+      {/* Resumo financeiro */}
+      <div className="mt-4 border-t border-border pt-4 grid grid-cols-3 gap-2 text-center text-xs">
+        <div>
+          <p className="text-muted-foreground">Total</p>
+          <p className="font-semibold mt-0.5">{brl(Number(order.total))}</p>
+        </div>
+        <div>
+          <p className="text-muted-foreground">Sinal (50%)</p>
+          <p className="font-semibold mt-0.5">{brl(Number(order.amount_due ?? order.total * 0.5))}</p>
+        </div>
+        <div>
+          <p className="text-muted-foreground">Restante</p>
+          <p className="font-semibold mt-0.5">{brl(Number(order.total) - Number(order.amount_paid ?? 0))}</p>
+        </div>
       </div>
     </div>
+  );
+}
+
+function PagamentosSection({ onNavigate }: { onNavigate: (s: SectionId) => void }) {
+  const { user } = useAuth();
+  const { data: orders, isLoading } = useQuery({
+    enabled: !!user,
+    queryKey: ['orders', user?.id],
+    queryFn: async () => (await supabase.from('orders').select('*').order('created_at', { ascending: false })).data ?? [],
+  });
+
+  if (isLoading) return <SkeletonCard />;
+
+  const pending = orders?.filter((o: any) => o.payment_status === 'pending') ?? [];
+  const paid = orders?.filter((o: any) => o.payment_status === 'paid') ?? [];
+
+  return (
+    <SectionCard title="Pagamentos">
+      {pending.length > 0 && (
+        <div className="mb-6">
+          <h3 className="text-sm font-semibold mb-3 text-amber-700">Aguardando confirmação</h3>
+          <div className="space-y-3">
+            {pending.map((o: any) => (
+              <div key={o.id} className="p-4 rounded-xl border border-amber-200 bg-amber-50">
+                <div className="flex justify-between items-start">
+                  <div>
+                    <p className="text-xs text-muted-foreground">Pedido #{o.id.slice(0,8)}</p>
+                    <p className="text-sm font-medium mt-0.5">Sinal de 50%: {brl(Number(o.amount_due ?? o.total * 0.5))}</p>
+                  </div>
+                  <span className="text-xs text-amber-700 bg-amber-100 px-2 py-1 rounded-full">Pendente</span>
+                </div>
+              </div>
+            ))}
+          </div>
+        </div>
+      )}
+      {paid.length > 0 && (
+        <div>
+          <h3 className="text-sm font-semibold mb-3 text-green-700">Pagamentos confirmados</h3>
+          <div className="space-y-3">
+            {paid.map((o: any) => (
+              <div key={o.id} className="p-4 rounded-xl border border-green-200 bg-green-50">
+                <div className="flex justify-between items-start">
+                  <div>
+                    <p className="text-xs text-muted-foreground">Pedido #{o.id.slice(0,8)}</p>
+                    <p className="text-sm font-medium mt-0.5">Pago: {brl(Number(o.amount_paid))}</p>
+                  </div>
+                  <span className="text-xs text-green-700 bg-green-100 px-2 py-1 rounded-full">Confirmado</span>
+                </div>
+              </div>
+            ))}
+          </div>
+        </div>
+      )}
+      {(orders?.length ?? 0) === 0 && (
+        <EmptyState text="Nenhum pagamento ainda." ctaTo="/catalogo" ctaText="Ver produtos" />
+      )}
+    </SectionCard>
   );
 }
 
