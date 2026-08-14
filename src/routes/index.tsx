@@ -11,19 +11,6 @@ import { ProductCard, type ProductCardData } from "@/components/site/ProductCard
 import { Button } from "@/components/ui/button";
 import heroImg from "@/assets/hero-mug.jpg";
 import corpImg from "@/assets/corporate-banner.jpg";
-import catCanecas from "@/assets/cat-canecas.jpg";
-import catCamisetas from "@/assets/cat-camisetas.jpg";
-import catCopos from "@/assets/cat-copos.jpg";
-import catCanetas from "@/assets/cat-canetas.jpg";
-
-export const Route = createFileRoute("/")({ component: HomePage });
-
-const cats = [
-  { slug: "canecas", name: "Canecas", img: catCanecas },
-  { slug: "camisetas", name: "Camisetas", img: catCamisetas },
-  { slug: "copos", name: "Copos", img: catCopos },
-  { slug: "canetas", name: "Canetas", img: catCanetas },
-];
 
 const WPP = (msg: string) => `https://wa.me/5566984266994?text=${encodeURIComponent(msg)}`;
 
@@ -40,7 +27,22 @@ const testimonials = [
   { initial: "C", name: "Camila S.", text: "Pedi uma garrafa com o logo da minha marca. Resultado impecável. A embalagem chegou melhor do que eu esperava." },
 ];
 
+export const Route = createFileRoute("/")({ component: HomePage });
+
 function HomePage() {
+  const { data: featuredCategories = [] } = useQuery({
+    queryKey: ['categories', 'featured'],
+    queryFn: async () => {
+      const { data } = await supabase
+        .from('categories')
+        .select('id, name, slug, image_url')
+        .eq('featured', true)
+        .order('display_order', { ascending: true })
+        .limit(6);
+      return data ?? [];
+    },
+  });
+
   const { data: ready } = useQuery({
     queryKey: ["products", "ready"],
     queryFn: async () => {
@@ -48,6 +50,7 @@ function HomePage() {
       return (data ?? []) as ProductCardData[];
     },
   });
+
   const { data: custom } = useQuery({
     queryKey: ["products", "custom"],
     queryFn: async () => {
@@ -55,6 +58,7 @@ function HomePage() {
       return (data ?? []) as ProductCardData[];
     },
   });
+
 
   return (
     <div className="min-h-screen flex flex-col">
@@ -94,25 +98,67 @@ function HomePage() {
         </section>
 
         {/* CATEGORIES */}
-        <section className="mx-auto max-w-7xl px-6 py-20">
+        <section className="mx-auto max-w-7xl px-6 py-16">
           <div className="mb-10 flex items-end justify-between">
             <div>
               <h2 className="font-serif text-3xl md:text-4xl">Categorias</h2>
               <p className="mt-2 text-sm text-muted-foreground">Explore nossa curadoria.</p>
             </div>
-            <Link to="/catalogo" className="text-xs uppercase tracking-widest border-b border-foreground/30 pb-1">Ver todos</Link>
+            <Link
+              to="/catalogo"
+              className="text-xs uppercase tracking-widest border-b border-foreground/30 pb-1 hover:text-[#e8509a] transition-colors"
+            >
+              Ver todos
+            </Link>
           </div>
-          <div className="grid grid-cols-2 gap-4 md:grid-cols-4 md:gap-6">
-            {cats.map((c) => (
-              <Link key={c.slug} to="/catalogo" className="group">
-                <div className="overflow-hidden rounded-2xl bg-secondary aspect-square">
-                  <img src={c.img} alt={c.name} loading="lazy" width={800} height={800} className="h-full w-full object-cover transition-transform duration-700 group-hover:scale-105" />
+
+          {featuredCategories.length > 0 ? (
+            <div className="grid grid-cols-3 gap-6 md:grid-cols-6">
+              {featuredCategories.map((cat: any) => (
+                <Link
+                  key={cat.slug}
+                  to="/catalogo"
+                  search={{ categoria: cat.slug }}
+                  className="group flex flex-col items-center gap-3"
+                >
+                  {/* Círculo */}
+                  <div className="relative w-full aspect-square rounded-full overflow-hidden bg-secondary border-2 border-transparent group-hover:border-[#e8509a] transition-all duration-300 shadow-sm group-hover:shadow-md group-hover:shadow-[#e8509a]/20">
+                    {cat.image_url ? (
+                      <img
+                        src={cat.image_url}
+                        alt={cat.name}
+                        className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-110"
+                        loading="lazy"
+                      />
+                    ) : (
+                      /* Placeholder com inicial */
+                      <div className="w-full h-full flex items-center justify-center bg-[#fce8f3]">
+                        <span className="text-2xl font-serif text-[#e8509a] font-medium">
+                          {cat.name.charAt(0)}
+                        </span>
+                      </div>
+                    )}
+                  </div>
+                  {/* Nome */}
+                  <span className="text-xs font-medium text-center text-muted-foreground group-hover:text-[#e8509a] transition-colors leading-tight">
+                    {cat.name}
+                  </span>
+                </Link>
+              ))}
+            </div>
+          ) : (
+            /* Skeleton loading */
+            <div className="grid grid-cols-3 gap-6 md:grid-cols-6">
+              {Array.from({ length: 6 }).map((_, i) => (
+                <div key={i} className="flex flex-col items-center gap-3">
+                  <div className="w-full aspect-square rounded-full bg-secondary animate-pulse" />
+                  <div className="h-3 w-16 bg-secondary rounded animate-pulse" />
                 </div>
-                <h3 className="mt-3 text-sm font-medium">{c.name}</h3>
-              </Link>
-            ))}
-          </div>
+              ))}
+            </div>
+          )}
         </section>
+
 
         {/* CTA STRIP — PERSONALIZADO */}
         <section className="px-6">
