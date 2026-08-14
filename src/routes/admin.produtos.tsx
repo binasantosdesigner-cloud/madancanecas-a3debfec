@@ -683,7 +683,17 @@ function AdminProducts() {
 
       <div className="bg-card border border-border rounded-xl overflow-hidden">
         <table className="w-full text-sm">
-          <thead className="bg-secondary/50"><tr><th className="text-left p-3">Produto</th><th className="text-left p-3">Categoria</th><th className="text-left p-3">Tipo</th><th className="text-left p-3">Preço</th><th className="text-center p-3">❤️</th><th className="text-center p-3">Destaque</th><th className="text-right p-3">Ações</th></tr></thead>
+          <thead className="bg-secondary/50">
+            <tr>
+              <SortHeader label="Produto" col="title" sortBy={sortBy} sortDir={sortDir} onSort={handleSort} />
+              <SortHeader label="Categoria" col="category" sortBy={sortBy} sortDir={sortDir} onSort={handleSort} />
+              <th className="text-left p-3 text-xs font-bold uppercase tracking-wider text-muted-foreground">Tipo</th>
+              <SortHeader label="Preço" col="price" sortBy={sortBy} sortDir={sortDir} onSort={handleSort} />
+              <SortHeader label="❤️" col="favorites" sortBy={sortBy} sortDir={sortDir} onSort={handleSort} align="center" />
+              <th className="text-center p-3 text-xs font-bold uppercase tracking-wider text-muted-foreground">Destaque</th>
+              <th className="text-right p-3 text-xs font-bold uppercase tracking-wider text-muted-foreground">Ações</th>
+            </tr>
+          </thead>
           <tbody>
             {paginated.map((p: any) => (
               <tr key={p.id} className="border-t border-border">
