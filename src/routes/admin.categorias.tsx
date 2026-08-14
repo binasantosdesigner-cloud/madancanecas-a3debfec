@@ -52,11 +52,11 @@ function AdminCategoriesPage() {
         name: c.name!,
         slug: c.slug?.trim() ? slugify(c.slug) : slugify(c.name!),
         description: c.description ?? null,
-        image_url: c.image_url ?? null,
         display_order: Number(c.display_order ?? 0),
         featured: featured,
         image_url: imageUrl || null,
       };
+
 
       if (c.id) {
         const { error } = await supabase.from("categories").update(payload).eq("id", c.id);
