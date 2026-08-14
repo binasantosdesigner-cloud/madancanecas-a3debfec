@@ -32,7 +32,7 @@ export function ProductCard({ p }: { p: ProductCardData }) {
 
   return (
     <article className="group flex flex-col">
-      <Link to="/catalogo" className="relative block overflow-hidden rounded-xl bg-secondary aspect-[4/5]">
+      <Link to="/produto/$slug" params={{ slug: p.slug }} className="relative block overflow-hidden rounded-xl bg-secondary aspect-[4/5]">
         {p.image_url ? (
           <img src={p.image_url} alt={p.title} loading="lazy" className="h-full w-full object-cover transition-transform duration-700 group-hover:scale-105" />
         ) : (
@@ -47,7 +47,7 @@ export function ProductCard({ p }: { p: ProductCardData }) {
       <div className="mt-4 flex items-start justify-between gap-3">
         <div>
           <h3 className="text-sm font-medium">
-            <Link to="/catalogo">{p.title}</Link>
+            <Link to="/produto/$slug" params={{ slug: p.slug }}>{p.title}</Link>
           </h3>
           <p className="text-sm font-semibold mt-1">{brl(Number(p.price))}</p>
         </div>
