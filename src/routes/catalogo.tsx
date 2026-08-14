@@ -1,5 +1,5 @@
 import { useMemo } from "react";
-import { createFileRoute, useNavigate } from "@tanstack/react-router";
+import { createFileRoute, useNavigate, Link } from "@tanstack/react-router";
 import { z } from "zod";
 import { Header } from "@/components/site/Header";
 import { Footer } from "@/components/site/Footer";
@@ -204,8 +204,9 @@ function CatalogoPage() {
                     animate={{ opacity: 1, scale: 1 }}
                     exit={{ opacity: 0, scale: 0.9 }}
                     transition={{ duration: 0.2 }}
-                    className="group bg-white rounded-2xl border border-border/40 overflow-hidden hover:shadow-xl transition-all duration-300"
+                    className="group bg-white rounded-2xl border border-border/40 overflow-hidden hover:shadow-xl transition-all duration-300 relative"
                   >
+                    <Link to="/produto/$slug" params={{ slug: p.name.toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "").replace(/[^a-z0-9]+/g, "-").replace(/^-|-$/g, "") }} className="absolute inset-0 z-10" />
                     <div className="aspect-square bg-brand-cream/30 relative overflow-hidden">
                       <img 
                         src={`https://placehold.co/400x400/fce8f3/b03578?text=${encodeURIComponent(p.name)}`} 
@@ -229,7 +230,7 @@ function CatalogoPage() {
                       </p>
                       <Button 
                         onClick={() => handleWhatsApp(p.name, p.price)}
-                        className="w-full bg-brand-gold hover:bg-brand-gold/90 text-brand-cream rounded-full py-6 group-hover:shadow-lg transition-all gap-2"
+                        className="w-full bg-brand-gold hover:bg-brand-gold/90 text-brand-cream rounded-full py-6 group-hover:shadow-lg transition-all gap-2 relative z-20"
                       >
                         <MessageCircle className="size-4" /> Quero esse
                       </Button>
