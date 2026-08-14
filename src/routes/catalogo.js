@@ -1,5 +1,5 @@
 import { useMemo, useEffect } from "react";
-import { createFileRoute, useNavigate, Link } from "@tanstack/react-router";
+import { createFileRoute, useNavigate } from "@tanstack/react-router";
 import { useQuery } from "@tanstack/react-query";
 import { z } from "zod";
 import { Header } from "@/components/site/Header";
@@ -8,6 +8,7 @@ import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
 import { MessageCircle, Loader2 } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
+import { ProductCard } from "@/components/site/ProductCard";
 import { supabase } from "@/integrations/supabase/client";
 const catalogoSearchSchema = z.object({
     categoria: z.string().optional(),
@@ -71,21 +72,35 @@ function CatalogoPage() {
         const text = `Olá! Vi o catálogo do site e tenho interesse em:\n\n🛍️ Produto: ${productName}\n💰 Valor: ${formattedPrice}\n\nPode me contar mais sobre prazo, arte e formas de pagamento?`;
         window.open(`https://wa.me/5566984266994?text=${encodeURIComponent(text)}`, "_blank");
     };
-    return (<div className="min-h-screen flex flex-col bg-brand-cream">
+    return (<div className="min-h-screen flex flex-col bg-brand-cream/30">
       <Header />
-      <main className="flex-1 pb-20">
-        <section className="px-6 py-12 text-center">
-          <div className="mx-auto max-w-4xl">
-            <h1 className="font-serif text-4xl md:text-5xl text-brand-dark mb-4">Catálogo de Produtos</h1>
-            <p className="text-muted-foreground text-sm md:text-base max-w-2xl mx-auto">
-              Escolha o produto, clique em "Quero esse" e a gente cuida do resto. Entrega em Rondonópolis-MT.
-            </p>
+      
+      <main className="flex-1">
+        {/* Hero Section */}
+        <section className="bg-brand-pink text-brand-cream py-16 md:py-24">
+          <div className="container mx-auto px-6 text-center max-w-4xl">
+            <motion.h1 initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} className="font-serif text-4xl md:text-6xl mb-6">
+              Nosso Catálogo
+            </motion.h1>
+            <motion.p initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.1 }} className="text-lg md:text-xl opacity-90 leading-relaxed font-light">
+              Explore nossa variedade de canecas, camisetas, copos e presentes personalizados 
+              feitos com carinho para momentos especiais.
+            </motion.p>
           </div>
         </section>
 
-        <section className="px-6 mb-12">
-          <div className="mx-auto max-w-7xl">
-            <div className="flex flex-nowrap md:flex-wrap overflow-x-auto pb-4 md:pb-0 gap-2 scrollbar-hide">
+        {/* Catalog Content */}
+        <div className="container mx-auto px-6 py-12">
+          
+          {/* Categories Filter */}
+          <div className="flex flex-col gap-6 mb-12">
+            <div className="flex items-center justify-between">
+              <h2 className="text-sm font-bold uppercase tracking-[0.2em] text-muted-foreground/60 flex items-center gap-2">
+                Filtrar por categoria
+              </h2>
+            </div>
+            
+            <div className="flex flex-wrap gap-2.5">
               <button onClick={() => handleCategoryClick("Todos")} className={cn("px-5 py-2.5 rounded-full text-sm font-medium transition-all border shrink-0", activeCategory === "Todos"
             ? "bg-brand-gold text-brand-cream border-brand-gold shadow-sm"
             : "bg-transparent border-border text-muted-foreground hover:border-brand-gold hover:text-brand-gold")}>
@@ -98,78 +113,64 @@ function CatalogoPage() {
                 </button>))}
             </div>
           </div>
-        </section>
 
-        <section className="px-6 mb-8">
-          <div className="mx-auto max-w-7xl">
-            <div className="bg-secondary/40 rounded-xl p-4 flex flex-col md:flex-row items-center justify-center gap-4 md:gap-8 text-[12px] text-muted-foreground border border-border/40">
-              <span className="flex items-center gap-2">📍 Entrega em domicílio em Rondonópolis-MT</span>
-              <span className="hidden md:inline text-border">•</span>
-              <span className="flex items-center gap-2">🎨 Arte inclusa em todos os produtos</span>
-              <span className="hidden md:inline text-border">•</span>
-              <span className="flex items-center gap-2">✅ Você aprova antes de produzir</span>
-            </div>
-          </div>
-        </section>
-
-        <section className="px-6 mb-20">
-          <div className="mx-auto max-w-7xl">
-            {(loadingCategories || loadingProducts) ? (<div className="flex flex-col items-center justify-center py-20 gap-4">
-                <Loader2 className="size-10 text-brand-gold animate-spin"/>
-                <p className="text-muted-foreground">Carregando catálogo...</p>
-              </div>) : (<motion.div layout className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4 md:gap-8">
+          {/* Products Grid */}
+          <div className="min-h-[400px]">
+            {loadingProducts || loadingCategories ? (<div className="flex flex-col items-center justify-center py-24 gap-4">
+                <Loader2 className="size-8 animate-spin text-brand-gold"/>
+                <p className="text-muted-foreground animate-pulse font-light">Buscando mimos exclusivos...</p>
+              </div>) : filteredProducts.length > 0 ? (<motion.div layout className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-8">
                 <AnimatePresence mode="popLayout">
-                  {filteredProducts.map((p) => (<motion.div key={p.id} layout initial={{ opacity: 0, scale: 0.9 }} animate={{ opacity: 1, scale: 1 }} exit={{ opacity: 0, scale: 0.9 }} transition={{ duration: 0.2 }} className="group bg-white rounded-2xl border border-border/40 overflow-hidden hover:shadow-xl transition-all duration-300 relative">
-                      <Link to="/produto/$slug" params={{ slug: p.slug }} className="absolute inset-0 z-10"/>
-                      <div className="aspect-square bg-brand-cream/30 relative overflow-hidden">
-                        <img src={p.image_url || `https://placehold.co/400x400/fce8f3/b03578?text=${encodeURIComponent(p.title)}`} alt={p.title} className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500"/>
-                        <div className="absolute top-3 left-3">
-                          <span className="px-3 py-1 bg-brand-gold/10 text-brand-gold text-[10px] font-bold uppercase tracking-wider rounded-full backdrop-blur-md">
-                            {p.categories?.name?.split(' ')[0] || 'Geral'}
-                          </span>
-                        </div>
-                      </div>
-                      <div className="p-4 md:p-5">
-                        <h3 className="font-serif text-base md:text-lg text-brand-dark mb-1 line-clamp-1">{p.title}</h3>
-                        <div className="flex items-baseline gap-1 mb-3">
-                          <span className="text-xs font-semibold text-brand-gold">R$</span>
-                          <span className="text-xl font-bold text-brand-dark tracking-tight">
-                            {new Intl.NumberFormat('pt-BR', { minimumFractionDigits: 2 }).format(p.price)}
-                          </span>
-                        </div>
-                        <p className="text-[10px] text-muted-foreground mb-4 flex items-center gap-1.5 uppercase tracking-wider font-semibold">
-                          <span className="size-1 bg-brand-gold rounded-full"/> Arte inclusa · Aprovação prévia
-                        </p>
-                        <Button onClick={() => handleWhatsApp(p.title, p.price)} className="w-full bg-brand-gold hover:bg-brand-gold/90 text-brand-cream rounded-full py-6 group-hover:shadow-lg transition-all gap-2 relative z-20">
-                          <MessageCircle className="size-4"/> Quero esse
-                        </Button>
-                      </div>
+                  {filteredProducts.map((product) => (<motion.div layout key={product.id} initial={{ opacity: 0, scale: 0.9 }} animate={{ opacity: 1, scale: 1 }} exit={{ opacity: 0, scale: 0.9 }} transition={{ duration: 0.2 }}>
+                      <ProductCard p={{
+                    id: product.id,
+                    title: product.title,
+                    price: Number(product.price),
+                    image_url: product.image_url,
+                    slug: product.slug,
+                    kind: product.kind || 'ready'
+                }}/>
                     </motion.div>))}
                 </AnimatePresence>
-              </motion.div>)}
-          </div>
-        </section>
-
-        <section className="px-6">
-          <div className="mx-auto max-w-7xl">
-            <div className="bg-brand-gold rounded-3xl p-10 md:p-16 text-center text-brand-cream shadow-2xl relative overflow-hidden">
-              <div className="absolute top-0 right-0 -mr-20 -mt-20 size-80 bg-white/10 rounded-full blur-3xl"/>
-              <div className="absolute bottom-0 left-0 -ml-20 -mb-20 size-80 bg-black/10 rounded-full blur-3xl"/>
-              <div className="relative z-10">
-                <h2 className="font-serif text-3xl md:text-4xl mb-4">Não achou o que procura?</h2>
-                <p className="text-brand-cream/80 mb-8 max-w-2xl mx-auto text-sm md:text-base">
-                  Personalizamos qualquer produto com a sua arte, seu logo ou sua frase. Fale com a gente e a gente resolve.
+              </motion.div>) : (<div className="text-center py-24 bg-secondary/20 rounded-3xl border border-dashed border-border">
+                <div className="size-16 bg-background rounded-full flex items-center justify-center mx-auto mb-6 shadow-sm">
+                  <MessageCircle className="size-8 text-muted-foreground/40"/>
+                </div>
+                <h3 className="text-xl font-medium mb-2">Nenhum produto encontrado</h3>
+                <p className="text-muted-foreground mb-8 max-w-sm mx-auto">
+                  Não encontrou o que procurava nesta categoria? Entre em contato e fazemos para você!
                 </p>
-                <a href="https://wa.me/5566984266994?text=Olá%21%20Não%20encontrei%20o%20produto%20que%20quero%20no%20catálogo.%20Pode%20me%20ajudar%3F" target="_blank" rel="noopener noreferrer">
-                  <Button size="lg" className="bg-white text-brand-gold hover:bg-white/90 rounded-full px-10 py-7 text-lg font-bold gap-3">
-                    <MessageCircle className="size-6"/> Conversar pelo WhatsApp
-                  </Button>
-                </a>
-              </div>
+                <Button onClick={() => handleCategoryClick("Todos")} variant="outline" className="rounded-full px-8">
+                  Ver todos os produtos
+                </Button>
+              </div>)}
+          </div>
+        </div>
+
+        {/* Custom Order CTA */}
+        <section className="container mx-auto px-6 py-20">
+          <div className="bg-[#fcf8f1] rounded-[2rem] border border-[#f0e6c8] p-8 md:p-16 text-center max-w-5xl mx-auto overflow-hidden relative">
+            <div className="absolute top-0 right-0 w-64 h-64 bg-brand-gold/5 rounded-full -mr-32 -mt-32"/>
+            <div className="absolute bottom-0 left-0 w-64 h-64 bg-brand-pink/5 rounded-full -ml-32 -mb-32"/>
+            
+            <div className="relative z-10">
+              <span className="inline-block text-brand-gold font-bold uppercase tracking-[0.2em] text-[10px] mb-6 px-4 py-1.5 rounded-full bg-brand-gold/10">
+                Encomendas Especiais
+              </span>
+              <h2 className="font-serif text-3xl md:text-4xl mb-6">Quer algo totalmente exclusivo?</h2>
+              <p className="text-muted-foreground text-lg mb-10 max-w-2xl mx-auto font-light">
+                Criamos projetos personalizados para empresas, eventos, casamentos ou presentes únicos. 
+                Fale conosco agora e solicite um orçamento sem compromisso.
+              </p>
+              <Button onClick={() => window.open('https://wa.me/5566984266994', '_blank')} size="lg" className="rounded-full bg-brand-pink text-brand-cream hover:bg-brand-pink/90 px-10 py-7 text-lg shadow-lg shadow-brand-pink/20 transition-all hover:scale-105">
+                <MessageCircle className="mr-2 size-5"/>
+                Chamar no WhatsApp
+              </Button>
             </div>
           </div>
         </section>
       </main>
+
       <Footer />
     </div>);
 }
