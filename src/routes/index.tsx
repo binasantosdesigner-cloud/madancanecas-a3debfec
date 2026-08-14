@@ -46,18 +46,54 @@ function HomePage() {
   const { data: ready } = useQuery({
     queryKey: ["products", "ready"],
     queryFn: async () => {
-      const { data } = await supabase.from("products").select("*").eq("kind", "ready").eq("active", true).limit(6);
+      // First try to fetch featured ready products
+      const { data: featured } = await supabase
+        .from("products")
+        .select("*")
+        .eq("kind", "ready")
+        .eq("active", true)
+        .eq("featured", true)
+        .limit(6);
+      
+      if (featured && featured.length > 0) return featured as ProductCardData[];
+      
+      // Fallback to normal ready products
+      const { data } = await supabase
+        .from("products")
+        .select("*")
+        .eq("kind", "ready")
+        .eq("active", true)
+        .limit(6);
       return (data ?? []) as ProductCardData[];
     },
   });
 
+
   const { data: custom } = useQuery({
     queryKey: ["products", "custom"],
     queryFn: async () => {
-      const { data } = await supabase.from("products").select("*").eq("kind", "custom").eq("active", true).limit(4);
+      // First try to fetch featured custom products
+      const { data: featured } = await supabase
+        .from("products")
+        .select("*")
+        .eq("kind", "custom")
+        .eq("active", true)
+        .eq("featured", true)
+        .limit(4);
+      
+      if (featured && featured.length > 0) return featured as ProductCardData[];
+
+      // Fallback to normal custom products
+      const { data } = await supabase
+        .from("products")
+        .select("*")
+        .eq("kind", "custom")
+        .eq("active", true)
+        .limit(4);
       return (data ?? []) as ProductCardData[];
     },
   });
+
 
 
   return (
