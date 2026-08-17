@@ -41,8 +41,10 @@ function CatalogoPage() {
   const [priceRange, setPriceRange] = useState(0); // índice em PRICE_RANGES
   const [showFavoritesOnly, setShowFavoritesOnly] = useState(false);
   const [showFilters, setShowFilters] = useState(false);
+  const [activeSubSlug, setActiveSubSlug] = useState<string | undefined>(undefined);
 
   useEffect(() => { window.scrollTo(0, 0); }, [pagina, categoria]);
+  useEffect(() => { setActiveSubSlug(undefined); }, [categoria]);
 
   // Categorias
   const { data: categories = [], isLoading: loadingCategories } = useQuery({
