@@ -104,8 +104,14 @@ function AdminProducts() {
     queryFn: async () => (await supabase.from("products").select("*, categories(name)").order("created_at", { ascending: false })).data ?? [],
   });
   const { data: cats } = useQuery({
-    queryKey: ["admin-cats"],
-    queryFn: async () => (await supabase.from("categories").select("*").order("display_order")).data ?? [],
+    queryKey: ["categories"],
+    queryFn: async () => {
+      const { data } = await supabase
+        .from("categories")
+        .select("id, name, slug, parent_id")
+        .order("display_order", { ascending: true });
+      return data;
+    },
   });
 
   // Query adicional para contar favoritos por produto
