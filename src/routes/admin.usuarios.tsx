@@ -1,5 +1,5 @@
 import { createFileRoute } from "@tanstack/react-router";
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { Input } from "@/components/ui/input";
@@ -75,6 +75,8 @@ function AdminUsersPage() {
     },
   });
 
+  const syncedRef = useRef(false);
+
   const roles = useQuery({
     queryKey: ["admin", "user_roles"],
     queryFn: async () => {
@@ -83,6 +85,37 @@ function AdminUsersPage() {
       return (data ?? []) as Role[];
     },
   });
+
+  // Alguns usuarios (ex.: criados direto no painel de autenticacao) podem nao ter
+  // linha em profiles. Criamos o perfil faltante uma unica vez por montagem.
+  useEffect(() => {
+    if (syncedRef.current) return;
+    if (!profiles.data || !roles.data) return;
+    syncedRef.current = true;
+
+    (async () => {
+      try {
+        const profileIds = new Set(profiles.data.map((p) => p.id));
+        const missingIds = Array.from(
+          new Set(roles.data.filter((r) => !profileIds.has(r.user_id)).map((r) => r.user_id))
+        );
+        if (missingIds.length === 0) return;
+
+        for (const userId of missingIds) {
+          const { error } = await supabase
+            .from("profiles")
+            .upsert(
+              { id: userId, full_name: null, email: null, phone: null },
+              { onConflict: "id", ignoreDuplicates: true }
+            );
+          if (error) console.error("Falha ao sincronizar perfil", userId, error);
+        }
+        qc.invalidateQueries({ queryKey: ["admin", "profiles"] });
+      } catch (err) {
+        console.error("Erro na sincronizacao de perfis", err);
+      }
+    })();
+  }, [profiles.data, roles.data, qc]);
 
   const orders = useQuery({
     queryKey: ["admin", "orders-aggregate"],
