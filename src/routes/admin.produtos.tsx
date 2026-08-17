@@ -399,12 +399,33 @@ function AdminProducts() {
                   </div>
                 </div>
               </div>
-              <div className="space-y-2">
+              {/* Category selector */}
+              <div className="space-y-1.5">
                 <Label>Categoria</Label>
-                <Select value={form.category_id ?? ""} onValueChange={(v) => setForm({ ...form, category_id: v })}>
-                  <SelectTrigger><SelectValue placeholder="Selecione" /></SelectTrigger>
-                  <SelectContent>{cats?.map((c) => <SelectItem key={c.id} value={c.id}>{c.name}</SelectItem>)}</SelectContent>
-                </Select>
+                <select
+                  value={form.category_id ?? ""}
+                  onChange={e => setForm({ ...form, category_id: e.target.value })}
+                  className="w-full rounded-lg border border-border bg-background px-3 py-2 text-sm focus:outline-none focus:ring-1 focus:ring-[#e8509a]"
+                >
+                  <option value="">Selecione uma categoria</option>
+                  {(() => {
+                    const roots = (cats ?? []).filter((c: any) => !c.parent_id);
+                    const subs = (cats ?? []).filter((c: any) => !!c.parent_id);
+                    return roots.map((root: any) => {
+                      const rootSubs = subs.filter((s: any) => s.parent_id === root.id);
+                      if (rootSubs.length === 0) {
+                        return <option key={root.id} value={root.id}>{root.name}</option>;
+                      }
+                      return (
+                        <optgroup key={root.id} label={root.name}>
+                          {rootSubs.map((sub: any) => (
+                            <option key={sub.id} value={sub.id}>{sub.name}</option>
+                          ))}
+                        </optgroup>
+                      );
+                    });
+                  })()}
+                </select>
               </div>
               <div className="space-y-2"><Label>Descrição</Label><Textarea value={form.description ?? ""} onChange={(e) => setForm({ ...form, description: e.target.value })} /></div>
               {/* Multi-image Manager */}
