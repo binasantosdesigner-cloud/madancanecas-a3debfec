@@ -1,5 +1,5 @@
 import { createFileRoute } from "@tanstack/react-router";
-import { useState } from "react";
+import { Fragment, useState } from "react";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { Input } from "@/components/ui/input";
@@ -21,6 +21,7 @@ type Category = {
   id: string; slug: string; name: string;
   description: string | null; image_url: string | null; display_order: number;
   featured?: boolean;
+  parent_id?: string | null;
 };
 
 
@@ -40,7 +41,10 @@ function AdminCategoriesPage() {
     queryKey: ["admin", "categories"],
     queryFn: async () => {
       const { data, error } = await supabase
-        .from("categories").select("*").order("display_order", { ascending: true });
+        .from("categories")
+        .select("*")
+        .order("parent_id", { ascending: true, nullsFirst: true })
+        .order("display_order", { ascending: true });
       if (error) throw error;
       return (data ?? []) as Category[];
     },
@@ -55,6 +59,7 @@ function AdminCategoriesPage() {
         display_order: Number(c.display_order ?? 0),
         featured: featured,
         image_url: imageUrl || null,
+        parent_id: c.parent_id || null,
       };
 
 
@@ -86,6 +91,17 @@ function AdminCategoriesPage() {
     onError: (e: Error) => toast.error(e.message),
   });
 
+  const all = list.data ?? [];
+  const rootCategories = all.filter((c) => !c.parent_id);
+  const subCategories = all.filter((c) => !!c.parent_id);
+  const getSubcats = (parentId: string) => subCategories.filter((c) => c.parent_id === parentId);
+
+  const openEdit = (c: Category) => {
+    setEditing(c);
+    setFeatured(c.featured ?? false);
+    setImageUrl(c.image_url ?? "");
+  };
+
   return (
     <div className="space-y-6">
       <header className="flex items-center justify-between gap-3">
@@ -96,7 +112,7 @@ function AdminCategoriesPage() {
         <Dialog open={!!editing} onOpenChange={(o) => !o && setEditing(null)}>
           <DialogTrigger asChild>
             <Button onClick={() => {
-              setEditing({ display_order: (list.data?.length ?? 0) + 1 });
+              setEditing({ display_order: (list.data?.length ?? 0) + 1, parent_id: null });
               setFeatured(false);
               setImageUrl('');
             }}>
@@ -109,6 +125,24 @@ function AdminCategoriesPage() {
               <DialogTitle>{editing?.id ? "Editar categoria" : "Nova categoria"}</DialogTitle>
             </DialogHeader>
             <div className="space-y-3">
+              <div className="space-y-1.5">
+                <Label>Tipo</Label>
+                <select
+                  value={editing?.parent_id ?? ""}
+                  onChange={(e) => setEditing({ ...editing, parent_id: e.target.value || null })}
+                  className="w-full rounded-lg border border-border bg-background px-3 py-2 text-sm focus:outline-none focus:ring-1 focus:ring-[#e8509a]"
+                >
+                  <option value="">Categoria principal</option>
+                  {(list.data ?? [])
+                    .filter((c) => !c.parent_id && (!editing?.id || c.id !== editing.id))
+                    .map((c) => (
+                      <option key={c.id} value={c.id}>{c.name}</option>
+                    ))}
+                </select>
+                <p className="text-xs text-muted-foreground">
+                  Deixe em branco para categoria principal. Selecione uma categoria para criar como subcategoria dela.
+                </p>
+              </div>
               <div>
                 <Label>Nome</Label>
                 <Input value={editing?.name ?? ""}
@@ -236,36 +270,78 @@ function AdminCategoriesPage() {
               {!list.isLoading && (list.data?.length ?? 0) === 0 && (
                 <tr><td colSpan={5} className="p-8 text-center text-muted-foreground">Nenhuma categoria.</td></tr>
               )}
-              {list.data?.map((c) => (
-                <tr key={c.id} className="border-t border-border">
-                  <td className="px-4 py-3 w-16 text-muted-foreground">{c.display_order}</td>
-                  <td className="px-4 py-3 font-medium text-foreground">{c.name}</td>
-                  <td className="px-4 py-3 text-muted-foreground">{c.slug}</td>
-                  <td className="px-4 py-3 text-muted-foreground max-w-md truncate">{c.description}</td>
-                  <td className="text-center">
-                    {c.featured ? (
-                      <span className="inline-flex items-center gap-1 text-xs text-[#e8509a] bg-[#fce8f3] px-2 py-0.5 rounded-full font-medium">
-                        ⭐ Destaque
-                      </span>
-                    ) : (
-                      <span className="text-xs text-muted-foreground">—</span>
-                    )}
-                  </td>
-                  <td className="px-4 py-3 text-right space-x-2">
-                    <Button size="sm" variant="outline" onClick={() => {
-                      setEditing(c);
-                      setFeatured(c.featured ?? false);
-                      setImageUrl(c.image_url ?? '');
-                    }}>
+              {rootCategories.map((cat) => (
+                <Fragment key={cat.id}>
+                  <tr className="border-t border-border hover:bg-secondary/20 transition-colors">
+                    <td className="px-4 py-3 w-16 text-muted-foreground">{cat.display_order}</td>
+                    <td className="px-4 py-3">
+                      <div className="flex items-center gap-2">
+                        {cat.image_url && (
+                          <img src={cat.image_url} alt="" className="size-8 rounded-full object-cover border border-border" />
+                        )}
+                        <span className="text-sm font-semibold text-foreground">{cat.name}</span>
+                        {getSubcats(cat.id).length > 0 && (
+                          <span className="text-[10px] bg-secondary text-muted-foreground px-2 py-0.5 rounded-full">
+                            {getSubcats(cat.id).length} subcats
+                          </span>
+                        )}
+                      </div>
+                    </td>
+                    <td className="px-4 py-3 text-muted-foreground">{cat.slug}</td>
+                    <td className="px-4 py-3 text-muted-foreground max-w-md truncate">{cat.description ?? "—"}</td>
+                    <td className="text-center">
+                      {cat.featured ? (
+                        <span className="inline-flex items-center gap-1 text-xs text-[#e8509a] bg-[#fce8f3] px-2 py-0.5 rounded-full font-medium">
+                          ⭐ Destaque
+                        </span>
+                      ) : (
+                        <span className="text-xs text-muted-foreground">—</span>
+                      )}
+                    </td>
+                    <td className="px-4 py-3 text-right space-x-2">
+                      <Button size="sm" variant="outline" onClick={() => openEdit(cat)}>
+                        <Pencil className="h-4 w-4" />
+                      </Button>
+                      <Button size="sm" variant="outline"
+                        onClick={() => { if (confirm(`Excluir "${cat.name}"?`)) remove.mutate(cat.id); }}>
+                        <Trash2 className="h-4 w-4" />
+                      </Button>
+                    </td>
+                  </tr>
 
-                      <Pencil className="h-4 w-4" />
-                    </Button>
-                    <Button size="sm" variant="outline"
-                      onClick={() => { if (confirm(`Excluir "${c.name}"?`)) remove.mutate(c.id); }}>
-                      <Trash2 className="h-4 w-4" />
-                    </Button>
-                  </td>
-                </tr>
+                  {getSubcats(cat.id).map((sub) => (
+                    <tr key={sub.id} className="border-t border-border/40 bg-secondary/5 hover:bg-secondary/10 transition-colors">
+                      <td className="px-4 py-3 pl-8 w-16 text-xs text-muted-foreground/60">{sub.display_order}</td>
+                      <td className="px-4 py-3 pl-8">
+                        <div className="flex items-center gap-2">
+                          <div className="size-1.5 rounded-full bg-[#e8509a]/40 shrink-0" />
+                          {sub.image_url && (
+                            <img src={sub.image_url} alt="" className="size-6 rounded-full object-cover border border-border" />
+                          )}
+                          <span className="text-sm text-muted-foreground">{sub.name}</span>
+                        </div>
+                      </td>
+                      <td className="px-4 py-3 text-xs text-muted-foreground/60">{sub.slug}</td>
+                      <td className="px-4 py-3 text-xs text-muted-foreground/60 max-w-md truncate">{sub.description ?? "—"}</td>
+                      <td className="text-center">
+                        {sub.featured ? (
+                          <span className="text-xs text-[#a57840] font-medium">⭐</span>
+                        ) : (
+                          <span className="text-xs text-muted-foreground/40">—</span>
+                        )}
+                      </td>
+                      <td className="px-4 py-3 text-right space-x-2">
+                        <Button size="sm" variant="outline" onClick={() => openEdit(sub)}>
+                          <Pencil className="h-3.5 w-3.5" />
+                        </Button>
+                        <Button size="sm" variant="outline"
+                          onClick={() => { if (confirm(`Excluir "${sub.name}"?`)) remove.mutate(sub.id); }}>
+                          <Trash2 className="h-3.5 w-3.5" />
+                        </Button>
+                      </td>
+                    </tr>
+                  ))}
+                </Fragment>
               ))}
             </tbody>
           </table>
