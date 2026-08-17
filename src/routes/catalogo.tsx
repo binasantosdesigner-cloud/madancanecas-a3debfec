@@ -79,20 +79,30 @@ function CatalogoPage() {
     },
   });
 
-  // Categoria ativa
-  const activeCategory = useMemo(() => {
-    if (!categoria) return "Todos";
-    const found = categories.find((c: any) => c.slug === categoria);
-    return found ? found.name : "Todos";
-  }, [categoria, categories]);
+  // Categoria ativa (slug ou "Todos")
+  const activeCategory = categoria ?? "Todos";
 
   // Filtros aplicados
   const filteredProducts = useMemo(() => {
     let list = [...products];
 
-    // Filtro por categoria
+    // Filtro por categoria (com subcategorias)
     if (activeCategory !== "Todos") {
-      list = list.filter((p: any) => p.categories?.name === activeCategory);
+      if (activeSubSlug) {
+        const subCat = allCategories.find((c: any) => c.slug === activeSubSlug);
+        if (subCat) {
+          list = list.filter((p: any) => p.category_id === subCat.id);
+        }
+      } else {
+        const parentCat = allCategories.find((c: any) => c.slug === activeCategory);
+        if (parentCat) {
+          const subIds = allCategories
+            .filter((c: any) => c.parent_id === parentCat.id)
+            .map((c: any) => c.id);
+          const validIds = [parentCat.id, ...subIds];
+          list = list.filter((p: any) => validIds.includes(p.category_id));
+        }
+      }
     }
 
     // Filtro por preço
