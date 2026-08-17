@@ -47,17 +47,23 @@ function CatalogoPage() {
   useEffect(() => { setActiveSubSlug(undefined); }, [categoria]);
 
   // Categorias
-  const { data: categories = [], isLoading: loadingCategories } = useQuery({
+  const { data: allCategories = [], isLoading: loadingCategories } = useQuery({
     queryKey: ["categories"],
     queryFn: async () => {
       const { data, error } = await supabase
         .from("categories")
-        .select("*")
+        .select("id, name, slug, parent_id, display_order")
         .order("display_order", { ascending: true });
       if (error) throw error;
-      return data;
+      return data ?? [];
     },
   });
+
+  const rootCategories = allCategories.filter((c: any) => !c.parent_id);
+  const getSubcats = (parentId: string) =>
+    allCategories.filter((c: any) => c.parent_id === parentId);
+
+
 
   // Produtos
   const { data: products = [], isLoading: loadingProducts } = useQuery({
