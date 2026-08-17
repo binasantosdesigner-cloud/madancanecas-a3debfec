@@ -251,6 +251,7 @@ export type Database = {
           id: string
           image_url: string | null
           name: string
+          parent_id: string | null
           slug: string
         }
         Insert: {
@@ -261,6 +262,7 @@ export type Database = {
           id?: string
           image_url?: string | null
           name: string
+          parent_id?: string | null
           slug: string
         }
         Update: {
@@ -271,9 +273,25 @@ export type Database = {
           id?: string
           image_url?: string | null
           name?: string
+          parent_id?: string | null
           slug?: string
         }
-        Relationships: []
+        Relationships: [
+          {
+            foreignKeyName: "categories_parent_id_fkey"
+            columns: ["parent_id"]
+            isOneToOne: false
+            referencedRelation: "categories"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "categories_parent_id_fkey"
+            columns: ["parent_id"]
+            isOneToOne: false
+            referencedRelation: "categories_tree"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       favorites: {
         Row: {
@@ -490,6 +508,13 @@ export type Database = {
             referencedRelation: "categories"
             referencedColumns: ["id"]
           },
+          {
+            foreignKeyName: "products_category_id_fkey"
+            columns: ["category_id"]
+            isOneToOne: false
+            referencedRelation: "categories_tree"
+            referencedColumns: ["id"]
+          },
         ]
       }
       profiles: {
@@ -569,7 +594,35 @@ export type Database = {
       }
     }
     Views: {
-      [_ in never]: never
+      categories_tree: {
+        Row: {
+          display_order: number | null
+          featured: boolean | null
+          id: string | null
+          image_url: string | null
+          name: string | null
+          parent_id: string | null
+          parent_name: string | null
+          parent_slug: string | null
+          slug: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "categories_parent_id_fkey"
+            columns: ["parent_id"]
+            isOneToOne: false
+            referencedRelation: "categories"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "categories_parent_id_fkey"
+            columns: ["parent_id"]
+            isOneToOne: false
+            referencedRelation: "categories_tree"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
     }
     Functions: {
       has_role: {
