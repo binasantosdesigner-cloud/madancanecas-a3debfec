@@ -163,32 +163,72 @@ function CatalogoPage() {
 
             {/* Linha 1: Categorias + botão de filtros avançados */}
             <div className="flex items-start justify-between gap-4">
-              <div className="flex flex-wrap gap-2">
-                <button
-                  onClick={() => handleCategoryClick(undefined)}
-                  className={cn(
-                    "px-4 py-2 rounded-full text-sm font-medium transition-all border",
-                    activeCategory === "Todos"
-                      ? "bg-[#e8509a] text-white border-[#e8509a]"
-                      : "bg-transparent border-border text-muted-foreground hover:border-[#e8509a] hover:text-[#e8509a]"
-                  )}
-                >
-                  Todos
-                </button>
-                {categories.map((cat: any) => (
+              <div className="flex flex-col gap-2 flex-1 min-w-0">
+                {/* Root category pills */}
+                <div className="flex flex-wrap gap-2">
                   <button
-                    key={cat.id}
-                    onClick={() => handleCategoryClick(cat.slug)}
+                    onClick={() => { handleCategoryClick(undefined); setActiveSubSlug(undefined); }}
                     className={cn(
                       "px-4 py-2 rounded-full text-sm font-medium transition-all border",
-                      activeCategory === cat.name
+                      !categoria
                         ? "bg-[#e8509a] text-white border-[#e8509a]"
                         : "bg-transparent border-border text-muted-foreground hover:border-[#e8509a] hover:text-[#e8509a]"
                     )}
                   >
-                    {cat.name}
+                    Todos
                   </button>
-                ))}
+                  {rootCategories.map((cat: any) => (
+                    <button
+                      key={cat.id}
+                      onClick={() => { handleCategoryClick(cat.slug); setActiveSubSlug(undefined); }}
+                      className={cn(
+                        "px-4 py-2 rounded-full text-sm font-medium transition-all border",
+                        categoria === cat.slug
+                          ? "bg-[#e8509a] text-white border-[#e8509a]"
+                          : "bg-transparent border-border text-muted-foreground hover:border-[#e8509a] hover:text-[#e8509a]"
+                      )}
+                    >
+                      {cat.name}
+                    </button>
+                  ))}
+                </div>
+
+                {/* Subcategory pills — only when a root with subcats is selected */}
+                {categoria && (() => {
+                  const parentCat = rootCategories.find((c: any) => c.slug === categoria);
+                  if (!parentCat) return null;
+                  const subcats = getSubcats(parentCat.id);
+                  if (subcats.length === 0) return null;
+                  return (
+                    <div className="flex flex-wrap gap-2 pl-2 border-l-2 border-[#e8509a]/30">
+                      <button
+                        onClick={() => setActiveSubSlug(undefined)}
+                        className={cn(
+                          "px-3 py-1.5 rounded-full text-xs font-medium transition-all border",
+                          !activeSubSlug
+                            ? "bg-[#a57840] text-white border-[#a57840]"
+                            : "bg-transparent border-border text-muted-foreground hover:border-[#a57840] hover:text-[#a57840]"
+                        )}
+                      >
+                        Todas as {parentCat.name}
+                      </button>
+                      {subcats.map((sub: any) => (
+                        <button
+                          key={sub.id}
+                          onClick={() => setActiveSubSlug(sub.slug)}
+                          className={cn(
+                            "px-3 py-1.5 rounded-full text-xs font-medium transition-all border",
+                            activeSubSlug === sub.slug
+                              ? "bg-[#a57840] text-white border-[#a57840]"
+                              : "bg-transparent border-border text-muted-foreground hover:border-[#a57840] hover:text-[#a57840]"
+                          )}
+                        >
+                          {sub.name}
+                        </button>
+                      ))}
+                    </div>
+                  );
+                })()}
               </div>
 
               {/* Botão filtros avançados */}
