@@ -120,7 +120,7 @@ function CatalogoPage() {
     }
 
     return list;
-  }, [products, activeCategory, priceRange, showFavoritesOnly, favorites, user]);
+  }, [products, allCategories, activeCategory, activeSubSlug, priceRange, showFavoritesOnly, favorites, user]);
 
   // Paginação
   const totalPages = Math.max(1, Math.ceil(filteredProducts.length / ITEMS_PER_PAGE));
