@@ -21,6 +21,7 @@ import { Route as PerguntasFrequentesRouteImport } from './routes/perguntas-freq
 import { Route as PoliticaDeTrocasRouteImport } from './routes/politica-de-trocas'
 import { Route as SobreNosRouteImport } from './routes/sobre-nos'
 import { Route as AdminIndexRouteImport } from './routes/admin.index'
+import { Route as AdminAjudaRouteImport } from './routes/admin.ajuda'
 import { Route as AdminArtesRouteImport } from './routes/admin.artes'
 import { Route as AdminCategoriasRouteImport } from './routes/admin.categorias'
 import { Route as AdminConfiguracoesRouteImport } from './routes/admin.configuracoes'
@@ -90,6 +91,11 @@ const AdminIndexRoute = AdminIndexRouteImport.update({
   path: '/',
   getParentRoute: () => AdminRoute,
 } as any)
+const AdminAjudaRoute = AdminAjudaRouteImport.update({
+  id: '/ajuda',
+  path: '/ajuda',
+  getParentRoute: () => AdminRoute,
+} as any)
 const AdminArtesRoute = AdminArtesRouteImport.update({
   id: '/artes',
   path: '/artes',
@@ -143,6 +149,7 @@ export interface FileRoutesByFullPath {
   '/perguntas-frequentes': typeof PerguntasFrequentesRoute
   '/politica-de-trocas': typeof PoliticaDeTrocasRoute
   '/sobre-nos': typeof SobreNosRoute
+  '/admin/ajuda': typeof AdminAjudaRoute
   '/admin/artes': typeof AdminArtesRoute
   '/admin/categorias': typeof AdminCategoriasRoute
   '/admin/configuracoes': typeof AdminConfiguracoesRoute
@@ -164,6 +171,7 @@ export interface FileRoutesByTo {
   '/perguntas-frequentes': typeof PerguntasFrequentesRoute
   '/politica-de-trocas': typeof PoliticaDeTrocasRoute
   '/sobre-nos': typeof SobreNosRoute
+  '/admin/ajuda': typeof AdminAjudaRoute
   '/admin/artes': typeof AdminArtesRoute
   '/admin/categorias': typeof AdminCategoriasRoute
   '/admin/configuracoes': typeof AdminConfiguracoesRoute
@@ -187,6 +195,7 @@ export interface FileRoutesById {
   '/perguntas-frequentes': typeof PerguntasFrequentesRoute
   '/politica-de-trocas': typeof PoliticaDeTrocasRoute
   '/sobre-nos': typeof SobreNosRoute
+  '/admin/ajuda': typeof AdminAjudaRoute
   '/admin/artes': typeof AdminArtesRoute
   '/admin/categorias': typeof AdminCategoriasRoute
   '/admin/configuracoes': typeof AdminConfiguracoesRoute
@@ -211,6 +220,7 @@ export interface FileRouteTypes {
     | '/perguntas-frequentes'
     | '/politica-de-trocas'
     | '/sobre-nos'
+    | '/admin/ajuda'
     | '/admin/artes'
     | '/admin/categorias'
     | '/admin/configuracoes'
@@ -232,6 +242,7 @@ export interface FileRouteTypes {
     | '/perguntas-frequentes'
     | '/politica-de-trocas'
     | '/sobre-nos'
+    | '/admin/ajuda'
     | '/admin/artes'
     | '/admin/categorias'
     | '/admin/configuracoes'
@@ -254,6 +265,7 @@ export interface FileRouteTypes {
     | '/perguntas-frequentes'
     | '/politica-de-trocas'
     | '/sobre-nos'
+    | '/admin/ajuda'
     | '/admin/artes'
     | '/admin/categorias'
     | '/admin/configuracoes'
@@ -366,6 +378,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AdminIndexRouteImport
       parentRoute: typeof AdminRoute
     }
+    '/admin/ajuda': {
+      id: '/admin/ajuda'
+      path: '/ajuda'
+      fullPath: '/admin/ajuda'
+      preLoaderRoute: typeof AdminAjudaRouteImport
+      parentRoute: typeof AdminRoute
+    }
     '/admin/artes': {
       id: '/admin/artes'
       path: '/artes'
@@ -426,6 +445,7 @@ declare module '@tanstack/react-router' {
 }
 
 interface AdminRouteChildren {
+  AdminAjudaRoute: typeof AdminAjudaRoute
   AdminArtesRoute: typeof AdminArtesRoute
   AdminCategoriasRoute: typeof AdminCategoriasRoute
   AdminConfiguracoesRoute: typeof AdminConfiguracoesRoute
@@ -437,6 +457,7 @@ interface AdminRouteChildren {
 }
 
 const AdminRouteChildren: AdminRouteChildren = {
+  AdminAjudaRoute: AdminAjudaRoute,
   AdminArtesRoute: AdminArtesRoute,
   AdminCategoriasRoute: AdminCategoriasRoute,
   AdminConfiguracoesRoute: AdminConfiguracoesRoute,

@@ -9,7 +9,7 @@ import {
 } from "@/components/ui/sidebar";
 import {
   LayoutDashboard, Package, ShoppingBag, Users, Tag, Palette, Settings,
-  ArrowLeft, LogOut,
+  ArrowLeft, LogOut, HelpCircle,
 } from "lucide-react";
 
 export const Route = createFileRoute("/admin")({ component: AdminLayout });
@@ -23,6 +23,7 @@ const NAV: NavItem[] = [
   { to: "/admin/categorias", label: "Categorias", icon: Tag },
   { to: "/admin/pagamentos", label: "Pagamentos", icon: ShoppingBag },
   { to: "/admin/artes", label: "Aprovação de Artes", icon: Palette },
+  { to: "/admin/ajuda", label: "Central de Ajuda", icon: HelpCircle },
   { to: "/admin/configuracoes", label: "Configurações", icon: Settings },
 ];
 
