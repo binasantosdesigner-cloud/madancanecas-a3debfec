@@ -11,8 +11,17 @@ import {
   Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter, DialogTrigger,
 } from "@/components/ui/dialog";
 import { toast } from "sonner";
-import { Pencil, Plus, Trash2, Upload } from "lucide-react";
+import { Pencil, Plus, Trash2, Upload, GripVertical } from "lucide-react";
 import { cn } from "@/lib/utils";
+import {
+  DndContext, closestCenter, KeyboardSensor, PointerSensor,
+  useSensor, useSensors, DragEndEvent,
+} from '@dnd-kit/core';
+import {
+  arrayMove, SortableContext, sortableKeyboardCoordinates,
+  useSortable, verticalListSortingStrategy,
+} from '@dnd-kit/sortable';
+import { CSS } from '@dnd-kit/utilities';
 
 
 export const Route = createFileRoute("/admin/categorias")({ component: AdminCategoriesPage });
@@ -29,12 +38,148 @@ const slugify = (s: string) =>
   s.toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "")
     .replace(/[^a-z0-9]+/g, "-").replace(/(^-|-$)/g, "");
 
+function SortableRow({ cat, onEdit, onDelete, isSubcat = false, getSubcats }: {
+  cat: Category;
+  onEdit: (c: any) => void;
+  onDelete: (c: any) => void;
+  isSubcat?: boolean;
+  getSubcats: (id: string) => Category[];
+}) {
+  const { attributes, listeners, setNodeRef, transform, transition, isDragging } = useSortable({ id: cat.id });
+
+  const style = {
+    transform: CSS.Transform.toString(transform),
+    transition,
+    opacity: isDragging ? 0.5 : 1,
+    zIndex: isDragging ? 50 : undefined,
+  };
+
+  return (
+    <tr
+      ref={setNodeRef}
+      style={style}
+      className={cn(
+        "border-t border-border transition-colors",
+        isSubcat ? "border-border/40 bg-secondary/5 hover:bg-secondary/10" : "hover:bg-secondary/20"
+      )}
+    >
+      {/* Drag handle */}
+      <td className="px-4 py-3 w-10">
+        <button
+          {...attributes}
+          {...listeners}
+          className="p-1 hover:bg-muted rounded-md cursor-grab active:cursor-grabbing text-muted-foreground/50 hover:text-foreground transition-colors"
+        >
+          <GripVertical className="size-4" />
+        </button>
+      </td>
+
+      <td className={cn("px-4 py-3 w-16 text-muted-foreground", isSubcat && "pl-8 text-xs text-muted-foreground/60")}>
+        {cat.display_order}
+      </td>
+
+      <td className={cn("px-4 py-3", isSubcat && "pl-8")}>
+        <div className="flex items-center gap-2">
+          {isSubcat && <div className="size-1.5 rounded-full bg-[#e8509a]/40 shrink-0" />}
+          {cat.image_url && (
+            <img src={cat.image_url} alt="" className={cn("rounded-full object-cover border border-border", isSubcat ? "size-6" : "size-8")} />
+          )}
+          <span className={cn("text-sm text-foreground", !isSubcat && "font-semibold")}>
+            {cat.name}
+          </span>
+          {!isSubcat && getSubcats(cat.id).length > 0 && (
+            <span className="text-[10px] bg-secondary text-muted-foreground px-2 py-0.5 rounded-full">
+              {getSubcats(cat.id).length} subcats
+            </span>
+          )}
+        </div>
+      </td>
+
+      <td className={cn("px-4 py-3 text-muted-foreground", isSubcat && "text-xs text-muted-foreground/60")}>
+        {cat.slug}
+      </td>
+      <td className={cn("px-4 py-3 text-muted-foreground max-w-md truncate", isSubcat && "text-xs text-muted-foreground/60")}>
+        {cat.description ?? '—'}
+      </td>
+      
+      <td className="text-center">
+        {cat.featured ? (
+          <span className={cn(
+            "inline-flex items-center gap-1 text-xs px-2 py-0.5 rounded-full font-medium",
+            isSubcat ? "text-[#a57840]" : "text-[#e8509a] bg-[#fce8f3]"
+          )}>
+            ⭐ Destaque
+          </span>
+        ) : (
+          <span className={cn("text-xs text-muted-foreground", isSubcat && "text-muted-foreground/40")}>—</span>
+        )}
+      </td>
+      
+      <td className="px-4 py-3 text-right space-x-2">
+        <Button size="sm" variant="outline" onClick={() => onEdit(cat)}>
+          <Pencil className={cn(isSubcat ? "h-3.5 w-3.5" : "h-4 w-4")} />
+        </Button>
+        <Button size="sm" variant="outline" onClick={() => onDelete(cat)}>
+          <Trash2 className={cn(isSubcat ? "h-3.5 w-3.5" : "h-4 w-4")} />
+        </Button>
+      </td>
+    </tr>
+  );
+}
+
 function AdminCategoriesPage() {
   const qc = useQueryClient();
   const [editing, setEditing] = useState<Partial<Category> | null>(null);
   const [featured, setFeatured] = useState(false);
   const [imageUrl, setImageUrl] = useState('');
   const [uploadingImage, setUploadingImage] = useState(false);
+  const [deleteTarget, setDeleteTarget] = useState<Category | null>(null);
+
+  const sensors = useSensors(
+    useSensor(PointerSensor),
+    useSensor(KeyboardSensor, { coordinateGetter: sortableKeyboardCoordinates })
+  );
+
+  const handleDragEnd = async (event: DragEndEvent) => {
+    const { active, over } = event;
+    if (!over || active.id === over.id) return;
+
+    const oldIndex = all.findIndex(c => c.id === active.id);
+    const newIndex = all.findIndex(c => c.id === over.id);
+    
+    // We only allow reordering within the same parent (root level or same subcategory group)
+    // for simplicity and to match the visual tree.
+    const activeCat = all[oldIndex];
+    const overCat = all[newIndex];
+    
+    if (activeCat.parent_id !== overCat.parent_id) {
+      toast.error("Só é possível reordenar dentro do mesmo nível");
+      return;
+    }
+
+    const reordered = arrayMove(all, oldIndex, newIndex);
+
+    // Optimistic update
+    qc.setQueryData(['admin', 'categories'], reordered);
+
+    // Persist all display orders for this specific level
+    const sameLevel = reordered.filter(c => c.parent_id === activeCat.parent_id);
+    const updates = sameLevel.map((cat, idx) => ({
+      id: cat.id,
+      display_order: idx + 1,
+    }));
+
+    try {
+      for (const u of updates) {
+        await supabase.from('categories').update({ display_order: u.display_order }).eq('id', u.id);
+      }
+      toast.success('Ordem salva!');
+      list.refetch();
+    } catch (err: any) {
+      toast.error("Erro ao salvar ordem: " + err.message);
+      list.refetch();
+    }
+  };
 
 
   const list = useQuery({
@@ -256,94 +401,53 @@ function AdminCategoriesPage() {
           <table className="w-full text-sm">
             <thead className="bg-muted/40 text-left text-xs uppercase text-muted-foreground">
               <tr>
-                <th className="px-4 py-3">Ordem</th>
+                <th className="px-4 py-3 w-10"></th>
+                <th className="px-4 py-3 w-16">Ordem</th>
                 <th className="px-4 py-3">Nome</th>
                 <th className="px-4 py-3">Slug</th>
                 <th className="px-4 py-3">Descrição</th>
                 <th className="px-4 py-3 text-center">Destaque</th>
                 <th className="px-4 py-3 text-right">Ações</th>
-
               </tr>
             </thead>
-            <tbody>
-              {list.isLoading && <tr><td colSpan={5} className="p-8 text-center text-muted-foreground">Carregando…</td></tr>}
-              {!list.isLoading && (list.data?.length ?? 0) === 0 && (
-                <tr><td colSpan={5} className="p-8 text-center text-muted-foreground">Nenhuma categoria.</td></tr>
-              )}
-              {rootCategories.map((cat) => (
-                <Fragment key={cat.id}>
-                  <tr className="border-t border-border hover:bg-secondary/20 transition-colors">
-                    <td className="px-4 py-3 w-16 text-muted-foreground">{cat.display_order}</td>
-                    <td className="px-4 py-3">
-                      <div className="flex items-center gap-2">
-                        {cat.image_url && (
-                          <img src={cat.image_url} alt="" className="size-8 rounded-full object-cover border border-border" />
-                        )}
-                        <span className="text-sm font-semibold text-foreground">{cat.name}</span>
-                        {getSubcats(cat.id).length > 0 && (
-                          <span className="text-[10px] bg-secondary text-muted-foreground px-2 py-0.5 rounded-full">
-                            {getSubcats(cat.id).length} subcats
-                          </span>
-                        )}
-                      </div>
-                    </td>
-                    <td className="px-4 py-3 text-muted-foreground">{cat.slug}</td>
-                    <td className="px-4 py-3 text-muted-foreground max-w-md truncate">{cat.description ?? "—"}</td>
-                    <td className="text-center">
-                      {cat.featured ? (
-                        <span className="inline-flex items-center gap-1 text-xs text-[#e8509a] bg-[#fce8f3] px-2 py-0.5 rounded-full font-medium">
-                          ⭐ Destaque
-                        </span>
-                      ) : (
-                        <span className="text-xs text-muted-foreground">—</span>
-                      )}
-                    </td>
-                    <td className="px-4 py-3 text-right space-x-2">
-                      <Button size="sm" variant="outline" onClick={() => openEdit(cat)}>
-                        <Pencil className="h-4 w-4" />
-                      </Button>
-                      <Button size="sm" variant="outline"
-                        onClick={() => { if (confirm(`Excluir "${cat.name}"?`)) remove.mutate(cat.id); }}>
-                        <Trash2 className="h-4 w-4" />
-                      </Button>
-                    </td>
-                  </tr>
+            <DndContext
+              sensors={sensors}
+              collisionDetection={closestCenter}
+              onDragEnd={handleDragEnd}
+            >
+              <SortableContext
+                items={all.map(c => c.id)}
+                strategy={verticalListSortingStrategy}
+              >
+                <tbody>
+                  {list.isLoading && <tr><td colSpan={7} className="p-8 text-center text-muted-foreground">Carregando…</td></tr>}
+                  {!list.isLoading && all.length === 0 && (
+                    <tr><td colSpan={7} className="p-8 text-center text-muted-foreground">Nenhuma categoria.</td></tr>
+                  )}
+                  {rootCategories.map((cat) => (
+                    <Fragment key={cat.id}>
+                      <SortableRow 
+                        cat={cat} 
+                        onEdit={openEdit} 
+                        onDelete={(c) => { if (confirm(`Excluir "${c.name}"?`)) remove.mutate(c.id); }} 
+                        getSubcats={getSubcats}
+                      />
 
-                  {getSubcats(cat.id).map((sub) => (
-                    <tr key={sub.id} className="border-t border-border/40 bg-secondary/5 hover:bg-secondary/10 transition-colors">
-                      <td className="px-4 py-3 pl-8 w-16 text-xs text-muted-foreground/60">{sub.display_order}</td>
-                      <td className="px-4 py-3 pl-8">
-                        <div className="flex items-center gap-2">
-                          <div className="size-1.5 rounded-full bg-[#e8509a]/40 shrink-0" />
-                          {sub.image_url && (
-                            <img src={sub.image_url} alt="" className="size-6 rounded-full object-cover border border-border" />
-                          )}
-                          <span className="text-sm text-muted-foreground">{sub.name}</span>
-                        </div>
-                      </td>
-                      <td className="px-4 py-3 text-xs text-muted-foreground/60">{sub.slug}</td>
-                      <td className="px-4 py-3 text-xs text-muted-foreground/60 max-w-md truncate">{sub.description ?? "—"}</td>
-                      <td className="text-center">
-                        {sub.featured ? (
-                          <span className="text-xs text-[#a57840] font-medium">⭐</span>
-                        ) : (
-                          <span className="text-xs text-muted-foreground/40">—</span>
-                        )}
-                      </td>
-                      <td className="px-4 py-3 text-right space-x-2">
-                        <Button size="sm" variant="outline" onClick={() => openEdit(sub)}>
-                          <Pencil className="h-3.5 w-3.5" />
-                        </Button>
-                        <Button size="sm" variant="outline"
-                          onClick={() => { if (confirm(`Excluir "${sub.name}"?`)) remove.mutate(sub.id); }}>
-                          <Trash2 className="h-3.5 w-3.5" />
-                        </Button>
-                      </td>
-                    </tr>
+                      {getSubcats(cat.id).map((sub) => (
+                        <SortableRow 
+                          key={sub.id} 
+                          cat={sub} 
+                          onEdit={openEdit} 
+                          onDelete={(c) => { if (confirm(`Excluir "${c.name}"?`)) remove.mutate(c.id); }} 
+                          isSubcat 
+                          getSubcats={getSubcats}
+                        />
+                      ))}
+                    </Fragment>
                   ))}
-                </Fragment>
-              ))}
-            </tbody>
+                </tbody>
+              </SortableContext>
+            </DndContext>
           </table>
         </div>
       </Card>
